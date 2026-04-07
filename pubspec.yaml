@@ -1,0 +1,81 @@
+name: ruang_karya
+description: Aplikasi manajemen UKM Seni + Kreativitas
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Supabase
+  supabase_flutter: ^2.3.0
+
+  # State Management & Navigation
+  get: ^4.6.6
+
+  # Environment Variables
+  flutter_dotenv: ^5.1.0
+
+  # Local Storage (untuk simpan tema dark/light)
+  get_storage: ^2.1.1
+
+  # Image Picker (untuk upload foto galeri & avatar)
+  image_picker: ^1.0.7
+
+  # Kalender
+  table_calendar: ^3.1.0
+
+  # Cache Image dari URL Supabase Storage
+  cached_network_image: ^3.3.1
+
+  # Launcher Icon
+  flutter_launcher_icons: ^0.13.1
+
+  # Native Splash Screen
+  flutter_native_splash: ^2.4.0
+
+  # Nilai Tambah 1 — Chart untuk statistik kas
+  fl_chart: ^0.67.0
+
+  # Nilai Tambah 2 — Shimmer loading effect
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/logo_mark.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#0A1A1C"
+  image: assets/images/logo_mark.png
+  android: true
+  ios: false
+  fullscreen: true
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/images/
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700

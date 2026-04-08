@@ -13,165 +13,170 @@ class EventMemberPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<EventController>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Kegiatan')),
-      body: Column(
-        children: [
-          // Tab switcher
-          Obx(() => Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    _tabButton(
-                      context,
-                      'Kalender',
-                      controller.activeTab.value == 0,
-                      () => controller.activeTab.value = 0,
-                    ),
-                    const SizedBox(width: 8),
-                    _tabButton(
-                      context,
-                      'Absensi Saya',
-                      controller.activeTab.value == 1,
-                      () => Get.toNamed('/attendance-history'),
-                    ),
-                  ],
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Jadwal Kegiatan',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
-              )),
-
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              onChanged: controller.searchQuery.call,
-              decoration: const InputDecoration(
-                hintText: 'Cari kegiatan...',
-                prefixIcon: Icon(Icons.search),
+              ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      onChanged: controller.searchQuery.call,
+                      decoration: InputDecoration(
+                        hintText: 'Cari kegiatan...',
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        filled: true,
+                        fillColor: theme.cardColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // kalender
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Obx(() => TableCalendar(
+                          firstDay: DateTime.utc(2020, 1, 1),
+                          lastDay: DateTime.utc(2030, 12, 31),
+                          focusedDay: controller.focusedDay.value,
+                          selectedDayPredicate: (day) =>
+                              isSameDay(controller.selectedDay.value, day),
+                          onDaySelected: (selected, focused) {
+                            controller.selectedDay.value = selected;
+                            controller.focusedDay.value = focused;
+                          },
+                          calendarFormat: CalendarFormat.month,
+                          availableCalendarFormats: const {
+                            CalendarFormat.month: 'Month',
+                          },
+                          eventLoader: (day) => controller.getEventsForDay(day),
+                          calendarStyle: CalendarStyle(
+                            todayDecoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            todayTextStyle: TextStyle(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            selectedDecoration: BoxDecoration(
+                              color: colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            markerDecoration: BoxDecoration(
+                              color: colorScheme.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                            outsideDaysVisible: false,
+                          ),
+                          headerStyle: HeaderStyle(
+                            formatButtonVisible: false,
+                            titleCentered: true,
+                            titleTextStyle: theme.textTheme.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                            leftChevronIcon: Icon(Icons.chevron_left_rounded, color: colorScheme.primary),
+                            rightChevronIcon: Icon(Icons.chevron_right_rounded, color: colorScheme.primary),
+                          ),
+                        )),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(() {
+                        final day = controller.selectedDay.value;
+                        final dateStr = day != null 
+                          ? '${day.day}-${day.month}-${day.year}'
+                          : 'Daftar Kegiatan';
+                        return Text(
+                          'Kegiatan: $dateStr',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          Obx(() {
+            final List<EventModel> events = controller.filteredEvents;
 
-          // Calendar
-          Obx(() => TableCalendar(
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: controller.focusedDay.value,
-                selectedDayPredicate: (day) =>
-                    isSameDay(controller.selectedDay.value, day),
-                onDaySelected: (selected, focused) {
-                  controller.selectedDay.value = selected;
-                  controller.focusedDay.value = focused;
-                },
-                calendarFormat: CalendarFormat.month,
-                eventLoader: (day) => controller.getEventsForDay(day),
-                calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  markerDecoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    shape: BoxShape.circle,
-                  ),
+            if (events.isEmpty) {
+              return const SliverFillRemaining(
+                child: EmptyState(
+                  message: 'Tidak ada kegiatan di tanggal ini',
+                  subtitle: 'Pilih tanggal lain di kalender',
+                  icon: Icons.event_busy_rounded,
                 ),
-                headerStyle: HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
-                  titleTextStyle: Theme.of(context).textTheme.titleMedium!,
-                ),
-              )),
-
-          const Divider(height: 1),
-
-          // Events list — kalau ada tanggal dipilih tampil event hari itu,
-          // kalau belum pilih tampil semua event mendatang
-          Expanded(
-            child: Obx(() {
-              final List<EventModel> events;
-              final bool isFiltered = controller.selectedDay.value != null;
-
-              if (isFiltered) {
-                events =
-                    controller.getEventsForDay(controller.selectedDay.value!);
-              } else {
-                // Semua event mendatang, diurutkan dari yang paling dekat
-                final now = DateTime.now();
-                events = controller.events
-                    .where((e) => e.startTime.isAfter(
-                          now.subtract(const Duration(days: 1)),
-                        ))
-                    .toList()
-                  ..sort((a, b) => a.startTime.compareTo(b.startTime));
-              }
-
-              if (events.isEmpty) {
-                return EmptyState(
-                  message: isFiltered
-                      ? 'Tidak ada kegiatan'
-                      : 'Belum ada kegiatan mendatang',
-                  subtitle: isFiltered
-                      ? 'Pilih tanggal lain untuk melihat kegiatan'
-                      : 'Kegiatan baru akan muncul di sini',
-                  icon: Icons.event_busy_outlined,
-                );
-              }
-
-              return ListView.separated(
-                // Padding bawah tambahan supaya tidak tertutup BottomNav
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                itemCount: events.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, i) => EventCard(event: events[i]),
               );
-            }),
-          ),
+            }
+            return SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: EventCard(event: events[i]),
+                  ),
+                  childCount: events.length,
+                ),
+              ),
+            );
+          }),
         ],
       ),
-      // Padding bawah di Scaffold agar konten tidak terpotong BottomNav
       bottomNavigationBar: const MemberBottomNav(currentIndex: 1),
-    );
-  }
-
-  Widget _tabButton(
-    BuildContext context,
-    String label,
-    bool isActive,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: isActive
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).dividerColor,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive
-                ? Colors.white
-                : Theme.of(context).colorScheme.onSurface,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
     );
   }
 }

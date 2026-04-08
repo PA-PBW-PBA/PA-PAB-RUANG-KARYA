@@ -1,6 +1,9 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/event_model.dart';
+import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../routes/app_routes.dart';
 
 class EventController extends GetxController {
   final _supabase = Supabase.instance.client;
@@ -19,27 +22,68 @@ class EventController extends GetxController {
   void onInit() {
     super.onInit();
     fetchEvents();
+    _setupRealtimeListener();
     selectedDay.value = DateTime.now();
     ever(searchQuery, (_) => _applyFilter());
     ever(selectedDivision, (_) => _applyFilter());
+    ever(selectedDay, (_) => _applyFilter());
+  }
+
+  void _setupRealtimeListener() {
+    _supabase
+        .from('events')
+        .stream(primaryKey: ['id'])
+        .listen((data) {
+          // buat notifikasi kalau ada data baru yang masuk (INSERT)
+          if (events.isNotEmpty && data.length > events.length) {
+            final newEvent = data.last;
+
+            if (newEvent['created_by'] != _supabase.auth.currentUser?.id) {
+              _showSystemNotification(newEvent['title']);
+            }
+          }
+          fetchEvents();
+        });
+  }
+
+  void _showSystemNotification(String title) {
+    Get.snackbar(
+      'Kegiatan Baru! 🔔',
+      'Baru saja diterbitkan: $title. Cek jadwal sekarang!',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: AppColors.primary.withOpacity(0.9),
+      colorText: Colors.white,
+      icon: const Icon(Icons.notifications_active, color: Colors.white),
+      duration: const Duration(seconds: 5),
+      mainButton: TextButton(
+        onPressed: () {
+          if (_supabase.auth.currentSession != null) {
+            Get.toNamed(AppRoutes.eventMember);
+          } else {
+            Get.toNamed(AppRoutes.eventVisitor);
+          }
+        },
+        child: const Text('LIHAT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+    );
   }
 
   Future<void> fetchEvents() async {
     isLoading.value = true;
     try {
-      // Cek apakah user sudah login
+      // cek apakah user sudah login
       final session = _supabase.auth.currentSession;
 
       late List response;
 
       if (session != null) {
-        // Anggota dan admin — lihat semua event
+        // anggota dan admin bisa lihat semua event
         response = await _supabase
             .from('events')
             .select('*, event_divisions(divisions(name))')
             .order('start_time');
       } else {
-        // Pengunjung — hanya lihat event publik
+        // Pengunjung cuma bisa lihat event publik
         response = await _supabase
             .from('events')
             .select('*, event_divisions(divisions(name))')
@@ -49,7 +93,8 @@ class EventController extends GetxController {
 
       events.value = response.map<EventModel>((json) {
         final divisions = (json['event_divisions'] as List)
-            .map((e) => e['divisions']['name'] as String)
+            .map((e) => e['divisions']?['name'] as String?)
+            .whereType<String>()
             .toList();
         final data = Map<String, dynamic>.from(json);
         data['divisions'] = divisions;
@@ -66,6 +111,16 @@ class EventController extends GetxController {
 
   void _applyFilter() {
     var result = events.toList();
+
+    if (selectedDay.value != null) {
+      final day = selectedDay.value!;
+      result = result
+          .where((e) =>
+              e.startTime.year == day.year &&
+              e.startTime.month == day.month &&
+              e.startTime.day == day.day)
+          .toList();
+    }
 
     if (selectedDivision.value != 'Semua') {
       result = result

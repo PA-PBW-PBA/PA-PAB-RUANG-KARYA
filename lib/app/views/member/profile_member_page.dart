@@ -18,7 +18,7 @@ class ProfileMemberPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Profil'),
         actions: [
-          // Dark/light mode toggle
+          // Dark/light mode
           Obx(() => IconButton(
                 onPressed: themeController.toggleTheme,
                 icon: Icon(
@@ -39,7 +39,6 @@ class ProfileMemberPage extends StatelessWidget {
             children: [
               const SizedBox(height: 16),
 
-              // Avatar
               Stack(
                 children: [
                   CircleAvatar(
@@ -82,7 +81,7 @@ class ProfileMemberPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Name & NIM
+              // Nama & NIM
               Text(
                 user.fullName,
                 style: Theme.of(context).textTheme.headlineLarge,

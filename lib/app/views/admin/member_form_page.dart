@@ -53,176 +53,250 @@ class _MemberFormPageState extends State<MemberFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Anggota' : 'Tambah Anggota'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Avatar upload
-            Center(
-              child: GestureDetector(
-                onTap: _controller.pickAvatar,
-                child: Obx(() => CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.1),
-                      backgroundImage:
-                          _controller.pickedAvatarFile.value != null
-                              ? null
-                              : null,
-                      child: _controller.pickedAvatarFile.value == null
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.camera_alt_outlined,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 24,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Foto',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontSize: 11,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                _isEdit ? 'Edit Anggota' : 'Tambah Anggota',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: GestureDetector(
+                      onTap: _controller.pickAvatar,
+                      child: Stack(
+                        children: [
+                          Obx(() => Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: colorScheme.primary.withOpacity(0.2),
+                                    width: 2,
                                   ),
                                 ),
-                              ],
-                            )
-                          : null,
-                    )),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Form fields
-            _buildField('Nama Lengkap', _nameController,
-                hint: 'Masukkan nama lengkap', icon: Icons.person_outline),
-            const SizedBox(height: 16),
-            _buildField('NIM', _nimController,
-                hint: 'Masukkan NIM',
-                icon: Icons.badge_outlined,
-                keyboardType: TextInputType.number,
-                enabled: !_isEdit),
-            const SizedBox(height: 16),
-            _buildField('Email', _emailController,
-                hint: 'Masukkan email',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress),
-            const SizedBox(height: 16),
-            _buildField('Nomor HP', _phoneController,
-                hint: 'Masukkan nomor HP',
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone),
-            const SizedBox(height: 16),
-            _buildField('Angkatan', _angkatanController,
-                hint: 'Contoh: 2024',
-                icon: Icons.school_outlined,
-                keyboardType: TextInputType.number),
-
-            // Password — hanya untuk tambah baru
-            if (!_isEdit) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: !_showPassword,
-                decoration: InputDecoration(
-                  labelText: 'Password Default',
-                  hintText: 'Kosongkan untuk pakai NIM sebagai password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: GestureDetector(
-                    onTap: () => setState(() => _showPassword = !_showPassword),
-                    child: Icon(
-                      _showPassword
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor:
+                                      colorScheme.primary.withOpacity(0.08),
+                                  backgroundImage:
+                                      _controller.pickedAvatarFile.value != null
+                                          ? null
+                                          : null,
+                                  child: _controller.pickedAvatarFile.value ==
+                                          null
+                                      ? Icon(
+                                          Icons.person_rounded,
+                                          color: colorScheme.primary
+                                              .withOpacity(0.5),
+                                          size: 50,
+                                        )
+                                      : null,
+                                ),
+                              )),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: theme.scaffoldBackgroundColor,
+                                    width: 3),
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ],
+                  const SizedBox(height: 32),
 
-            const SizedBox(height: 24),
+                  _buildFormHeader('Informasi Pribadi'),
+                  const SizedBox(height: 16),
 
-            // Division selector
-            Text(
-              'Divisi',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: AppConstants.divisions.map((division) {
-                final isSelected = _selectedDivisions.contains(division);
-                final color = AppColors.getDivisionColor(division);
-                return GestureDetector(
-                  onTap: () => setState(() {
-                    if (isSelected) {
-                      _selectedDivisions.remove(division);
-                    } else {
-                      _selectedDivisions.add(division);
+                  _buildField(context, 'Nama Lengkap', _nameController,
+                      hint: 'Masukkan nama lengkap',
+                      icon: Icons.person_outline_rounded),
+                  const SizedBox(height: 16),
+                  _buildField(context, 'NIM', _nimController,
+                      hint: 'Masukkan NIM',
+                      icon: Icons.badge_outlined,
+                      keyboardType: TextInputType.number,
+                      enabled: !_isEdit),
+                  const SizedBox(height: 16),
+                  _buildField(context, 'Email', _emailController,
+                      hint: 'Masukkan email',
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      enabled: !_isEdit),
+                  const SizedBox(height: 16),
+                  _buildField(context, 'Nomor HP', _phoneController,
+                      hint: 'Masukkan nomor HP',
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone),
+                  const SizedBox(height: 16),
+                  _buildField(context, 'Angkatan', _angkatanController,
+                      hint: 'Contoh: 2024',
+                      icon: Icons.school_outlined,
+                      keyboardType: TextInputType.number),
+
+                  if (!_isEdit) ...[
+                    const SizedBox(height: 24),
+                    _buildFormHeader('Keamanan'),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: !_showPassword,
+                      decoration: InputDecoration(
+                        labelText: 'Password Default',
+                        hintText: 'Kosongkan untuk pakai NIM',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          onPressed: () =>
+                              setState(() => _showPassword = !_showPassword),
+                          icon: Icon(
+                            _showPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 32),
+                  _buildFormHeader('Divisi Organisasi'),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: AppConstants.divisions.map((division) {
+                      final isSelected = _selectedDivisions.contains(division);
+                      final color = AppColors.getDivisionColor(division);
+                      return GestureDetector(
+                        onTap: () => setState(() {
+                          if (isSelected) {
+                            _selectedDivisions.remove(division);
+                          } else {
+                            _selectedDivisions.add(division);
+                          }
+                        }),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? color : color.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSelected ? color : color.withOpacity(0.15),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            division,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : color,
+                              fontWeight:
+                                  isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  Obx(() {
+                    if (_controller.errorMessage.value.isEmpty) {
+                      return const SizedBox.shrink();
                     }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colorScheme.error.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline_rounded,
+                                color: colorScheme.error, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _controller.errorMessage.value,
+                                style: TextStyle(
+                                  color: colorScheme.error,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   }),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? color : color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: color,
-                        width: isSelected ? 0 : 0.5,
-                      ),
-                    ),
-                    child: Text(
-                      division,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
-
-            // Error
-            Obx(() {
-              if (_controller.errorMessage.value.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  _controller.errorMessage.value,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 13,
-                  ),
-                ),
-              );
-            }),
-
-            const SizedBox(height: 32),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
           ],
         ),
-      ),
-
-      // Save button sticky
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Obx(() => ElevatedButton(
               onPressed: _controller.isLoading.value ? null : _handleSave,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
               child: _controller.isLoading.value
                   ? const SizedBox(
                       height: 20,
@@ -230,13 +304,30 @@ class _MemberFormPageState extends State<MemberFormPage> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : Text(_isEdit ? 'Simpan Perubahan' : 'Tambah Anggota'),
+                  : Text(
+                      _isEdit ? 'Simpan Perubahan' : 'Tambah Anggota Baru',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700),
+                    ),
             )),
       ),
     );
   }
 
+  Widget _buildFormHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
   Widget _buildField(
+    BuildContext context,
     String label,
     TextEditingController controller, {
     String? hint,
@@ -252,6 +343,8 @@ class _MemberFormPageState extends State<MemberFormPage> {
         labelText: label,
         hintText: hint,
         prefixIcon: icon != null ? Icon(icon) : null,
+        filled: !enabled,
+        fillColor: enabled ? null : Theme.of(context).dividerColor.withOpacity(0.1),
       ),
     );
   }

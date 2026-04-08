@@ -11,6 +11,15 @@ class AuthController extends GetxController {
   final currentUser = Rxn<UserModel>();
   final errorMessage = ''.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    final session = _supabase.auth.currentSession;
+    if (session != null) {
+      _loadCurrentUser(session.user.id);
+    }
+  }
+
   // Auto deteksi apakah input email atau NIM
   String _resolveEmail(String input) {
     if (input.contains('@')) {
@@ -45,6 +54,13 @@ class AuthController extends GetxController {
       if (user == null) {
         errorMessage.value = 'Profil tidak ditemukan. Hubungi admin.';
         await _supabase.auth.signOut();
+        return;
+      }
+
+      if (!user.isActive) {
+        errorMessage.value = 'Akun Anda telah dinonaktifkan. Hubungi admin.';
+        await _supabase.auth.signOut();
+        currentUser.value = null;
         return;
       }
 

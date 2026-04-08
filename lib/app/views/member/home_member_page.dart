@@ -6,7 +6,6 @@ import '../../controllers/gallery_controller.dart';
 import '../../routes/app_routes.dart';
 import '../widgets/event_card.dart';
 import '../widgets/gallery_card.dart';
-import '../widgets/division_badge.dart';
 import '../widgets/member_bottom_nav.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -18,6 +17,8 @@ class HomeMemberPage extends StatelessWidget {
     final authController = Get.find<AuthController>();
     final eventController = Get.put(EventController());
     final galleryController = Get.put(GalleryController());
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final hour = DateTime.now().hour;
     final greeting = hour < 11
@@ -29,201 +30,176 @@ class HomeMemberPage extends StatelessWidget {
                 : 'Selamat Malam';
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
+          // AppBar
           SliverAppBar(
+            expandedHeight: 80,
             floating: true,
-            title: Image.asset(
-              'assets/images/logo_mark.png',
-              height: 28,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.palette_outlined,
-                color: Theme.of(context).colorScheme.primary,
+            pinned: false,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Image.asset(
+                'assets/images/logo_mark.png',
+                height: 32,
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.palette_rounded,
+                  color: colorScheme.primary,
+                  size: 28,
+                ),
               ),
             ),
             actions: [
-              Obx(() => GestureDetector(
-                    onTap: () => Get.toNamed(AppRoutes.profileMember),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withOpacity(0.15),
-                        child: Text(
-                          authController
-                                      .currentUser.value?.fullName.isNotEmpty ==
-                                  true
-                              ? authController.currentUser.value!.fullName[0]
-                                  .toUpperCase()
-                              : '?',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
+              Obx(() => Padding(
+                padding: const EdgeInsets.only(right: 20, top: 8),
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(AppRoutes.profileMember),
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: colorScheme.primary.withOpacity(0.3), width: 1.5),
+                    ),
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: colorScheme.primary.withOpacity(0.1),
+                      child: Text(
+                        authController.currentUser.value?.fullName.isNotEmpty == true
+                            ? authController.currentUser.value!.fullName[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
                         ),
                       ),
                     ),
-                  )),
+                  ),
+                ),
+              )),
             ],
           ),
+
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Greeting
-                  Obx(() => Text(
-                        '$greeting, ${authController.currentUser.value?.fullName.split(' ').first ?? ''}!',
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      )),
-                  const SizedBox(height: 16),
-
-                  // Member card — full width
-                  Obx(() {
-                    final user = authController.currentUser.value;
-                    if (user == null) return const SizedBox.shrink();
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primary,
-                            AppColors.primary.withOpacity(0.7),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Avatar inisial
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            child: Text(
-                              user.fullName.isNotEmpty
-                                  ? user.fullName[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.fullName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  user.nim,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                Text(
-                                  'Angkatan ${user.angkatan ?? '-'}',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 4,
-                                  children: user.divisions
-                                      .map((d) => DivisionBadge(division: d))
-                                      .toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 24),
-
-                  // Quick access — 6 item, 2 baris 3 kolom
-                  Text(
-                    'Akses Cepat',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
                   const SizedBox(height: 12),
-                  _quickAccessGrid(context),
+                  
+                  Obx(() => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        greeting,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${authController.currentUser.value?.fullName.split(' ').first ?? 'Anggota'}!',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  )),
+                  
                   const SizedBox(height: 24),
 
-                  // Kegiatan mendatang
-                  _sectionHeader(
-                    context,
-                    'Kegiatan Mendatang',
+                  _buildPremiumMemberCard(context, authController),
+                  
+                  const SizedBox(height: 32),
+
+                  _buildSectionHeader(context, title: 'Akses Cepat'),
+                  const SizedBox(height: 16),
+                  _buildModernQuickAccess(context),
+
+                  const SizedBox(height: 32),
+
+                  // event yang akan datang
+                  _buildSectionHeader(
+                    context, 
+                    title: 'Kegiatan Mendatang',
                     onSeeAll: () => Get.toNamed(AppRoutes.eventVisitor),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (eventController.events.isEmpty) {
-                      return const SizedBox(height: 80);
+                      return _buildEmptyState('Belum ada kegiatan mendatang');
                     }
                     return SizedBox(
-                      height: 160,
+                      height: 180,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (_, i) => SizedBox(
-                          width: 260,
+                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        itemBuilder: (_, i) => Container(
+                          width: 280,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
                           child: EventCard(event: eventController.events[i]),
                         ),
                       ),
                     );
                   }),
-                  const SizedBox(height: 24),
 
-                  // Galeri terbaru
-                  _sectionHeader(
-                    context,
-                    'Galeri Terbaru',
+                  const SizedBox(height: 32),
+
+                  // galeri
+                  _buildSectionHeader(
+                    context, 
+                    title: 'Galeri Karya',
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryMember),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
-                      return const SizedBox(height: 80);
+                      return _buildEmptyState('Galeri masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.85,
                       ),
                       itemCount: galleryController.gallery.take(4).length,
-                      itemBuilder: (_, i) => GalleryCard(
-                        gallery: galleryController.gallery[i],
+                      itemBuilder: (_, i) => Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: GalleryCard(gallery: galleryController.gallery[i]),
                       ),
                     );
                   }),
+                  
                   const SizedBox(height: 100),
                 ],
               ),
@@ -235,45 +211,169 @@ class HomeMemberPage extends StatelessWidget {
     );
   }
 
-  Widget _quickAccessGrid(BuildContext context) {
-    // 6 item — 2 baris × 3 kolom
+  Widget _buildPremiumMemberCard(BuildContext context, AuthController authController) {
+    return Obx(() {
+      final user = authController.currentUser.value;
+      if (user == null) return const SizedBox.shrink();
+      
+      return Container(
+        width: double.infinity,
+        height: 200,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primary, Color(0xFF4F46E5)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.35),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            // Decorative Graphic Elements
+            Positioned(
+              top: -30,
+              right: -30,
+              child: CircleAvatar(
+                radius: 70,
+                backgroundColor: Colors.white.withOpacity(0.08),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              right: 60,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white.withOpacity(0.05), width: 20),
+                ),
+              ),
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(28),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'KARTU ANGGOTA DIGITAL',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          user.fullName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user.nim,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                            fontFamily: 'monospace',
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: user.divisions.map((d) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                            ),
+                            child: Text(
+                              d,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          )).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Angkatan ${user.angkatan ?? '-'}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildModernQuickAccess(BuildContext context) {
     final items = [
-      {
-        'icon': Icons.event_outlined,
-        'label': 'Kegiatan',
-        'route': AppRoutes.eventVisitor, // list event + search
-        'color': AppColors.primary,
-      },
-      {
-        'icon': Icons.calendar_month_outlined,
-        'label': 'Jadwalku',
-        'route': AppRoutes.eventMember, // halaman kalender
-        'color': AppColors.secondary,
-      },
-      {
-        'icon': Icons.checklist_outlined,
-        'label': 'Absensi',
-        'route': AppRoutes.attendanceHistory,
-        'color': AppColors.accentGreen,
-      },
-      {
-        'icon': Icons.photo_library_outlined,
-        'label': 'Galeri',
-        'route': AppRoutes.galleryMember,
-        'color': AppColors.accentRed,
-      },
-      {
-        'icon': Icons.people_outline,
-        'label': 'Anggota',
-        'route': AppRoutes.memberListReadonly, // list read-only
-        'color': AppColors.primary,
-      },
-      {
-        'icon': Icons.person_outline,
-        'label': 'Profil',
-        'route': AppRoutes.profileMember,
-        'color': AppColors.secondary,
-      },
+      {'icon': Icons.event_available_rounded, 'label': 'Kegiatan', 'route': AppRoutes.eventVisitor, 'color': AppColors.primary},
+      {'icon': Icons.calendar_today_rounded, 'label': 'Jadwalku', 'route': AppRoutes.eventMember, 'color': AppColors.accentBlue},
+      {'icon': Icons.assignment_turned_in_rounded, 'label': 'Absensi', 'route': AppRoutes.attendanceHistory, 'color': AppColors.success},
+      {'icon': Icons.collections_rounded, 'label': 'Galeri', 'route': AppRoutes.galleryMember, 'color': AppColors.accentRed},
+      {'icon': Icons.groups_rounded, 'label': 'Anggota', 'route': AppRoutes.memberListReadonly, 'color': AppColors.accentPurple},
+      {'icon': Icons.manage_accounts_rounded, 'label': 'Profil', 'route': AppRoutes.profileMember, 'color': AppColors.warning},
     ];
 
     return GridView.builder(
@@ -281,46 +381,43 @@ class HomeMemberPage extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.1,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.95,
       ),
       itemCount: items.length,
       itemBuilder: (_, i) {
         final item = items[i];
         final color = item['color'] as Color;
-        return GestureDetector(
+        return InkWell(
           onTap: () => Get.toNamed(item['route'] as String),
+          borderRadius: BorderRadius.circular(24),
           child: Container(
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withOpacity(0.2), width: 0.5),
+              color: color.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: color.withOpacity(0.12), width: 1.5),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    item['icon'] as IconData,
-                    color: color,
-                    size: 22,
-                  ),
+                  child: Icon(item['icon'] as IconData, color: color, size: 24),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 Text(
                   item['label'] as String,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    letterSpacing: -0.2,
+                  ),
                 ),
               ],
             ),
@@ -330,28 +427,51 @@ class HomeMemberPage extends StatelessWidget {
     );
   }
 
-  Widget _sectionHeader(
-    BuildContext context,
-    String title, {
-    VoidCallback? onSeeAll,
-  }) {
+  Widget _buildSectionHeader(BuildContext context, {required String title, VoidCallback? onSeeAll}) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: Theme.of(context).textTheme.headlineMedium),
+        Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, fontSize: 18),
+        ),
         if (onSeeAll != null)
-          GestureDetector(
-            onTap: onSeeAll,
-            child: Text(
-              'Lihat Semua',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+          TextButton(
+            onPressed: onSeeAll,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Lihat Semua',
+                  style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right_rounded, size: 18, color: theme.colorScheme.primary),
+              ],
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.divider.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Center(
+        child: Text(
+          message,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
+      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import '../../controllers/attendance_controller.dart';
 import '../../models/user_model.dart';
 import '../widgets/division_badge.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../routes/app_routes.dart';
 
 class MemberDetailPage extends StatelessWidget {
   const MemberDetailPage({super.key});
@@ -15,234 +16,267 @@ class MemberDetailPage extends StatelessWidget {
     final UserModel member = Get.arguments as UserModel;
     final memberController = Get.find<MemberController>();
     final attendanceController = Get.put(AttendanceController());
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     attendanceController.fetchMemberAttendances(member.id);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detail Anggota'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => Get.toNamed(
-              '/member-form',
-              arguments: member,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 100,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Detail Anggota',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit_note_rounded),
+                onPressed: () => Get.toNamed(
+                  AppRoutes.memberForm,
+                  arguments: member,
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
-        ],
-      ),
-      body: Obx(() {
-        final attendances = attendanceController.myAttendances;
-        final total = attendances.length;
-        final hadir = attendances.where((a) => a.isHadir).length;
-        final percentage = total == 0 ? 0 : ((hadir / total) * 100).round();
+          SliverToBoxAdapter(
+            child: Obx(() {
+              final attendances = attendanceController.myAttendances;
+              final total = attendances.length;
+              final hadir = attendances.where((a) => a.isHadir).length;
+              final percentage = total == 0 ? 0 : ((hadir / total) * 100).round();
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Profile header
-              Center(
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.15),
-                      backgroundImage: member.avatarUrl != null
-                          ? CachedNetworkImageProvider(member.avatarUrl!)
-                          : null,
-                      child: member.avatarUrl == null
-                          ? Text(
-                              member.fullName.isNotEmpty
-                                  ? member.fullName[0].toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).colorScheme.primary,
+                    const SizedBox(height: 20),
+                    
+                    // profil header
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colorScheme.primary.withOpacity(0.2),
+                                width: 2,
                               ),
-                            )
-                          : null,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      member.fullName,
-                      style: Theme.of(context).textTheme.headlineLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      member.nim,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      alignment: WrapAlignment.center,
-                      children: member.divisions
-                          .map((d) => DivisionBadge(division: d))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Status aktif toggle
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: member.isActive
-                                ? AppColors.accentGreen.withOpacity(0.1)
-                                : AppColors.accentRed.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: member.isActive
-                                  ? AppColors.accentGreen
-                                  : AppColors.accentRed,
-                              width: 0.5,
+                            ),
+                            child: CircleAvatar(
+                              radius: 54,
+                              backgroundColor: colorScheme.primary.withOpacity(0.1),
+                              backgroundImage: member.avatarUrl != null
+                                  ? CachedNetworkImageProvider(member.avatarUrl!)
+                                  : null,
+                              child: member.avatarUrl == null
+                                  ? Text(
+                                      member.fullName.isNotEmpty
+                                          ? member.fullName[0].toUpperCase()
+                                          : '?',
+                                      style: TextStyle(
+                                        fontSize: 42,
+                                        fontWeight: FontWeight.w800,
+                                        color: colorScheme.primary,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
-                          child: Text(
-                            member.isActive ? 'Aktif' : 'Tidak Aktif',
-                            style: TextStyle(
-                              color: member.isActive
-                                  ? AppColors.accentGreen
-                                  : AppColors.accentRed,
-                              fontSize: 13,
+                          const SizedBox(height: 20),
+                          Text(
+                            member.fullName,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            member.nim,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        TextButton(
-                          onPressed: () => _confirmToggleStatus(
-                            context,
-                            memberController,
-                            member,
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: member.divisions
+                                .map((d) => DivisionBadge(division: d))
+                                .toList(),
                           ),
-                          child: Text(
-                            member.isActive ? 'Nonaktifkan' : 'Aktifkan',
-                            style: TextStyle(
-                              color: member.isActive
-                                  ? AppColors.accentRed
-                                  : AppColors.accentGreen,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ],
+                          const SizedBox(height: 24),
+
+                          _buildStatusAction(context, member, memberController),
+                        ],
+                      ),
                     ),
+                    const SizedBox(height: 40),
+
+                    // kehadiran
+                    _buildSectionHeader('KEHADIRAN'),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [colorScheme.primary, AppColors.primaryDark],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(0.25),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _statItem('$total', 'Total'),
+                          _statDivider(),
+                          _statItem('$hadir', 'Hadir'),
+                          _statDivider(),
+                          _statItem('$percentage%', 'Ratio'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // profil
+                    _buildSectionHeader('INFORMASI PROFIL'),
+                    const SizedBox(height: 16),
+                    _buildInfoTile(context, Icons.school_rounded, 'Angkatan', member.angkatan ?? '-'),
+                    _buildInfoTile(context, Icons.phone_android_rounded, 'Nomor HP', member.phone ?? '-'),
+                    _buildInfoTile(context, Icons.email_rounded, 'Alamat Email', member.email),
+                    
+                    const SizedBox(height: 120),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-
-              // Statistik absensi
-              Text(
-                'Statistik Kehadiran',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _statItem(context, '$total', 'Total Kegiatan'),
-                    _divider(),
-                    _statItem(context, '$hadir', 'Hadir'),
-                    _divider(),
-                    _statItem(context, '$percentage%', 'Kehadiran'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Info
-              Text(
-                'Informasi',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              _infoCard(context, Icons.school_outlined, 'Angkatan',
-                  member.angkatan ?? '-'),
-              const SizedBox(height: 8),
-              _infoCard(context, Icons.phone_outlined, 'Nomor HP',
-                  member.phone ?? '-'),
-              const SizedBox(height: 8),
-              _infoCard(context, Icons.email_outlined, 'Email', member.email),
-              const SizedBox(height: 100),
-            ],
+              );
+            }),
           ),
-        );
-      }),
+        ],
+      ),
     );
   }
 
-  Widget _statItem(BuildContext context, String value, String label) {
+  Widget _buildStatusAction(BuildContext context, UserModel member, MemberController controller) {
+    final isActive = member.isActive;
+    final color = isActive ? AppColors.accentRed : AppColors.accentGreen;
+    
+    return OutlinedButton.icon(
+      onPressed: () => _confirmToggleStatus(context, controller, member),
+      icon: Icon(isActive ? Icons.person_off_rounded : Icons.person_add_rounded, size: 18),
+      label: Text(isActive ? 'Nonaktifkan Akun' : 'Aktifkan Akun'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: color,
+        side: BorderSide(color: color.withOpacity(0.5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textSecondary,
+          letterSpacing: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _statItem(String value, String label) {
     return Column(
       children: [
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
           ),
         ),
+        const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
         ),
       ],
     );
   }
 
-  Widget _divider() {
+  Widget _statDivider() {
     return Container(
-      height: 40,
+      height: 30,
       width: 1,
-      color: Colors.white.withOpacity(0.3),
+      color: Colors.white.withOpacity(0.2),
     );
   }
 
-  Widget _infoCard(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
+  Widget _buildInfoTile(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).dividerColor,
-          width: 0.5,
-        ),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: Theme.of(context).textTheme.bodySmall),
+              Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
               const SizedBox(height: 2),
-              Text(value, style: Theme.of(context).textTheme.bodyMedium),
+              Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
             ],
           ),
         ],
@@ -259,8 +293,9 @@ class MemberDetailPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text('${action.capitalizeFirst} Anggota'),
-        content: Text('Yakin ingin $action ${member.fullName}?'),
+        content: Text('Yakin ingin $action akun ${member.fullName}?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -273,8 +308,10 @@ class MemberDetailPage extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: member.isActive
-                  ? Theme.of(context).colorScheme.error
+                  ? AppColors.accentRed
                   : AppColors.accentGreen,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(action.capitalizeFirst!),
           ),

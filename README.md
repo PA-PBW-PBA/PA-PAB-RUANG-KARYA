@@ -11,10 +11,10 @@
 
 | **Nama**                         | **NIM**     | **Kelas**            |
 |----------------------------------|------------|----------------------|
-| Rizqy                            | 2409116039 | Sistem Informasi A   |
 | Jen Agresia Misti                | 2409116007 | Sistem Informasi A   |
 | Maifariza Aulia Dyas             | 2409116032 | Sistem Informasi A   |
 | Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   |
+| Rizqy                            | 2409116039 | Sistem Informasi A   |
 
 ## Deskripsi Aplikasi
 

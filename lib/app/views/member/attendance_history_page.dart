@@ -21,7 +21,6 @@ class AttendanceHistoryPage extends StatelessWidget {
 
         return Column(
           children: [
-            // Summary card
             Padding(
               padding: const EdgeInsets.all(16),
               child: Container(
@@ -55,7 +54,6 @@ class AttendanceHistoryPage extends StatelessWidget {
               ),
             ),
 
-            // List
             Expanded(
               child: controller.myAttendances.isEmpty
                   ? const EmptyState(

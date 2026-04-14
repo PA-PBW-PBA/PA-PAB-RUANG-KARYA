@@ -126,7 +126,6 @@ class _MemberReadonlyCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar
           CircleAvatar(
             radius: 24,
             backgroundColor:

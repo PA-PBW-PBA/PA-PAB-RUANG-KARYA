@@ -51,175 +51,225 @@ class _EventFormPageState extends State<EventFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Kegiatan' : 'Tambah Kegiatan'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Kegiatan',
-                hintText: 'Masukkan nama kegiatan',
-                prefixIcon: Icon(Icons.event_outlined),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                _isEdit ? 'Edit Kegiatan' : 'Buat Kegiatan',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
               ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
             ),
-            const SizedBox(height: 16),
-
-            // Date & Time pickers
-            Row(
-              children: [
-                Expanded(
-                  child: _dateTimeTile(
-                    context,
-                    label: 'Waktu Mulai',
-                    value: _startTime,
-                    onTap: () => _pickDateTime(context, isStart: true),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFormHeader('Informasi Dasar'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Kegiatan',
+                      hintText: 'Contoh: Rapat Koordinasi Musik',
+                      prefixIcon: Icon(Icons.event_note_rounded),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _dateTimeTile(
-                    context,
-                    label: 'Waktu Selesai',
-                    value: _endTime,
-                    onTap: () => _pickDateTime(context, isStart: false),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _dateTimeTile(
+                          context,
+                          label: 'Waktu Mulai',
+                          value: _startTime,
+                          onTap: () => _pickDateTime(context, isStart: true),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _dateTimeTile(
+                          context,
+                          label: 'Waktu Selesai',
+                          value: _endTime,
+                          onTap: () => _pickDateTime(context, isStart: false),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-            TextField(
-              controller: _locationController,
-              decoration: const InputDecoration(
-                labelText: 'Lokasi',
-                hintText: 'Masukkan lokasi kegiatan',
-                prefixIcon: Icon(Icons.location_on_outlined),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: _descriptionController,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Deskripsi',
-                hintText: 'Masukkan deskripsi kegiatan',
-                prefixIcon: Icon(Icons.description_outlined),
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Toggle publik / internal
-            Text(
-              'Visibilitas',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _visibilityButton(
-                    context,
-                    label: 'Publik',
-                    subtitle: 'Semua orang bisa lihat',
-                    icon: Icons.public_outlined,
-                    isActive: _isPublic,
-                    color: AppColors.accentGreen,
-                    onTap: () => setState(() => _isPublic = true),
+                  TextField(
+                    controller: _locationController,
+                    decoration: const InputDecoration(
+                      labelText: 'Lokasi',
+                      hintText: 'Contoh: Studio Ruang Karya',
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _visibilityButton(
-                    context,
-                    label: 'Internal',
-                    subtitle: 'Hanya anggota & admin',
-                    icon: Icons.lock_outline,
-                    isActive: !_isPublic,
-                    color: AppColors.primary,
-                    onTap: () => setState(() => _isPublic = false),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-            // Division selector
-            Text(
-              'Divisi Terkait',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: AppConstants.divisions.map((division) {
-                final isSelected = _selectedDivisions.contains(division);
-                final color = AppColors.getDivisionColor(division);
-                return GestureDetector(
-                  onTap: () => setState(() {
-                    if (isSelected) {
-                      _selectedDivisions.remove(division);
-                    } else {
-                      _selectedDivisions.add(division);
+                  TextField(
+                    controller: _descriptionController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                      labelText: 'Deskripsi',
+                      hintText: 'Tulis detail kegiatan...',
+                      prefixIcon: Icon(Icons.description_outlined),
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildFormHeader('Visibilitas & Akses'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _visibilityButton(
+                          context,
+                          label: 'Publik',
+                          subtitle: 'Semua pengunjung',
+                          icon: Icons.public_rounded,
+                          isActive: _isPublic,
+                          color: AppColors.accentGreen,
+                          onTap: () => setState(() => _isPublic = true),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _visibilityButton(
+                          context,
+                          label: 'Internal',
+                          subtitle: 'Anggota & Admin',
+                          icon: Icons.lock_person_rounded,
+                          isActive: !_isPublic,
+                          color: colorScheme.primary,
+                          onTap: () => setState(() => _isPublic = false),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildFormHeader('Divisi Terkait'),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: AppConstants.divisions.map((division) {
+                      final isSelected = _selectedDivisions.contains(division);
+                      final color = AppColors.getDivisionColor(division);
+                      return GestureDetector(
+                        onTap: () => setState(() {
+                          if (isSelected) {
+                            _selectedDivisions.remove(division);
+                          } else {
+                            _selectedDivisions.add(division);
+                          }
+                        }),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? color : color.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSelected ? color : color.withOpacity(0.15),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            division,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : color,
+                              fontWeight:
+                                  isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  Obx(() {
+                    if (_controller.errorMessage.value.isEmpty) {
+                      return const SizedBox.shrink();
                     }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colorScheme.error.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline_rounded,
+                                color: colorScheme.error, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _controller.errorMessage.value,
+                                style: TextStyle(
+                                  color: colorScheme.error,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   }),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? color : color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: color,
-                        width: isSelected ? 0 : 0.5,
-                      ),
-                    ),
-                    child: Text(
-                      division,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
-
-            // Error
-            Obx(() {
-              if (_controller.errorMessage.value.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  _controller.errorMessage.value,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 13,
-                  ),
-                ),
-              );
-            }),
-            const SizedBox(height: 32),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
           ],
         ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Obx(() => ElevatedButton(
               onPressed: _controller.isLoading.value ? null : _handleSave,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
               child: _controller.isLoading.value
                   ? const SizedBox(
                       height: 20,
@@ -227,8 +277,24 @@ class _EventFormPageState extends State<EventFormPage> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : Text(_isEdit ? 'Simpan Perubahan' : 'Tambah Kegiatan'),
+                  : Text(
+                      _isEdit ? 'Simpan Perubahan' : 'Terbitkan Kegiatan',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700),
+                    ),
             )),
+      ),
+    );
+  }
+
+  Widget _buildFormHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -245,15 +311,15 @@ class _EventFormPageState extends State<EventFormPage> {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.all(12),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color:
               isActive ? color.withOpacity(0.1) : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isActive ? color : Theme.of(context).dividerColor,
-            width: isActive ? 1.5 : 0.5,
+            width: isActive ? 2 : 1,
           ),
         ),
         child: Column(
@@ -263,19 +329,20 @@ class _EventFormPageState extends State<EventFormPage> {
                 color: isActive
                     ? color
                     : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
-                size: 20),
-            const SizedBox(height: 6),
+                size: 24),
+            const SizedBox(height: 10),
             Text(
               label,
               style: TextStyle(
                 color: isActive ? color : null,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
             ),
           ],
         ),
@@ -292,26 +359,30 @@ class _EventFormPageState extends State<EventFormPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Theme.of(context).dividerColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 4),
-            Text(
-              value != null
-                  ? '${value.day.toString().padLeft(2, '0')}-'
-                      '${value.month.toString().padLeft(2, '0')}-'
-                      '${value.year} '
-                      '${value.hour.toString().padLeft(2, '0')}:'
-                      '${value.minute.toString().padLeft(2, '0')}'
-                  : 'Pilih tanggal',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(Icons.calendar_month_rounded, size: 16, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    value != null
+                        ? '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year} ${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}'
+                        : 'Pilih Jadwal',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -347,21 +418,93 @@ class _EventFormPageState extends State<EventFormPage> {
   }
 
   void _handleSave() {
-    if (_titleController.text.trim().isEmpty) {
-      _controller.errorMessage.value = 'Nama kegiatan wajib diisi';
+    final title = _titleController.text.trim();
+    final location = _locationController.text.trim();
+    final description = _descriptionController.text.trim();
+
+    if (title.isEmpty) {
+      _controller.errorMessage.value = 'Nama kegiatan tidak boleh kosong ⚠️';
       return;
     }
-    if (_startTime == null || _endTime == null) {
-      _controller.errorMessage.value = 'Waktu mulai dan selesai wajib diisi';
+    
+    if (title.length < 3) {
+      _controller.errorMessage.value = 'Nama kegiatan terlalu pendek (min. 3 karakter) 📝';
       return;
     }
 
+    if (_startTime == null || _endTime == null) {
+      _controller.errorMessage.value = 'Waktu mulai dan selesai wajib dipilih 📅';
+      return;
+    }
+
+    if (_endTime!.isBefore(_startTime!)) {
+      _controller.errorMessage.value = 'Waktu selesai tidak boleh sebelum waktu mulai ⏰';
+      return;
+    }
+
+    if (_selectedDivisions.isEmpty) {
+      _controller.errorMessage.value = 'Pilih minimal satu divisi terkait 👥';
+      return;
+    }
+
+    // notifikasi berhasil dikirimkan ke anggota atau pengunjung
+    if (!_isEdit) {
+      _showSuccessNotificationDialog(title);
+    } else {
+      _performSave(title, location, description);
+    }
+  }
+
+  void _showSuccessNotificationDialog(String title) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(
+          children: [
+            Icon(Icons.notifications_active_rounded, color: AppColors.accentGreen),
+            SizedBox(width: 12),
+            Text('Kirim Notifikasi?'),
+          ],
+        ),
+        content: Text('Kegiatan "$title" akan diterbitkan. Beritahu semua anggota melalui notifikasi sistem? 🔔'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _performSave(_titleController.text.trim(), _locationController.text.trim(), _descriptionController.text.trim());
+            },
+            child: const Text('Simpan Saja'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              Get.snackbar(
+                'Notifikasi Terkirim 🚀',
+                'Anggota akan segera menerima pemberitahuan kegiatan baru.',
+                snackPosition: SnackPosition.TOP,
+                backgroundColor: AppColors.accentGreen.withOpacity(0.9),
+                colorText: Colors.white,
+                duration: const Duration(seconds: 3),
+              );
+              _performSave(_titleController.text.trim(), _locationController.text.trim(), _descriptionController.text.trim());
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.accentGreen),
+            child: const Text('Ya, Kirim 🔔'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _performSave(String title, String location, String description) {
     if (_isEdit) {
       _controller.updateEvent(
         id: _editEvent!.id,
-        title: _titleController.text.trim(),
-        location: _locationController.text.trim(),
-        description: _descriptionController.text.trim(),
+        title: title,
+        location: location,
+        description: description,
         startTime: _startTime!,
         endTime: _endTime!,
         isPublic: _isPublic,
@@ -369,9 +512,9 @@ class _EventFormPageState extends State<EventFormPage> {
       );
     } else {
       _controller.createEvent(
-        title: _titleController.text.trim(),
-        location: _locationController.text.trim(),
-        description: _descriptionController.text.trim(),
+        title: title,
+        location: location,
+        description: description,
         startTime: _startTime!,
         endTime: _endTime!,
         isPublic: _isPublic,

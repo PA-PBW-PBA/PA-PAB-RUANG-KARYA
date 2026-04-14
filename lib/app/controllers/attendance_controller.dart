@@ -8,7 +8,6 @@ class AttendanceController extends GetxController {
   final isLoading = false.obs;
   final myAttendances = <AttendanceModel>[].obs;
 
-  // Map userId -> status untuk input absensi admin
   final attendanceMap = <String, String>{}.obs;
 
   int get totalEvents => myAttendances.length;
@@ -42,7 +41,7 @@ class AttendanceController extends GetxController {
           .map<AttendanceModel>((json) => AttendanceModel.fromJson(json))
           .toList();
     } catch (e) {
-      // Handle error
+      Get.snackbar('Gagal', 'Gagal memuat riwayat absensi');
     } finally {
       isLoading.value = false;
     }
@@ -79,7 +78,7 @@ class AttendanceController extends GetxController {
         attendanceMap[item['user_id']] = item['status'];
       }
     } catch (e) {
-      // Handle error
+      Get.snackbar('Gagal', 'Gagal memuat riwayat absensi');
     } finally {
       isLoading.value = false;
     }
@@ -99,10 +98,8 @@ class AttendanceController extends GetxController {
       final adminId = _supabase.auth.currentUser?.id;
       if (adminId == null) throw Exception('User tidak ditemukan');
 
-      // Delete existing attendance for this event
       await _supabase.from('attendances').delete().eq('event_id', eventId);
 
-      // Insert all attendance records
       if (attendanceMap.isEmpty) return;
 
       final rows = attendanceMap.entries

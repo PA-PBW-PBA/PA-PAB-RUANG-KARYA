@@ -13,23 +13,28 @@ class AuthMiddleware extends GetMiddleware {
   RouteSettings? redirect(String? route) {
     final session = Supabase.instance.client.auth.currentSession;
 
-    // Belum login sama sekali
+    // belum login sama sekali
     if (session == null) {
       return const RouteSettings(name: AppRoutes.login);
     }
 
-    // Kalau tidak ada role yang disyaratkan, cukup cek login saja
+    // kalau tidak ada role yang disyaratkan, cukup cek login saja
     if (requiredRole == null) return null;
 
-    // Ambil role dari AuthController yang sudah load dari tabel profiles
+    // ambil role dari AuthController yang sudah load dari tabel profiles
     final authController = Get.find<AuthController>();
     final user = authController.currentUser.value;
 
-    // Kalau user belum terload, biarkan lewat dulu
+    // kalau user belum terload, biarkan lewat dulu
     // auth_controller akan handle redirect yang benar
     if (user == null) return null;
 
-    // Cek role
+    // user dinonaktifkan
+    if (!user.isActive) {
+      return const RouteSettings(name: AppRoutes.login);
+    }
+
+    // cek role
     if (user.role != requiredRole) {
       if (user.isAdmin) {
         return const RouteSettings(name: AppRoutes.dashboardAdmin);

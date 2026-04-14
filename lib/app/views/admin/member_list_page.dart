@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import '../../controllers/member_controller.dart';
 import '../../routes/app_routes.dart';
@@ -6,118 +7,215 @@ import '../widgets/member_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/loading_skeleton.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_colors.dart';
 import '../widgets/admin_bottom_nav.dart';
 
-class MemberListPage extends StatelessWidget {
+class MemberListPage extends StatefulWidget {
   const MemberListPage({super.key});
 
   @override
+  State<MemberListPage> createState() => _MemberListPageState();
+}
+
+class _MemberListPageState extends State<MemberListPage> {
+  final controller = Get.find<MemberController>();
+  late ScrollController _scrollController;
+  bool _isFabVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+        if (_isFabVisible) setState(() => _isFabVisible = false);
+      } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+        if (!_isFabVisible) setState(() => _isFabVisible = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MemberController>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Anggota')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Column(
-              children: [
-                // Search
-                TextField(
-                  onChanged: controller.searchQuery.call,
-                  decoration: const InputDecoration(
-                    hintText: 'Cari nama atau NIM...',
-                    prefixIcon: Icon(Icons.search),
-                  ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Daftar Anggota',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
-                const SizedBox(height: 12),
-                // Filter chips
-                SizedBox(
-                  height: 36,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      'Semua',
-                      ...AppConstants.divisions,
-                    ].map((division) {
-                      return Obx(() {
-                        final isSelected =
-                            controller.selectedDivision.value == division;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(division),
-                            selected: isSelected,
-                            onSelected: (_) =>
-                                controller.filterByDivision(division),
-                            selectedColor: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.15),
-                            checkmarkColor:
-                                Theme.of(context).colorScheme.primary,
-                            labelStyle: TextStyle(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
-                          ),
-                        );
-                      });
-                    }).toList(),
-                  ),
-                ),
-              ],
+              ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
             ),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const LoadingSkeletonList();
-              }
-              if (controller.filteredMembers.isEmpty) {
-                return const EmptyState(
-                  message: 'Belum ada anggota',
-                  subtitle: 'Tap + untuk tambah anggota baru',
-                  icon: Icons.people_outline,
-                );
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.filteredMembers.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (_, i) {
-                  final member = controller.filteredMembers[i];
-                  return MemberCard(
-                    member: member,
-                    onTap: () => Get.toNamed(
-                      AppRoutes.memberForm,
-                      arguments: member,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                    onEdit: () => Get.toNamed(
-                      AppRoutes.memberForm,
-                      arguments: member,
+                    child: TextField(
+                      onChanged: controller.searchQuery.call,
+                      decoration: InputDecoration(
+                        hintText: 'Cari nama atau NIM...',
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        filled: true,
+                        fillColor: theme.cardColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     ),
-                    onDelete: () =>
-                        _confirmDelete(context, controller, member.id),
-                  );
-                },
-              );
-            }),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        'Semua',
+                        ...AppConstants.divisions,
+                      ].map((division) {
+                        return Obx(() {
+                          final isSelected =
+                              controller.selectedDivision.value == division;
+                          final color = division == 'Semua' 
+                              ? colorScheme.primary 
+                              : AppColors.getDivisionColor(division);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: FilterChip(
+                              label: Text(division),
+                              selected: isSelected,
+                              onSelected: (_) =>
+                                  controller.filterByDivision(division),
+                              backgroundColor: color.withOpacity(0.05),
+                              selectedColor: color.withOpacity(0.15),
+                              checkmarkColor: color,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(
+                                color: isSelected ? color.withOpacity(0.3) : Colors.transparent,
+                              ),
+                              labelStyle: TextStyle(
+                                color: isSelected ? color : AppColors.textSecondary,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                          );
+                        });
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const SliverFillRemaining(
+                child: LoadingSkeletonList(),
+              );
+            }
+            if (controller.filteredMembers.isEmpty) {
+              return const SliverFillRemaining(
+                child: EmptyState(
+                  message: 'Tidak ada anggota ditemukan',
+                  subtitle: 'Coba ubah kata kunci atau filter divisi',
+                  icon: Icons.people_outline,
+                ),
+              );
+            }
+            return SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    final member = controller.filteredMembers[i];
+                    return MemberCard(
+                      member: member,
+                      onTap: () => Get.toNamed(
+                        AppRoutes.memberDetail,
+                        arguments: member,
+                      ),
+                      onEdit: () => Get.toNamed(
+                        AppRoutes.memberForm,
+                        arguments: member,
+                      ),
+                      onDelete: () =>
+                          _confirmDelete(context, controller, member.id),
+                    );
+                  },
+                  childCount: controller.filteredMembers.length,
+                ),
+              ),
+            );
+          }),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.memberForm),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: _isFabVisible ? 1.0 : 0.0,
+        child: Visibility(
+          visible: _isFabVisible,
+          child: FloatingActionButton.extended(
+            onPressed: () => Get.toNamed(AppRoutes.memberForm),
+            backgroundColor: colorScheme.primary,
+            elevation: 6,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            icon: const Icon(Icons.add_rounded, color: Colors.white),
+            label: const Text(
+              'Tambah Anggota',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
       ),
-      bottomNavigationBar: AdminBottomNav(currentIndex: 1),
+      bottomNavigationBar: const AdminBottomNav(currentIndex: 1),
     );
   }
 
@@ -126,8 +224,8 @@ class MemberListPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Hapus Anggota'),
-        content: const Text('Data anggota akan dihapus permanen. Lanjutkan?'),
+        title: const Text('Nonaktifkan Anggota'),
+        content: const Text('Anggota ini akan dinonaktifkan dan tidak bisa login. Lanjutkan?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -141,7 +239,7 @@ class MemberListPage extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Hapus'),
+            child: const Text('Nonaktifkan'),
           ),
         ],
       ),

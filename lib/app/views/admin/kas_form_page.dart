@@ -29,157 +29,229 @@ class _KasFormPageState extends State<KasFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Transaksi')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Jenis toggle
-            Text('Jenis Transaksi',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _jenisButton(
-                    context,
-                    label: 'Pemasukan',
-                    value: 'pemasukan',
-                    color: AppColors.accentGreen,
-                  ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Catat Transaksi',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _jenisButton(
-                    context,
-                    label: 'Pengeluaran',
-                    value: 'pengeluaran',
-                    color: AppColors.accentRed,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            TextField(
-              controller: _nominalController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Nominal',
-                hintText: 'Masukkan jumlah',
-                prefixIcon: Icon(Icons.attach_money),
-                prefixText: 'Rp ',
               ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
             ),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: _keteranganController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Keterangan',
-                hintText: 'Keterangan transaksi...',
-                prefixIcon: Icon(Icons.description_outlined),
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Date picker
-            GestureDetector(
-              onTap: _pickDate,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Theme.of(context).dividerColor),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today_outlined,
-                        color: Theme.of(context).colorScheme.primary, size: 18),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Tanggal',
-                            style: Theme.of(context).textTheme.bodySmall),
-                        Text(
-                          '${_selectedDate.day.toString().padLeft(2, '0')}-'
-                          '${_selectedDate.month.toString().padLeft(2, '0')}-'
-                          '${_selectedDate.year}',
-                          style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFormHeader('Klasifikasi Keuangan'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _jenisButton(
+                          context,
+                          label: 'Pemasukan',
+                          value: 'pemasukan',
+                          icon: Icons.add_chart_rounded,
+                          color: AppColors.accentGreen,
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _jenisButton(
+                          context,
+                          label: 'Pengeluaran',
+                          value: 'pengeluaran',
+                          icon: Icons.remove_moderator_rounded,
+                          color: AppColors.accentRed,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildFormHeader('Detail Transaksi'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _nominalController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    decoration: InputDecoration(
+                      labelText: 'Nominal Transaksi',
+                      hintText: '0',
+                      prefixIcon: Container(
+                        padding: const EdgeInsets.all(12),
+                        child: Text('Rp', style: TextStyle(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                        )),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextField(
+                    controller: _keteranganController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Keterangan',
+                      hintText: 'Misal: Iuran bulanan divisi...',
+                      prefixIcon: Icon(Icons.notes_rounded),
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  GestureDetector(
+                    onTap: _pickDate,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: theme.dividerColor),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.calendar_today_rounded,
+                                color: colorScheme.primary, size: 18),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Tanggal Transaksi',
+                                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                              Text(
+                                '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
+                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Icon(Icons.edit_calendar_rounded, size: 20, color: colorScheme.primary.withOpacity(0.5)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  _buildFormHeader('Divisi Penanggung Jawab'),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: AppConstants.divisions.map((division) {
+                      final isSelected = _selectedDivision == division;
+                      final color = AppColors.getDivisionColor(division);
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedDivision = division),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? color : color.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSelected ? color : color.withOpacity(0.15),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            division,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : color,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  Obx(() {
+                    if (_controller.errorMessage.value.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colorScheme.error.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline_rounded,
+                                color: colorScheme.error, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _controller.errorMessage.value,
+                                style: TextStyle(
+                                  color: colorScheme.error,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 100),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Division selector
-            Text('Divisi', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: AppConstants.divisions.map((division) {
-                final isSelected = _selectedDivision == division;
-                final color = AppColors.getDivisionColor(division);
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedDivision = division),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: isSelected ? color : color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: color,
-                        width: isSelected ? 0 : 0.5,
-                      ),
-                    ),
-                    child: Text(
-                      division,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
             ),
-
-            // Error
-            Obx(() {
-              if (_controller.errorMessage.value.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  _controller.errorMessage.value,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 13,
-                  ),
-                ),
-              );
-            }),
-            const SizedBox(height: 32),
           ],
         ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Obx(() => ElevatedButton(
               onPressed: _controller.isLoading.value ? null : _handleSave,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
               child: _controller.isLoading.value
                   ? const SizedBox(
                       height: 20,
@@ -187,8 +259,20 @@ class _KasFormPageState extends State<KasFormPage> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Simpan Transaksi'),
+                  : const Text('Simpan Transaksi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             )),
+      ),
+    );
+  }
+
+  Widget _buildFormHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textSecondary,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -197,30 +281,36 @@ class _KasFormPageState extends State<KasFormPage> {
     BuildContext context, {
     required String label,
     required String value,
+    required IconData icon,
     required Color color,
   }) {
     final isActive = _jenis == value;
     return GestureDetector(
       onTap: () => setState(() => _jenis = value),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? color : color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
+          color: isActive ? color : color.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: color,
-            width: isActive ? 0 : 0.5,
+            color: isActive ? color : color.withOpacity(0.15),
+            width: 2,
           ),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isActive ? Colors.white : color,
-              fontWeight: FontWeight.w600,
+        child: Column(
+          children: [
+            Icon(icon, color: isActive ? Colors.white : color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : color,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

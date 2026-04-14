@@ -36,7 +36,8 @@ class MemberController extends GetxController {
 
       members.value = response.map<UserModel>((json) {
         final divisions = (json['member_divisions'] as List)
-            .map((e) => e['divisions']['name'] as String)
+            .map((e) => e['divisions']?['name'] as String?)
+            .whereType<String>()
             .toList();
         final data = Map<String, dynamic>.from(json);
         data['divisions'] = divisions;

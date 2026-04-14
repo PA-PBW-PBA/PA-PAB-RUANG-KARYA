@@ -64,8 +64,13 @@ class _EventFormPageState extends State<EventFormPage> {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 _isEdit ? 'Edit Kegiatan' : 'Buat Kegiatan',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -73,7 +78,7 @@ class _EventFormPageState extends State<EventFormPage> {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
@@ -93,7 +98,6 @@ class _EventFormPageState extends State<EventFormPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   Row(
                     children: [
                       Expanded(
@@ -116,7 +120,6 @@ class _EventFormPageState extends State<EventFormPage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
                   TextField(
                     controller: _locationController,
                     decoration: const InputDecoration(
@@ -126,7 +129,6 @@ class _EventFormPageState extends State<EventFormPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   TextField(
                     controller: _descriptionController,
                     maxLines: 4,
@@ -138,7 +140,6 @@ class _EventFormPageState extends State<EventFormPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
                   _buildFormHeader('Visibilitas & Akses'),
                   const SizedBox(height: 16),
                   Row(
@@ -169,7 +170,6 @@ class _EventFormPageState extends State<EventFormPage> {
                     ],
                   ),
                   const SizedBox(height: 32),
-
                   _buildFormHeader('Divisi Terkait'),
                   const SizedBox(height: 16),
                   Wrap(
@@ -194,7 +194,8 @@ class _EventFormPageState extends State<EventFormPage> {
                             color: isSelected ? color : color.withOpacity(0.06),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: isSelected ? color : color.withOpacity(0.15),
+                              color:
+                                  isSelected ? color : color.withOpacity(0.15),
                               width: 1.5,
                             ),
                           ),
@@ -202,8 +203,9 @@ class _EventFormPageState extends State<EventFormPage> {
                             division,
                             style: TextStyle(
                               color: isSelected ? Colors.white : color,
-                              fontWeight:
-                                  isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
                               fontSize: 13,
                             ),
                           ),
@@ -211,7 +213,6 @@ class _EventFormPageState extends State<EventFormPage> {
                       );
                     }).toList(),
                   ),
-
                   Obx(() {
                     if (_controller.errorMessage.value.isEmpty) {
                       return const SizedBox.shrink();
@@ -314,8 +315,7 @@ class _EventFormPageState extends State<EventFormPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color:
-              isActive ? color.withOpacity(0.1) : Theme.of(context).cardColor,
+          color: isActive ? color.withOpacity(0.1) : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isActive ? color : Theme.of(context).dividerColor,
@@ -342,7 +342,8 @@ class _EventFormPageState extends State<EventFormPage> {
             const SizedBox(height: 2),
             Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+              style:
+                  Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
             ),
           ],
         ),
@@ -368,18 +369,26 @@ class _EventFormPageState extends State<EventFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+            Text(label,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.calendar_month_rounded, size: 16, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.calendar_month_rounded,
+                    size: 16, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     value != null
                         ? '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year} ${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}'
                         : 'Pilih Jadwal',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
                   ),
                 ),
               ],
@@ -392,10 +401,12 @@ class _EventFormPageState extends State<EventFormPage> {
 
   Future<void> _pickDateTime(BuildContext context,
       {required bool isStart}) async {
+    final now = DateTime.now();
+
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
+      initialDate: _isEdit ? (_startTime ?? now) : now,
+      firstDate: now,
       lastDate: DateTime(2030),
     );
     if (date == null) return;
@@ -406,8 +417,13 @@ class _EventFormPageState extends State<EventFormPage> {
     );
     if (time == null) return;
 
-    final dt =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    final dt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+
+    if (dt.isBefore(now)) {
+      _controller.errorMessage.value = 'Waktu tidak boleh di masa lampau ⏳';
+      return;
+    }
+
     setState(() {
       if (isStart) {
         _startTime = dt;
@@ -421,14 +437,16 @@ class _EventFormPageState extends State<EventFormPage> {
     final title = _titleController.text.trim();
     final location = _locationController.text.trim();
     final description = _descriptionController.text.trim();
+    final now = DateTime.now();
 
     if (title.isEmpty) {
       _controller.errorMessage.value = 'Nama kegiatan tidak boleh kosong ⚠️';
       return;
     }
-    
+
     if (title.length < 3) {
-      _controller.errorMessage.value = 'Nama kegiatan terlalu pendek (min. 3 karakter) 📝';
+      _controller.errorMessage.value =
+          'Nama kegiatan terlalu pendek (min. 3 karakter) 📝';
       return;
     }
 
@@ -437,8 +455,14 @@ class _EventFormPageState extends State<EventFormPage> {
       return;
     }
 
+    if (!_isEdit && _startTime!.isBefore(now)) {
+      _controller.errorMessage.value = 'Waktu mulai tidak boleh di masa lampau ⏳';
+      return;
+    }
+
     if (_endTime!.isBefore(_startTime!)) {
-      _controller.errorMessage.value = 'Waktu selesai tidak boleh sebelum waktu mulai ⏰';
+      _controller.errorMessage.value =
+          'Waktu selesai tidak boleh sebelum waktu mulai ⏰';
       return;
     }
 
@@ -447,7 +471,6 @@ class _EventFormPageState extends State<EventFormPage> {
       return;
     }
 
-    // notifikasi berhasil dikirimkan ke anggota atau pengunjung
     if (!_isEdit) {
       _showSuccessNotificationDialog(title);
     } else {
@@ -463,17 +486,22 @@ class _EventFormPageState extends State<EventFormPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Row(
           children: [
-            Icon(Icons.notifications_active_rounded, color: AppColors.accentGreen),
+            Icon(Icons.notifications_active_rounded,
+                color: AppColors.accentGreen),
             SizedBox(width: 12),
             Text('Kirim Notifikasi?'),
           ],
         ),
-        content: Text('Kegiatan "$title" akan diterbitkan. Beritahu semua anggota melalui notifikasi sistem? 🔔'),
+        content: Text(
+            'Kegiatan "$title" akan diterbitkan. Beritahu semua anggota melalui notifikasi sistem? 🔔'),
         actions: [
           TextButton(
             onPressed: () {
               Get.back();
-              _performSave(_titleController.text.trim(), _locationController.text.trim(), _descriptionController.text.trim());
+              _performSave(
+                  _titleController.text.trim(),
+                  _locationController.text.trim(),
+                  _descriptionController.text.trim());
             },
             child: const Text('Simpan Saja'),
           ),
@@ -488,9 +516,13 @@ class _EventFormPageState extends State<EventFormPage> {
                 colorText: Colors.white,
                 duration: const Duration(seconds: 3),
               );
-              _performSave(_titleController.text.trim(), _locationController.text.trim(), _descriptionController.text.trim());
+              _performSave(
+                  _titleController.text.trim(),
+                  _locationController.text.trim(),
+                  _descriptionController.text.trim());
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.accentGreen),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accentGreen),
             child: const Text('Ya, Kirim 🔔'),
           ),
         ],

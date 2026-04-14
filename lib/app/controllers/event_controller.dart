@@ -34,15 +34,30 @@ class EventController extends GetxController {
         .from('events')
         .stream(primaryKey: ['id'])
         .listen((data) {
-          // buat notifikasi kalau ada data baru yang masuk (INSERT)
+          // Detect new events (INSERT only)
           if (events.isNotEmpty && data.length > events.length) {
             final newEvent = data.last;
 
+            // Show notification if event is created by someone else
             if (newEvent['created_by'] != _supabase.auth.currentUser?.id) {
               _showSystemNotification(newEvent['title']);
             }
           }
-          fetchEvents();
+          
+          // Update events list directly instead of refetching
+          events.value = data
+              .map<EventModel>((json) {
+                final divisions = (json['event_divisions'] as List?)
+                    ?.map((e) => e['divisions']?['name'] as String?)
+                    .whereType<String>()
+                    .toList() ?? [];
+                final eventData = Map<String, dynamic>.from(json);
+                eventData['divisions'] = divisions;
+                return EventModel.fromJson(eventData);
+              })
+              .toList();
+          
+          _applyFilter();
         });
   }
 

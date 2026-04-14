@@ -37,13 +37,19 @@ class _KasFormPageState extends State<KasFormPage> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
+          // AppBar dengan Tombol Kembali
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 'Catat Transaksi',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -51,7 +57,7 @@ class _KasFormPageState extends State<KasFormPage> {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
@@ -89,20 +95,32 @@ class _KasFormPageState extends State<KasFormPage> {
 
                   _buildFormHeader('Detail Transaksi'),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: _nominalController,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                    decoration: InputDecoration(
-                      labelText: 'Nominal Transaksi',
-                      hintText: '0',
-                      prefixIcon: Container(
-                        padding: const EdgeInsets.all(12),
-                        child: Text('Rp', style: TextStyle(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
-                        )),
+                  // Field Nominal dengan Shadow
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _nominalController,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      decoration: InputDecoration(
+                        labelText: 'Nominal Transaksi',
+                        hintText: '0',
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.all(12),
+                          child: Text('Rp', style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                          )),
+                        ),
                       ),
                     ),
                   ),
@@ -120,6 +138,7 @@ class _KasFormPageState extends State<KasFormPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Date Picker Tile
                   GestureDetector(
                     onTap: _pickDate,
                     child: Container(
@@ -128,6 +147,13 @@ class _KasFormPageState extends State<KasFormPage> {
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: theme.dividerColor),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -259,7 +285,8 @@ class _KasFormPageState extends State<KasFormPage> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Simpan Transaksi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  : const Text('Simpan Transaksi', 
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             )),
       ),
     );
@@ -297,6 +324,13 @@ class _KasFormPageState extends State<KasFormPage> {
             color: isActive ? color : color.withOpacity(0.15),
             width: 2,
           ),
+          boxShadow: isActive ? [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ] : null,
         ),
         child: Column(
           children: [
@@ -322,18 +356,28 @@ class _KasFormPageState extends State<KasFormPage> {
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (date != null) setState(() => _selectedDate = date);
   }
 
   void _handleSave() {
     if (_nominalController.text.trim().isEmpty) {
-      _controller.errorMessage.value = 'Nominal wajib diisi';
+      _controller.errorMessage.value = 'Nominal wajib diisi ⚠️';
       return;
     }
     final nominal = double.tryParse(_nominalController.text.trim());
     if (nominal == null || nominal <= 0) {
-      _controller.errorMessage.value = 'Nominal tidak valid';
+      _controller.errorMessage.value = 'Nominal tidak valid ❌';
       return;
     }
 

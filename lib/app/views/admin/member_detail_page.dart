@@ -31,8 +31,13 @@ class MemberDetailPage extends StatelessWidget {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 'Detail Anggota',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -40,7 +45,7 @@ class MemberDetailPage extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
             actions: [
               IconButton(
@@ -66,7 +71,7 @@ class MemberDetailPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 20),
                     
-                    // profil header
+                    // Profil Header
                     Center(
                       child: Column(
                         children: [
@@ -78,6 +83,13 @@ class MemberDetailPage extends StatelessWidget {
                                 color: colorScheme.primary.withOpacity(0.2),
                                 width: 2,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
                             child: CircleAvatar(
                               radius: 54,
@@ -99,7 +111,7 @@ class MemberDetailPage extends StatelessWidget {
                                   : null,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           Text(
                             member.fullName,
                             style: theme.textTheme.headlineSmall?.copyWith(
@@ -108,7 +120,7 @@ class MemberDetailPage extends StatelessWidget {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           Text(
                             member.nim,
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -116,7 +128,7 @@ class MemberDetailPage extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -125,17 +137,16 @@ class MemberDetailPage extends StatelessWidget {
                                 .map((d) => DivisionBadge(division: d))
                                 .toList(),
                           ),
-                          const SizedBox(height: 24),
-
+                          const SizedBox(height: 20),
                           _buildStatusAction(context, member, memberController),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
-                    // kehadiran
-                    _buildSectionHeader('KEHADIRAN'),
-                    const SizedBox(height: 16),
+                    // Kehadiran Section
+                    _buildSectionHeader('RINGKASAN KEHADIRAN'),
+                    const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
@@ -147,9 +158,10 @@ class MemberDetailPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(28),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.primary.withOpacity(0.25),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
+                            color: colorScheme.primary.withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
@@ -164,16 +176,16 @@ class MemberDetailPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
-                    // profil
-                    _buildSectionHeader('INFORMASI PROFIL'),
-                    const SizedBox(height: 16),
+                    // Profil Section
+                    _buildSectionHeader('INFORMASI DETAIL'),
+                    const SizedBox(height: 12),
                     _buildInfoTile(context, Icons.school_rounded, 'Angkatan', member.angkatan ?? '-'),
                     _buildInfoTile(context, Icons.phone_android_rounded, 'Nomor HP', member.phone ?? '-'),
                     _buildInfoTile(context, Icons.email_rounded, 'Alamat Email', member.email),
                     
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 60),
                   ],
                 ),
               );
@@ -194,9 +206,10 @@ class MemberDetailPage extends StatelessWidget {
       label: Text(isActive ? 'Nonaktifkan Akun' : 'Aktifkan Akun'),
       style: OutlinedButton.styleFrom(
         foregroundColor: color,
-        side: BorderSide(color: color.withOpacity(0.5)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        side: BorderSide(color: color.withOpacity(0.5), width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        backgroundColor: color.withOpacity(0.02),
       ),
     );
   }
@@ -257,27 +270,49 @@ class MemberDetailPage extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 18, color: theme.colorScheme.primary),
+            child: Icon(icon, size: 20, color: theme.colorScheme.primary),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-              const SizedBox(height: 2),
-              Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textSecondary,
+                    fontSize: 10,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -293,7 +328,7 @@ class MemberDetailPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         title: Text('${action.capitalizeFirst} Anggota'),
         content: Text('Yakin ingin $action akun ${member.fullName}?'),
         actions: [
@@ -311,6 +346,7 @@ class MemberDetailPage extends StatelessWidget {
                   ? AppColors.accentRed
                   : AppColors.accentGreen,
               foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(action.capitalizeFirst!),

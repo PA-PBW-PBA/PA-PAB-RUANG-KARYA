@@ -34,7 +34,6 @@ class HomeMemberPage extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // AppBar
           SliverAppBar(
             expandedHeight: 80,
             floating: true,
@@ -55,35 +54,39 @@ class HomeMemberPage extends StatelessWidget {
             ),
             actions: [
               Obx(() => Padding(
-                padding: const EdgeInsets.only(right: 20, top: 8),
-                child: GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.profileMember),
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.primary.withOpacity(0.3), width: 1.5),
-                    ),
-                    child: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: colorScheme.primary.withOpacity(0.1),
-                      child: Text(
-                        authController.currentUser.value?.fullName.isNotEmpty == true
-                            ? authController.currentUser.value!.fullName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
+                    padding: const EdgeInsets.only(right: 20, top: 8),
+                    child: GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.profileMember),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: colorScheme.primary.withOpacity(0.3),
+                              width: 1.5),
+                        ),
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: colorScheme.primary.withOpacity(0.1),
+                          child: Text(
+                            authController.currentUser.value?.fullName
+                                        .isNotEmpty ==
+                                    true
+                                ? authController.currentUser.value!.fullName[0]
+                                    .toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              )),
+                  )),
             ],
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -91,49 +94,41 @@ class HomeMemberPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  
                   Obx(() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        greeting,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${authController.currentUser.value?.fullName.split(' ').first ?? 'Anggota'}!',
-                        style: theme.textTheme.headlineLarge?.copyWith(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  )),
-                  
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            greeting,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${authController.currentUser.value?.fullName.split(' ').first ?? 'Anggota'}!',
+                            style: theme.textTheme.headlineLarge?.copyWith(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ],
+                      )),
                   const SizedBox(height: 24),
-
                   _buildPremiumMemberCard(context, authController),
-                  
                   const SizedBox(height: 32),
-
                   _buildSectionHeader(context, title: 'Akses Cepat'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildModernQuickAccess(context),
-
                   const SizedBox(height: 32),
-
-                  // event yang akan datang
                   _buildSectionHeader(
-                    context, 
+                    context,
                     title: 'Kegiatan Mendatang',
                     onSeeAll: () => Get.toNamed(AppRoutes.eventVisitor),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Obx(() {
                     if (eventController.events.isEmpty) {
                       return _buildEmptyState('Belum ada kegiatan mendatang');
@@ -142,16 +137,19 @@ class HomeMemberPage extends StatelessWidget {
                       height: 180,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
                         separatorBuilder: (_, __) => const SizedBox(width: 16),
                         itemBuilder: (_, i) => Container(
                           width: 280,
                           decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withOpacity(0.1),
                                 blurRadius: 12,
+                                spreadRadius: 1,
                                 offset: const Offset(0, 4),
                               ),
                             ],
@@ -161,24 +159,23 @@ class HomeMemberPage extends StatelessWidget {
                       ),
                     );
                   }),
-
                   const SizedBox(height: 32),
-
-                  // galeri
                   _buildSectionHeader(
-                    context, 
+                    context,
                     title: 'Galeri Karya',
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryMember),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
                       return _buildEmptyState('Galeri masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
@@ -187,19 +184,21 @@ class HomeMemberPage extends StatelessWidget {
                       itemCount: galleryController.gallery.take(4).length,
                       itemBuilder: (_, i) => Container(
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 15,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
-                        child: GalleryCard(gallery: galleryController.gallery[i]),
+                        child:
+                            GalleryCard(gallery: galleryController.gallery[i]),
                       ),
                     );
                   }),
-                  
                   const SizedBox(height: 100),
                 ],
               ),
@@ -211,11 +210,12 @@ class HomeMemberPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPremiumMemberCard(BuildContext context, AuthController authController) {
+  Widget _buildPremiumMemberCard(
+      BuildContext context, AuthController authController) {
     return Obx(() {
       final user = authController.currentUser.value;
       if (user == null) return const SizedBox.shrink();
-      
+
       return Container(
         width: double.infinity,
         height: 200,
@@ -228,16 +228,16 @@ class HomeMemberPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.35),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              color: AppColors.primary.withOpacity(0.4),
+              blurRadius: 25,
+              spreadRadius: 2,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
-            // Decorative Graphic Elements
             Positioned(
               top: -30,
               right: -30,
@@ -254,11 +254,11 @@ class HomeMemberPage extends StatelessWidget {
                 height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.05), width: 20),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.05), width: 20),
                 ),
               ),
             ),
-            
             Padding(
               padding: const EdgeInsets.all(28),
               child: Row(
@@ -303,22 +303,27 @@ class HomeMemberPage extends StatelessWidget {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: user.divisions.map((d) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.white.withOpacity(0.2)),
-                            ),
-                            child: Text(
-                              d,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          )).toList(),
+                          children: user.divisions
+                              .map((d) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          color:
+                                              Colors.white.withOpacity(0.2)),
+                                    ),
+                                    child: Text(
+                                      d,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
                         ),
                       ],
                     ),
@@ -333,11 +338,14 @@ class HomeMemberPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.3), width: 2),
                         ),
                         child: Center(
                           child: Text(
-                            user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?',
+                            user.fullName.isNotEmpty
+                                ? user.fullName[0].toUpperCase()
+                                : '?',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 32,
@@ -368,16 +376,47 @@ class HomeMemberPage extends StatelessWidget {
 
   Widget _buildModernQuickAccess(BuildContext context) {
     final items = [
-      {'icon': Icons.event_available_rounded, 'label': 'Kegiatan', 'route': AppRoutes.eventVisitor, 'color': AppColors.primary},
-      {'icon': Icons.calendar_today_rounded, 'label': 'Jadwalku', 'route': AppRoutes.eventMember, 'color': AppColors.accentBlue},
-      {'icon': Icons.assignment_turned_in_rounded, 'label': 'Absensi', 'route': AppRoutes.attendanceHistory, 'color': AppColors.success},
-      {'icon': Icons.collections_rounded, 'label': 'Galeri', 'route': AppRoutes.galleryMember, 'color': AppColors.accentRed},
-      {'icon': Icons.groups_rounded, 'label': 'Anggota', 'route': AppRoutes.memberListReadonly, 'color': AppColors.accentPurple},
-      {'icon': Icons.manage_accounts_rounded, 'label': 'Profil', 'route': AppRoutes.profileMember, 'color': AppColors.warning},
+      {
+        'icon': Icons.event_available_rounded,
+        'label': 'Kegiatan',
+        'route': AppRoutes.eventVisitor,
+        'color': AppColors.primary
+      },
+      {
+        'icon': Icons.calendar_today_rounded,
+        'label': 'Jadwalku',
+        'route': AppRoutes.eventMember,
+        'color': AppColors.accentBlue
+      },
+      {
+        'icon': Icons.assignment_turned_in_rounded,
+        'label': 'Absensi',
+        'route': AppRoutes.attendanceHistory,
+        'color': AppColors.success
+      },
+      {
+        'icon': Icons.collections_rounded,
+        'label': 'Galeri',
+        'route': AppRoutes.galleryMember,
+        'color': AppColors.accentRed
+      },
+      {
+        'icon': Icons.groups_rounded,
+        'label': 'Anggota',
+        'route': AppRoutes.memberListReadonly,
+        'color': AppColors.accentPurple
+      },
+      {
+        'icon': Icons.manage_accounts_rounded,
+        'label': 'Profil',
+        'route': AppRoutes.profileMember,
+        'color': AppColors.warning
+      },
     ];
 
     return GridView.builder(
       shrinkWrap: true,
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -397,6 +436,13 @@ class HomeMemberPage extends StatelessWidget {
               color: color.withOpacity(0.06),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: color.withOpacity(0.12), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -409,10 +455,10 @@ class HomeMemberPage extends StatelessWidget {
                   ),
                   child: Icon(item['icon'] as IconData, color: color, size: 24),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   item['label'] as String,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
@@ -427,30 +473,37 @@ class HomeMemberPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, {required String title, VoidCallback? onSeeAll}) {
+  Widget _buildSectionHeader(BuildContext context,
+      {required String title, VoidCallback? onSeeAll}) {
     final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, fontSize: 18),
+          style: theme.textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.w800, fontSize: 18),
         ),
         if (onSeeAll != null)
           TextButton(
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
             child: Row(
               children: [
                 Text(
                   'Lihat Semua',
-                  style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w700, fontSize: 13),
+                  style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, size: 18, color: theme.colorScheme.primary),
+                Icon(Icons.chevron_right_rounded,
+                    size: 18, color: theme.colorScheme.primary),
               ],
             ),
           ),

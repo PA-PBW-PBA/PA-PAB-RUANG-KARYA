@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/gallery_controller.dart';
 import '../widgets/gallery_card.dart';
 import '../widgets/empty_state.dart';
@@ -8,8 +10,6 @@ import '../widgets/loading_skeleton.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/admin_bottom_nav.dart';
-import 'package:flutter/rendering.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class GalleryAdminPage extends StatefulWidget {
   const GalleryAdminPage({super.key});
@@ -58,25 +58,29 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
-                'Galeri Karya',
+                'Manajemen Galeri',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Modern Filter chips
+                  const SizedBox(height: 12),
                   SizedBox(
                     height: 40,
                     child: ListView(
@@ -87,8 +91,7 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                         ...AppConstants.divisions,
                       ].map((division) {
                         return Obx(() {
-                          final isSelected =
-                              controller.selectedDivision.value == division;
+                          final isSelected = controller.selectedDivision.value == division;
                           final color = division == 'Semua' 
                               ? colorScheme.primary 
                               : AppColors.getDivisionColor(division);
@@ -98,23 +101,18 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                             child: FilterChip(
                               label: Text(division),
                               selected: isSelected,
-                              onSelected: (_) =>
-                                  controller.filterByDivision(division),
+                              onSelected: (_) => controller.filterByDivision(division),
                               backgroundColor: color.withOpacity(0.05),
                               selectedColor: color.withOpacity(0.15),
                               checkmarkColor: color,
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               side: BorderSide(
                                 color: isSelected ? color.withOpacity(0.3) : Colors.transparent,
                               ),
                               labelStyle: TextStyle(
                                 color: isSelected ? color : AppColors.textSecondary,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                 fontSize: 13,
                               ),
                             ),
@@ -149,8 +147,8 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
             if (controller.filteredGallery.isEmpty) {
               return const SliverFillRemaining(
                 child: EmptyState(
-                  message: 'Belum ada karya di galeri',
-                  subtitle: 'Mulai dengan mengupload karya terbaik divisi',
+                  message: 'Belum ada karya',
+                  subtitle: 'Mulai upload karya terbaik organisasi',
                   icon: Icons.photo_library_outlined,
                 ),
               );
@@ -169,10 +167,11 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                     final item = controller.filteredGallery[i];
                     return Container(
                       decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
                         ],
@@ -181,8 +180,7 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                         gallery: item,
                         showAdminActions: true,
                         onTap: () => _showImageDetail(context, item),
-                        onDelete: () =>
-                            _confirmDelete(context, controller, item.id),
+                        onDelete: () => _confirmDelete(context, controller, item.id),
                       ),
                     );
                   },
@@ -201,92 +199,96 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
           child: FloatingActionButton.extended(
             onPressed: () => _showUploadSheet(context, controller),
             backgroundColor: colorScheme.primary,
-            elevation: 6,
+            elevation: 8,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             icon: const Icon(Icons.add_a_photo_rounded, color: Colors.white),
-            label: const Text(
-              'Upload Karya',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            label: const Text('Upload Karya', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
           ),
         ),
       ),
-      bottomNavigationBar: AdminBottomNav(currentIndex: 3),
+      bottomNavigationBar: const AdminBottomNav(currentIndex: 3),
     );
   }
 
+  // PERBAIKAN: Mengatasi Pixel Overflowed dengan Flexible dan ScrollView
   void _showImageDetail(BuildContext context, dynamic item) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(10),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Stack(
-          alignment: Alignment.center,
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(28),
                 color: Theme.of(context).cardColor,
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.min, // Mengikuti ukuran konten
                 children: [
-                  InteractiveViewer(
-                    child: CachedNetworkImage(
-                      imageUrl: item.imageUrl,
-                      fit: BoxFit.contain,
+                  Flexible(
+                    child: InteractiveViewer(
+                      maxScale: 5.0,
+                      child: CachedNetworkImage(
+                        imageUrl: item.imageUrl,
+                        fit: BoxFit.contain,
+                        placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                      ),
                     ),
                   ),
-                  Padding(
+                  Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.getDivisionColor(item.divisionName).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                item.divisionName,
-                                style: TextStyle(
-                                  color: AppColors.getDivisionColor(item.divisionName),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10,
-                                ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+                    ),
+                    child: SingleChildScrollView( // Mencegah overflow pada teks panjang
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.getDivisionColor(item.divisionName).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              item.divisionName.toUpperCase(),
+                              style: TextStyle(
+                                color: AppColors.getDivisionColor(item.divisionName),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 10,
+                                letterSpacing: 0.5,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          item.caption ?? 'Tidak ada keterangan',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 12),
+                          Text(
+                            item.caption ?? 'Tidak ada keterangan',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             Positioned(
-              top: 10,
-              right: 10,
-              child: IconButton(
-                onPressed: () => Get.back(),
-                icon: const CircleAvatar(
+              top: 12,
+              right: 12,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: const CircleAvatar(
                   backgroundColor: Colors.black54,
-                  child: Icon(Icons.close_rounded, color: Colors.white),
+                  radius: 18,
+                  child: Icon(Icons.close_rounded, color: Colors.white, size: 20),
                 ),
               ),
             ),
@@ -324,8 +326,7 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
             children: [
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: 40, height: 4,
                   decoration: BoxDecoration(
                     color: theme.dividerColor.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(999),
@@ -333,103 +334,47 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                'Upload Karya Baru',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
+              Text('Upload Karya Baru', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
               const SizedBox(height: 24),
-
               Obx(() => GestureDetector(
-                    onTap: controller.pickGalleryImage,
-                    child: Container(
-                      height: 180,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary.withOpacity(0.03),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: colorScheme.primary.withOpacity(0.15),
-                          style: BorderStyle.solid,
-                          width: 2,
+                onTap: controller.pickGalleryImage,
+                child: Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: colorScheme.primary.withOpacity(0.2), width: 2, style: BorderStyle.solid),
+                  ),
+                  child: controller.pickedGalleryFile.value == null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_photo_alternate_rounded, color: colorScheme.primary, size: 40),
+                            const SizedBox(height: 12),
+                            Text('Tap untuk pilih foto', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
+                          ],
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: Image.file(File(controller.pickedGalleryFile.value!.path), fit: BoxFit.cover),
                         ),
-                      ),
-                      child: controller.pickedGalleryFile.value == null
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primary.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.add_photo_alternate_rounded,
-                                    color: colorScheme.primary,
-                                    size: 32,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Tap untuk pilih foto',
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                Text(
-                                  'Format JPG, PNG (Max 5MB)',
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ],
-                            )
-                          : Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(22),
-                                  child: Image.file(
-                                    File(controller.pickedGalleryFile.value!.path),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(22),
-                                  ),
-                                  child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 48),
-                                ),
-                              ],
-                            ),
-                    ),
-                  )),
+                ),
+              )),
               const SizedBox(height: 24),
-
               TextField(
                 controller: captionController,
                 maxLines: 2,
                 decoration: const InputDecoration(
-                  labelText: 'Keterangan / Caption',
-                  hintText: 'Berikan deskripsi singkat karya ini...',
+                  labelText: 'Caption Karya',
                   prefixIcon: Icon(Icons.chat_bubble_outline_rounded),
                 ),
               ),
               const SizedBox(height: 24),
-
-              // divisi
-              Text(
-                'Divisi Pemilik Karya',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-              ),
+              Text('Divisi Pemilik Karya', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
               const SizedBox(height: 12),
               Wrap(
-                spacing: 10,
-                runSpacing: 10,
+                spacing: 10, runSpacing: 10,
                 children: AppConstants.divisions.map((division) {
                   final isSelected = selectedDivision == division;
                   final color = AppColors.getDivisionColor(division);
@@ -437,36 +382,24 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                     onTap: () => setState(() => selectedDivision = division),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSelected ? color : color.withOpacity(0.06),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: isSelected ? color : color.withOpacity(0.15),
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: isSelected ? color : color.withOpacity(0.15), width: 1.5),
                       ),
-                      child: Text(
-                        division,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : color,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
+                      child: Text(division, style: TextStyle(color: isSelected ? Colors.white : color, fontWeight: FontWeight.bold, fontSize: 13)),
                     ),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 32),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     if (controller.pickedGalleryFile.value == null) {
-                      Get.snackbar('Error', 'Silakan pilih foto terlebih dahulu');
+                      Get.snackbar('Gagal', 'Pilih foto dulu ya!');
                       return;
                     }
                     controller.uploadGallery(
@@ -475,11 +408,7 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
                     );
                     Get.back();
                   },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text('Publish Karya', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: const Text('Publish Karya Sekarang'),
                 ),
               ),
             ],
@@ -489,26 +418,21 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
     );
   }
 
-  void _confirmDelete(
-      BuildContext context, GalleryController controller, String id) {
+  void _confirmDelete(BuildContext context, GalleryController controller, String id) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Hapus Foto'),
-        content: const Text('Foto akan dihapus permanen. Lanjutkan?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Hapus Karya?'),
+        content: const Text('Data ini tidak bisa dikembalikan setelah dihapus.'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Batal'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Batal')),
           ElevatedButton(
             onPressed: () {
               Get.back();
               controller.deleteGallery(id);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Hapus'),
           ),
         ],

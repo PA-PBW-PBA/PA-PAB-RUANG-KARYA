@@ -11,171 +11,237 @@ class AttendanceHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AttendanceController>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Absensi Saya')),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const LoadingSkeletonList();
-        }
-
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(16),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // 1. App Bar
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
+              title: Text(
+                'Absensi Saya',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _statItem(
-                      context,
-                      '${controller.totalEvents}',
-                      'Total Kegiatan',
+              ),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+            ),
+          ),
+
+          // 2. Stat Card Section
+          SliverToBoxAdapter(
+            child: Obx(() {
+              if (controller.isLoading.value) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [colorScheme.primary, AppColors.primaryDark],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    _divider(),
-                    _statItem(
-                      context,
-                      '${controller.totalHadir}',
-                      'Hadir',
-                    ),
-                    _divider(),
-                    _statItem(
-                      context,
-                      '${controller.attendancePercentage}%',
-                      'Kehadiran',
-                    ),
-                  ],
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _statItem('${controller.totalEvents}', 'Total'),
+                      _statDivider(),
+                      _statItem('${controller.totalHadir}', 'Hadir'),
+                      _statDivider(),
+                      _statItem('${controller.attendancePercentage}%', 'Ratio'),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+
+          // 3. Header List
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              child: Text(
+                'RIWAYAT KEHADIRAN',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 1.5,
                 ),
               ),
             ),
+          ),
 
-            Expanded(
-              child: controller.myAttendances.isEmpty
-                  ? const EmptyState(
-                      message: 'Belum ada data absensi',
-                      icon: Icons.checklist_outlined,
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: controller.myAttendances.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (_, i) {
-                        final item = controller.myAttendances[i];
-                        return Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Theme.of(context).dividerColor,
-                              width: 0.5,
+          // 4. Content (List Riwayat)
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const SliverFillRemaining(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: LoadingSkeletonList(),
+                ),
+              );
+            }
+
+            if (controller.myAttendances.isEmpty) {
+              return const SliverFillRemaining(
+                child: EmptyState(
+                  message: 'Belum ada data absensi',
+                  subtitle: 'Riwayat kehadiranmu akan muncul di sini',
+                  icon: Icons.checklist_outlined,
+                ),
+              );
+            }
+
+            // PERBAIKAN UTAMA: Menggunakan SliverList agar lazy loading dan tidak ANR
+            return SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    final item = controller.myAttendances[i];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: theme.dividerColor.withOpacity(0.5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.eventTitle,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _formatDate(item.createdAt),
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ],
-                                ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(item.status).withOpacity(0.1),
+                                shape: BoxShape.circle,
                               ),
-                              _statusBadge(context, item.status),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        );
-      }),
+                              child: Icon(
+                                _getStatusIcon(item.status),
+                                size: 20,
+                                color: _getStatusColor(item.status),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.eventTitle,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _formatDate(item.createdAt),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            _statusBadge(item.status),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  childCount: controller.myAttendances.length,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
-  Widget _statItem(BuildContext context, String value, String label) {
+  // --- Helper Widgets ---
+
+  Widget _statItem(String value, String label) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w700)),
       ],
     );
   }
 
-  Widget _divider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: Colors.white.withOpacity(0.3),
-    );
+  Widget _statDivider() {
+    return Container(height: 30, width: 1, color: Colors.white.withOpacity(0.2));
   }
 
-  Widget _statusBadge(BuildContext context, String status) {
-    Color color;
-    String label;
+  Color _getStatusColor(String status) {
+    if (status == 'hadir') return AppColors.accentGreen;
+    if (status == 'izin') return AppColors.secondary;
+    return AppColors.accentRed;
+  }
 
-    switch (status) {
-      case 'hadir':
-        color = AppColors.accentGreen;
-        label = 'Hadir';
-        break;
-      case 'izin':
-        color = AppColors.secondary;
-        label = 'Izin';
-        break;
-      default:
-        color = AppColors.accentRed;
-        label = 'Tidak Hadir';
-    }
+  IconData _getStatusIcon(String status) {
+    if (status == 'hadir') return Icons.check_circle_rounded;
+    if (status == 'izin') return Icons.info_rounded;
+    return Icons.cancel_rounded;
+  }
 
+  Widget _statusBadge(String status) {
+    final color = _getStatusColor(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.4)),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2), width: 1.5),
       ),
       child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        status.toUpperCase(),
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800),
       ),
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2, '0')}-'
-      '${date.month.toString().padLeft(2, '0')}-'
-      '${date.year}';
+  String _formatDate(DateTime date) => 
+      '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
 }

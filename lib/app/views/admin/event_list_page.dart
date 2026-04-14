@@ -57,8 +57,13 @@ class _EventListPageState extends State<EventListPage> {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 'Manajemen Kegiatan',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -66,7 +71,7 @@ class _EventListPageState extends State<EventListPage> {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
@@ -74,7 +79,6 @@ class _EventListPageState extends State<EventListPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  // Search
                   Container(
                     decoration: BoxDecoration(
                       boxShadow: [
@@ -102,61 +106,76 @@ class _EventListPageState extends State<EventListPage> {
                   ),
                   const SizedBox(height: 20),
                   
-                  // kalender
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: theme.dividerColor.withOpacity(0.5),
-                        width: 1,
+                  // PERBAIKAN: Obx membungkus seluruh TableCalendar dan memantau controller.events
+                  Obx(() {
+                    // Trigger rebuild saat list events berubah
+                    // ignore: unused_local_variable
+                    final dataTrigger = controller.events.length; 
+                    
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.5),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Obx(() => TableCalendar(
-                          firstDay: DateTime.utc(2020, 1, 1),
-                          lastDay: DateTime.utc(2030, 12, 31),
-                          focusedDay: controller.focusedDay.value,
-                          selectedDayPredicate: (day) =>
-                              isSameDay(controller.selectedDay.value, day),
-                          onDaySelected: (selected, focused) {
-                            controller.selectedDay.value = selected;
-                            controller.focusedDay.value = focused;
-                          },
-                          calendarFormat: CalendarFormat.month,
-                          availableCalendarFormats: const {
-                            CalendarFormat.month: 'Month',
-                          },
-                          eventLoader: (day) => controller.getEventsForDay(day),
-                          calendarStyle: CalendarStyle(
-                            todayDecoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            todayTextStyle: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            selectedDecoration: BoxDecoration(
-                              color: colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            markerDecoration: BoxDecoration(
-                              color: colorScheme.secondary,
-                              shape: BoxShape.circle,
-                            ),
-                            outsideDaysVisible: false,
+                      child: TableCalendar(
+                        firstDay: DateTime.utc(2020, 1, 1),
+                        lastDay: DateTime.utc(2030, 12, 31),
+                        focusedDay: controller.focusedDay.value,
+                        selectedDayPredicate: (day) =>
+                            isSameDay(controller.selectedDay.value, day),
+                        onDaySelected: (selected, focused) {
+                          controller.selectedDay.value = selected;
+                          controller.focusedDay.value = focused;
+                        },
+                        calendarFormat: CalendarFormat.month,
+                        availableCalendarFormats: const {
+                          CalendarFormat.month: 'Month',
+                        },
+                        // eventLoader akan otomatis terpanggil saat widget rebuild
+                        eventLoader: (day) => controller.getEventsForDay(day),
+                        calendarStyle: CalendarStyle(
+                          todayDecoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.15),
+                            shape: BoxShape.circle,
                           ),
-                          headerStyle: HeaderStyle(
-                            formatButtonVisible: false,
-                            titleCentered: true,
-                            titleTextStyle: theme.textTheme.titleMedium!.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                            leftChevronIcon: Icon(Icons.chevron_left_rounded, color: colorScheme.primary),
-                            rightChevronIcon: Icon(Icons.chevron_right_rounded, color: colorScheme.primary),
+                          todayTextStyle: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )),
-                  ),
+                          selectedDecoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          markerDecoration: BoxDecoration(
+                            color: colorScheme.secondary,
+                            shape: BoxShape.circle,
+                          ),
+                          outsideDaysVisible: false,
+                        ),
+                        headerStyle: HeaderStyle(
+                          formatButtonVisible: false,
+                          titleCentered: true,
+                          titleTextStyle: theme.textTheme.titleMedium!.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                          leftChevronIcon: Icon(Icons.chevron_left_rounded, color: colorScheme.primary),
+                          rightChevronIcon: Icon(Icons.chevron_right_rounded, color: colorScheme.primary),
+                        ),
+                      ),
+                    );
+                  }),
+                  
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -190,7 +209,7 @@ class _EventListPageState extends State<EventListPage> {
                       )),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -226,17 +245,28 @@ class _EventListPageState extends State<EventListPage> {
         opacity: _isFabVisible ? 1.0 : 0.0,
         child: Visibility(
           visible: _isFabVisible,
-          child: FloatingActionButton.extended(
-            onPressed: () => Get.toNamed(AppRoutes.eventForm),
-            backgroundColor: colorScheme.primary,
-            elevation: 6,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            icon: const Icon(Icons.add_rounded, color: Colors.white),
-            label: const Text(
-              'Kegiatan Baru',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: FloatingActionButton.extended(
+              onPressed: () => Get.toNamed(AppRoutes.eventForm),
+              backgroundColor: colorScheme.primary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Kegiatan Baru',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -259,6 +289,13 @@ class _EventListPageState extends State<EventListPage> {
           color: theme.dividerColor.withOpacity(0.5),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -266,7 +303,6 @@ class _EventListPageState extends State<EventListPage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Date Indicator Side
               Container(
                 width: 60,
                 color: colorScheme.primary.withOpacity(0.05),
@@ -293,7 +329,6 @@ class _EventListPageState extends State<EventListPage> {
                   ],
                 ),
               ),
-              
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -347,7 +382,6 @@ class _EventListPageState extends State<EventListPage> {
                   ),
                 ),
               ),
-              
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Column(

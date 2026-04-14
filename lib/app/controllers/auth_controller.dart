@@ -14,9 +14,14 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Load user asynchronously without blocking UI
+    _initializeUser();
+  }
+
+  Future<void> _initializeUser() async {
     final session = _supabase.auth.currentSession;
     if (session != null) {
-      _loadCurrentUser(session.user.id);
+      await _loadCurrentUser(session.user.id);
     }
   }
 

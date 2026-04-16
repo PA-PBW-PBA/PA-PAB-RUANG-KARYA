@@ -28,11 +28,6 @@ Untuk pengurus, aplikasi ini dilengkapi dengan fitur manajemen anggota (CRUD), p
 
 ---
 
-
-## Teknologi yang Digunakan
-
----
-
 ## Fitur Aplikasi
 
 ### ᯓ★ Pengunjung (Public)

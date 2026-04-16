@@ -25,6 +25,13 @@ Melalui aplikasi ini, anggota UKM dapat melihat informasi kegiatan, melakukan ab
 Untuk pengurus, aplikasi ini dilengkapi dengan fitur manajemen anggota (CRUD), pengelolaan kas, serta dashboard monitoring untuk memantau aktivitas UKM dengan lebih mudah. Dengan adanya sistem ini, UKM menjadi lebih terstruktur, rapi, dan efisien dibandingkan dengan cara manual.
 
 
+---
+
+## Struktur Folder
+
+---
+
+## Database Schema
 
 ---
 

@@ -39,7 +39,6 @@ class DashboardAdminPage extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // SliverAppBar
           SliverAppBar(
             expandedHeight: 80,
             floating: true,
@@ -93,7 +92,6 @@ class DashboardAdminPage extends StatelessWidget {
                   )),
             ],
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -101,8 +99,6 @@ class DashboardAdminPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-
-                  // Warm Greeting
                   Obx(() => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -136,26 +132,20 @@ class DashboardAdminPage extends StatelessWidget {
                           ),
                         ],
                       )),
-
                   const SizedBox(height: 24),
-
                   _buildPremiumAdminCard(
                       context, memberController, kasController),
-
                   const SizedBox(height: 32),
-
                   _buildSectionHeader(context, title: 'Manajemen Inti'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildModernManagementGrid(context),
-
                   const SizedBox(height: 32),
-
                   _buildSectionHeader(
                     context,
                     title: 'Kegiatan Terdekat',
                     onSeeAll: () => Get.toNamed(AppRoutes.eventList),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Obx(() {
                     if (eventController.events.isEmpty) {
                       return _buildEmptyState('Belum ada kegiatan terjadwal');
@@ -164,16 +154,19 @@ class DashboardAdminPage extends StatelessWidget {
                       height: 180,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
                         separatorBuilder: (_, __) => const SizedBox(width: 16),
                         itemBuilder: (_, i) => Container(
                           width: 280,
                           decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withOpacity(0.1),
                                 blurRadius: 12,
+                                spreadRadius: 1,
                                 offset: const Offset(0, 4),
                               ),
                             ],
@@ -183,27 +176,24 @@ class DashboardAdminPage extends StatelessWidget {
                       ),
                     );
                   }),
-
                   const SizedBox(height: 32),
-
                   _buildSectionHeader(context, title: 'Distribusi Anggota'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildModernDivisionGrid(context, memberController),
-
                   const SizedBox(height: 32),
-
                   _buildSectionHeader(
                     context,
                     title: 'Galeri Terbaru',
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryAdmin),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
                       return _buildEmptyState('Galeri admin masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -215,20 +205,21 @@ class DashboardAdminPage extends StatelessWidget {
                       itemCount: galleryController.gallery.take(4).length,
                       itemBuilder: (_, i) => Container(
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 15,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
-                        child:
-                            GalleryCard(gallery: galleryController.gallery[i]),
+                        child: GalleryCard(
+                            gallery: galleryController.gallery[i]),
                       ),
                     );
                   }),
-
                   const SizedBox(height: 120),
                 ],
               ),
@@ -254,16 +245,16 @@ class DashboardAdminPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 25,
+                spreadRadius: 2,
+                offset: const Offset(0, 12),
               ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
-              // Decorative Graphic
               Positioned(
                 top: -20,
                 right: -20,
@@ -281,7 +272,6 @@ class DashboardAdminPage extends StatelessWidget {
                   color: Colors.white.withOpacity(0.02),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -417,6 +407,7 @@ class DashboardAdminPage extends StatelessWidget {
 
     return GridView.builder(
       shrinkWrap: true,
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
@@ -440,6 +431,13 @@ class DashboardAdminPage extends StatelessWidget {
                   color: color.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: color.withOpacity(0.15), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Icon(item['icon'] as IconData, color: color, size: 24),
               ),
@@ -466,6 +464,7 @@ class DashboardAdminPage extends StatelessWidget {
       final memberList = memberController.members.toList();
       return GridView.builder(
         shrinkWrap: true,
+        padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -490,6 +489,13 @@ class DashboardAdminPage extends StatelessWidget {
                 color: color.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: color.withOpacity(0.12), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,7 +528,7 @@ class DashboardAdminPage extends StatelessWidget {
                     children: [
                       Text(
                         division,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -530,7 +536,7 @@ class DashboardAdminPage extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
+                      const Text(
                         'Total Anggota',
                         style: TextStyle(
                           color: AppColors.textSecondary,

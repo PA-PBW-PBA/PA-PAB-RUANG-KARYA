@@ -57,8 +57,13 @@ class _MemberListPageState extends State<MemberListPage> {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 'Daftar Anggota',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -66,7 +71,7 @@ class _MemberListPageState extends State<MemberListPage> {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
@@ -74,11 +79,12 @@ class _MemberListPageState extends State<MemberListPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
+                  const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withOpacity(0.05),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
@@ -105,6 +111,7 @@ class _MemberListPageState extends State<MemberListPage> {
                     height: 40,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.zero,
                       physics: const BouncingScrollPhysics(),
                       children: [
                         'Semua',
@@ -133,6 +140,7 @@ class _MemberListPageState extends State<MemberListPage> {
                               ),
                               side: BorderSide(
                                 color: isSelected ? color.withOpacity(0.3) : Colors.transparent,
+                                width: 1.5,
                               ),
                               labelStyle: TextStyle(
                                 color: isSelected ? color : AppColors.textSecondary,
@@ -147,7 +155,7 @@ class _MemberListPageState extends State<MemberListPage> {
                       }).toList(),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -173,18 +181,31 @@ class _MemberListPageState extends State<MemberListPage> {
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
                     final member = controller.filteredMembers[i];
-                    return MemberCard(
-                      member: member,
-                      onTap: () => Get.toNamed(
-                        AppRoutes.memberDetail,
-                        arguments: member,
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      onEdit: () => Get.toNamed(
-                        AppRoutes.memberForm,
-                        arguments: member,
+                      child: MemberCard(
+                        member: member,
+                        onTap: () => Get.toNamed(
+                          AppRoutes.memberDetail,
+                          arguments: member,
+                        ),
+                        onEdit: () => Get.toNamed(
+                          AppRoutes.memberForm,
+                          arguments: member,
+                        ),
+                        onDelete: () =>
+                            _confirmDelete(context, controller, member.id),
                       ),
-                      onDelete: () =>
-                          _confirmDelete(context, controller, member.id),
                     );
                   },
                   childCount: controller.filteredMembers.length,
@@ -199,17 +220,28 @@ class _MemberListPageState extends State<MemberListPage> {
         opacity: _isFabVisible ? 1.0 : 0.0,
         child: Visibility(
           visible: _isFabVisible,
-          child: FloatingActionButton.extended(
-            onPressed: () => Get.toNamed(AppRoutes.memberForm),
-            backgroundColor: colorScheme.primary,
-            elevation: 6,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            icon: const Icon(Icons.add_rounded, color: Colors.white),
-            label: const Text(
-              'Tambah Anggota',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: FloatingActionButton.extended(
+              onPressed: () => Get.toNamed(AppRoutes.memberForm),
+              backgroundColor: colorScheme.primary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Tambah Anggota',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -224,6 +256,7 @@ class _MemberListPageState extends State<MemberListPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Nonaktifkan Anggota'),
         content: const Text('Anggota ini akan dinonaktifkan dan tidak bisa login. Lanjutkan?'),
         actions: [
@@ -238,6 +271,9 @@ class _MemberListPageState extends State<MemberListPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
             ),
             child: const Text('Nonaktifkan'),
           ),

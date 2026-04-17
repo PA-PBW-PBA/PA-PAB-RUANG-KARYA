@@ -23,7 +23,6 @@ class HomeVisitorPage extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // AppBar
           SliverAppBar(
             expandedHeight: 70,
             floating: true,
@@ -82,7 +81,6 @@ class HomeVisitorPage extends StatelessWidget {
               ),
             ],
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -90,19 +88,15 @@ class HomeVisitorPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  
                   _buildModernHero(context),
-                  
                   const SizedBox(height: 32),
-
-                  // event mendatang
                   _buildSectionHeader(
                     context,
                     title: 'Kegiatan Terdekat',
                     subtitle: 'Jangan lewatkan momen seru kami',
                     onSeeAll: () => Get.toNamed(AppRoutes.eventVisitor),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Obx(() {
                     if (eventController.isLoading.value) {
                       return _buildShimmerPlaceholder();
@@ -114,17 +108,20 @@ class HomeVisitorPage extends StatelessWidget {
                       height: 180,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
                         separatorBuilder: (_, __) => const SizedBox(width: 16),
                         itemBuilder: (_, i) => Container(
                           width: 280,
                           decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
@@ -133,34 +130,29 @@ class HomeVisitorPage extends StatelessWidget {
                       ),
                     );
                   }),
-
                   const SizedBox(height: 32),
-
-                  // divisi
                   _buildSectionHeader(
                     context,
                     title: 'Eksplorasi Divisi',
                     subtitle: 'Temukan minat dan bakatmu di sini',
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   _buildModernDivisionGrid(context),
-
                   const SizedBox(height: 32),
-
-                  // galeri terbaru
                   _buildSectionHeader(
                     context,
                     title: 'Karya Terbaru',
                     subtitle: 'Inspirasi tanpa batas dari anggota kami',
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryVisitor),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
                       return _buildEmptyState('Galeri masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
@@ -171,11 +163,13 @@ class HomeVisitorPage extends StatelessWidget {
                       itemCount: galleryController.gallery.take(4).length,
                       itemBuilder: (_, i) => Container(
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 15,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
@@ -183,7 +177,6 @@ class HomeVisitorPage extends StatelessWidget {
                       ),
                     );
                   }),
-                  
                   const SizedBox(height: 100),
                 ],
               ),
@@ -191,30 +184,41 @@ class HomeVisitorPage extends StatelessWidget {
           ),
         ],
       ),
-      
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         width: double.infinity,
         height: 60,
-        child: FloatingActionButton.extended(
-          onPressed: () => Get.toNamed(AppRoutes.login),
-          backgroundColor: colorScheme.primary,
-          elevation: 8,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          label: Row(
-            children: [
-              const Text(
-                'Sudah Anggota? Masuk Sekarang',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.primary.withOpacity(0.4),
+                blurRadius: 25,
+                spreadRadius: -2,
+                offset: const Offset(0, 10),
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_rounded, size: 20, color: Colors.white),
             ],
+          ),
+          child: FloatingActionButton.extended(
+            onPressed: () => Get.toNamed(AppRoutes.login),
+            backgroundColor: colorScheme.primary,
+            elevation: 0, // Elevation diatur ke 0 karena kita pakai Custom Shadow di Container
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            label: Row(
+              children: [
+                const Text(
+                  'Sudah Anggota? Masuk Sekarang',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_rounded, size: 20, color: Colors.white),
+              ],
+            ),
           ),
         ),
       ),
@@ -237,9 +241,10 @@ class HomeVisitorPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: colorScheme.primary.withOpacity(0.4),
+            blurRadius: 25,
+            spreadRadius: 2,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -262,7 +267,6 @@ class HomeVisitorPage extends StatelessWidget {
               backgroundColor: Colors.white.withOpacity(0.05),
             ),
           ),
-          
           Padding(
             padding: const EdgeInsets.all(28),
             child: Column(
@@ -400,6 +404,7 @@ class HomeVisitorPage extends StatelessWidget {
   Widget _buildModernDivisionGrid(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -419,6 +424,13 @@ class HomeVisitorPage extends StatelessWidget {
               color: color.withOpacity(0.06),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: color.withOpacity(0.15), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

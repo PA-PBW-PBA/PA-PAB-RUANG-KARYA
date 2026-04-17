@@ -25,8 +25,13 @@ class EventVisitorPage extends StatelessWidget {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 'Kegiatan UKM',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -34,7 +39,7 @@ class EventVisitorPage extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
@@ -42,7 +47,6 @@ class EventVisitorPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  // Search
                   Container(
                     decoration: BoxDecoration(
                       boxShadow: [
@@ -69,8 +73,6 @@ class EventVisitorPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
-                  // kalender
                   Container(
                     decoration: BoxDecoration(
                       color: theme.cardColor,

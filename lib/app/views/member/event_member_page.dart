@@ -21,13 +21,19 @@ class EventMemberPage extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
+          // AppBar dengan Tombol Kembali
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 'Jadwal Kegiatan',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -35,19 +41,22 @@ class EventMemberPage extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
+          
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
+                  const SizedBox(height: 12),
+                  // Search Bar dengan Shadow yang lebih tegas
                   Container(
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withOpacity(0.05),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
@@ -70,62 +79,77 @@ class EventMemberPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   
-                  // kalender
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: theme.dividerColor.withOpacity(0.5),
-                        width: 1,
+                  // Kalender dengan Shadow dan Border konsisten
+                  Obx(() {
+                    // Trigger rebuild jika data events berubah agar dot kuning langsung muncul
+                    // ignore: unused_local_variable
+                    final dataTrigger = controller.events.length;
+                    
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.5),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Obx(() => TableCalendar(
-                          firstDay: DateTime.utc(2020, 1, 1),
-                          lastDay: DateTime.utc(2030, 12, 31),
-                          focusedDay: controller.focusedDay.value,
-                          selectedDayPredicate: (day) =>
-                              isSameDay(controller.selectedDay.value, day),
-                          onDaySelected: (selected, focused) {
-                            controller.selectedDay.value = selected;
-                            controller.focusedDay.value = focused;
-                          },
-                          calendarFormat: CalendarFormat.month,
-                          availableCalendarFormats: const {
-                            CalendarFormat.month: 'Month',
-                          },
-                          eventLoader: (day) => controller.getEventsForDay(day),
-                          calendarStyle: CalendarStyle(
-                            todayDecoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            todayTextStyle: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            selectedDecoration: BoxDecoration(
-                              color: colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            markerDecoration: BoxDecoration(
-                              color: colorScheme.secondary,
-                              shape: BoxShape.circle,
-                            ),
-                            outsideDaysVisible: false,
+                      child: TableCalendar(
+                        firstDay: DateTime.utc(2020, 1, 1),
+                        lastDay: DateTime.utc(2030, 12, 31),
+                        focusedDay: controller.focusedDay.value,
+                        selectedDayPredicate: (day) =>
+                            isSameDay(controller.selectedDay.value, day),
+                        onDaySelected: (selected, focused) {
+                          controller.selectedDay.value = selected;
+                          controller.focusedDay.value = focused;
+                        },
+                        calendarFormat: CalendarFormat.month,
+                        availableCalendarFormats: const {
+                          CalendarFormat.month: 'Month',
+                        },
+                        eventLoader: (day) => controller.getEventsForDay(day),
+                        calendarStyle: CalendarStyle(
+                          todayDecoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.15),
+                            shape: BoxShape.circle,
                           ),
-                          headerStyle: HeaderStyle(
-                            formatButtonVisible: false,
-                            titleCentered: true,
-                            titleTextStyle: theme.textTheme.titleMedium!.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                            leftChevronIcon: Icon(Icons.chevron_left_rounded, color: colorScheme.primary),
-                            rightChevronIcon: Icon(Icons.chevron_right_rounded, color: colorScheme.primary),
+                          todayTextStyle: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )),
-                  ),
+                          selectedDecoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          markerDecoration: BoxDecoration(
+                            color: colorScheme.secondary,
+                            shape: BoxShape.circle,
+                          ),
+                          outsideDaysVisible: false,
+                        ),
+                        headerStyle: HeaderStyle(
+                          formatButtonVisible: false,
+                          titleCentered: true,
+                          titleTextStyle: theme.textTheme.titleMedium!.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                          leftChevronIcon: Icon(Icons.chevron_left_rounded, color: colorScheme.primary),
+                          rightChevronIcon: Icon(Icons.chevron_right_rounded, color: colorScheme.primary),
+                        ),
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 24),
+                  
+                  // Section Title
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -142,6 +166,21 @@ class EventMemberPage extends StatelessWidget {
                           ),
                         );
                       }),
+                      Obx(() => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${controller.filteredEvents.length} Event',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -149,6 +188,8 @@ class EventMemberPage extends StatelessWidget {
               ),
             ),
           ),
+          
+          // List Kegiatan
           Obx(() {
             final List<EventModel> events = controller.filteredEvents;
 
@@ -167,7 +208,19 @@ class EventMemberPage extends StatelessWidget {
                 delegate: SliverChildBuilderDelegate(
                   (context, i) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: EventCard(event: events[i]),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: EventCard(event: events[i]),
+                    ),
                   ),
                   childCount: events.length,
                 ),

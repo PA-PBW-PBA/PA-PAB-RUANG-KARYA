@@ -66,8 +66,13 @@ class _MemberFormPageState extends State<MemberFormPage> {
             floating: true,
             pinned: true,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
               title: Text(
                 _isEdit ? 'Edit Anggota' : 'Tambah Anggota',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -75,7 +80,7 @@ class _MemberFormPageState extends State<MemberFormPage> {
                   letterSpacing: -0.5,
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
           SliverToBoxAdapter(
@@ -97,17 +102,19 @@ class _MemberFormPageState extends State<MemberFormPage> {
                                     color: colorScheme.primary.withOpacity(0.2),
                                     width: 2,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: colorScheme.primary.withOpacity(0.1),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
                                 ),
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor:
                                       colorScheme.primary.withOpacity(0.08),
-                                  backgroundImage:
-                                      _controller.pickedAvatarFile.value != null
-                                          ? null
-                                          : null,
-                                  child: _controller.pickedAvatarFile.value ==
-                                          null
+                                  child: _controller.pickedAvatarFile.value == null
                                       ? Icon(
                                           Icons.person_rounded,
                                           color: colorScheme.primary

@@ -225,35 +225,41 @@ Semua data terhubung melalui relasi antar tabel menggunakan foreign key.
 
 User (Supabase Auth)
         |
-        | id
-        ↓
-     profiles
+        v
+    profiles
         |
-        | id
         |
-        ├───────────────┬───────────────┬───────────────┐
-        ↓               ↓               ↓               ↓
-member_divisions   attendances       events          gallery
-        |               |               |               |
-        |               |               |               |
-        ↓               ↓               ↓               ↓
-    divisions         events        profiles        profiles
-                         ↑           (created_by)   (uploaded_by)
-                         |
-                         |
-                event_divisions
-                         |
-                         ↓
-                    divisions
+        +-------------------------+
+        |                         |
+        v                         v
+member_divisions             attendances
+   |      |                 |      |      |
+   |      |                 |      |      |
+   v      v                 v      v      v
+profiles divisions      profiles  events  profiles
+(user_id)(division_id)  (user_id)(event_id)(created_by)
+
+
+events
+   |
+   |
+   v
+event_divisions
+   |        |
+   v        v
+events   divisions
+
 
 divisions
    |
-   ↓
-  kas
-   |
-   ↓
-profiles
-(created_by)
+   +-----------+-----------+
+   |                       |
+   v                       v
+gallery                  kas
+   |                       |
+   v                       v
+profiles                profiles
+(uploaded_by)          (created_by)
 
 ```
 

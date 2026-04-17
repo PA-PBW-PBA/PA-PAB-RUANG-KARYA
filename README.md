@@ -28,14 +28,14 @@ Untuk pengurus, aplikasi ini dilengkapi dengan fitur manajemen anggota (CRUD), p
 
 ## Fitur Aplikasi
 
-### ᯓ★ Pengunjung (Public)
+### Pengunjung (Public)
 
 - Melihat informasi umum UKM
 - Melihat galeri kegiatan
 - Melihat jumlah anggota dan divisi
 - Melihat kegiatan terdekat UKM
 
-### ᯓ★ Anggota (User)
+### Anggota (User)
 
 - Login ke dalam sistem
 - Melihat kalender kegiatan (rapat, mentoring, event)
@@ -44,7 +44,7 @@ Untuk pengurus, aplikasi ini dilengkapi dengan fitur manajemen anggota (CRUD), p
 - Mengelola profil pribadi
 
 
-### ᯓ★ Admin
+### Admin
 
 - Login ke dashboard admin
 - Mengelola data anggota (CRUD)
@@ -330,6 +330,48 @@ profiles                profiles
 
 ## Cara Menjalankan Aplikasi
 
+Berikut langkah-langkah untuk menjalankan aplikasi Ruang Karya
 
+
+1. Clone Repository
+   
+   > Clone project dari GitHub menggunakan perintah berikut:
+   
+   ```
+   git clone https://github.com/PA-PBW-PBA/PA-PAB-RUANG-KARYA.git
+   ```
+
+2. Masuk ke folder project
+
+   > Masuk ke direktori project yang telah di-clone:
+   
+   ```
+   cd PA-PAB-RUANG-KARYA
+   ```
+
+4. Konfigurasi File Environment (.env)
+
+   > Buat file .env di root project, kemudian isi dengan konfigurasi Supabase:
+   
+   ```
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+5. Install Dependencies
+
+   > Install semua package yang dibutuhkan dengan perintah:
+
+   ```
+   flutter pub get
+   ```
+
+6. Jalankan Aplikasi
+
+   > Jalankan aplikasi menggunakan perintah berikut:
+
+   ```
+   flutter run
+   ```
 
 

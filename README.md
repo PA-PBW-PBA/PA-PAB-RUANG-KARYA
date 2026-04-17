@@ -24,12 +24,49 @@ Melalui aplikasi ini, anggota UKM dapat melihat informasi kegiatan, melakukan ab
 
 Untuk pengurus, aplikasi ini dilengkapi dengan fitur manajemen anggota (CRUD), pengelolaan kas, serta dashboard monitoring untuk memantau aktivitas UKM dengan lebih mudah. Dengan adanya sistem ini, UKM menjadi lebih terstruktur, rapi, dan efisien dibandingkan dengan cara manual.
 
+---
+
+## Fitur Aplikasi
+
+### ᯓ★ Pengunjung (Public)
+
+- Melihat informasi umum UKM
+- Melihat galeri kegiatan
+- Melihat jumlah anggota dan divisi
+- Melihat kegiatan terdekat UKM
+
+### ᯓ★ Anggota (User)
+
+- Login ke dalam sistem
+- Melihat kalender kegiatan (rapat, mentoring, event)
+- Melihat galeri kegiatan
+- Melihat data anggota
+- Mengelola profil pribadi
+
+
+### ᯓ★ Admin
+
+- Login ke dashboard admin
+- Mengelola data anggota (CRUD)
+- Mengelola absensi kegiatan
+- Mengelola data keuangan kas
+- Mengelola kegiatan melalui kalender
+- Mengelola galeri kegiatan
+- Melihat dashboard monitoring aktivitas UKM
+
+
+---
+
+## Nilai Tambah
+
+
+
 
 ---
 
 ## Struktur Folder
 
-<details>
+<Detail>
 
 ```
 lib/
@@ -265,38 +302,6 @@ profiles                profiles
 
 ---
 
-## Fitur Aplikasi
-
-### ᯓ★ Pengunjung (Public)
-
-- Melihat informasi umum UKM
-- Melihat galeri kegiatan
-- Melihat jumlah anggota dan divisi
-- Melihat kegiatan terdekat UKM
-
-### ᯓ★ Anggota (User)
-
-- Login ke dalam sistem
-- Melihat kalender kegiatan (rapat, mentoring, event)
-- Melihat galeri kegiatan
-- Melihat data anggota
-- Mengelola profil pribadi
-
-
-### ᯓ★ Admin
-
-- Login ke dashboard admin
-- Mengelola data anggota (CRUD)
-- Mengelola absensi kegiatan
-- Mengelola data keuangan kas
-- Mengelola kegiatan melalui kalender
-- Mengelola galeri kegiatan
-- Melihat dashboard monitoring aktivitas UKM
-
-
----
-
-
 ## Widget yang Digunkan
 
 
@@ -305,16 +310,25 @@ profiles                profiles
 | Tampilan | `GetMaterialApp`, `Icon`, `Text`, `TextStyle`, `CircleAvatar`, `Image`, `CachedNetworkImage` |
 | Layout | `Scaffold`, `SafeArea`, `CustomScrollView`, `SliverAppBar`, `FlexibleSpaceBar`, `SliverToBoxAdapter`, `Padding`, `Column`, `Container`, `Wrap`, `Row`, `Expanded`, `Flexible`, `AspectRatio`, `DraggableScrollableSheet`, `SliverFillRemaining`, `SliverPadding`, `SliverList`, `SliverGrid`, `SizedBox`, `Center`, `Stack`, `Positioned`, `GridView`, `ListView`, `ListView.separated`, `ClipRRect`, `IntrinsicHeight`, `SingleChildScrollView`, `Divider` |
 | Interaksi | `TextButton`, `TextField`, `ElevatedButton`, `OutlinedButton.icon`, `ElevatedButton.icon`, `GestureDetector`, `InkWell`, `IconButton`, `FloatingActionButton.extended`, `FilterChip`, `PopupMenuButton`, `PopupMenuItem` |
-| Animasi / Scroll | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `NeverScrollableScrollPhysics`, `ScrollController`, `ScrollDirection`, `Shimmer.fromColors` |
-| State Management | `StatefulWidget`, `State`, `StatelessWidget`, `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt` |
+| Animasi | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `NeverScrollableScrollPhysics`, `ScrollController`, `ScrollDirection`, `Shimmer.fromColors` |
+| State | `StatefulWidget`, `State`, `StatelessWidget`, `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt` |
 | Navigasi | `GetMaterialApp`, `GetPage`, `Get.back`, `Get.toNamed`, `Get.offAllNamed`, `Get.snackbar`, `Get.changeThemeMode`, `RouteSettings`, `GetMiddleware`, `showDialog`, `showModalBottomSheet` |
-| Dependency Injection | `BindingsBuilder`, `Get.lazyPut`, `Get.find`, `Get.put` |
-| Form / Input | `InputDecoration`, `OutlineInputBorder`, `TextEditingController` |
-| Dialog & Picker | `AlertDialog`, `Dialog`, `showDatePicker`, `showTimePicker` |
-| Media & Interaction | `InteractiveViewer` |
+| Dependency | `BindingsBuilder`, `Get.lazyPut`, `Get.find`, `Get.put` |
+| Form | `InputDecoration`, `OutlineInputBorder`, `TextEditingController` |
+| Dialog | `AlertDialog`, `Dialog`, `showDatePicker`, `showTimePicker` |
+| Media | `InteractiveViewer` |
 | Kalender | `TableCalendar` |
-| Visualisasi Data | `PieChart`, `PieChartData`, `PieChartSectionData` |
-| Visibility / Control | `Visibility` |
-| Styling / Dekorasi | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
-| Loading / Feedback | `CircularProgressIndicator`, `Shimmer.fromColors` |
+| Visualisasi | `PieChart`, `PieChartData`, `PieChartSectionData` |
+| Kontrol | `Visibility` |
+| Styling | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
+| Loading | `CircularProgressIndicator`, `Shimmer.fromColors` |
 | Inisialisasi | `WidgetsFlutterBinding` |
+
+---
+
+
+## Cara Menjalankan Aplikasi
+
+
+
+

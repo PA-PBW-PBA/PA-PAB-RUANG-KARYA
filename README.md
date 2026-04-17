@@ -67,6 +67,7 @@ Untuk pengurus, aplikasi ini dilengkapi dengan fitur manajemen anggota (CRUD), p
 ## Struktur Folder
 
 <Detail>
+<summary>Struktur Folder Aplikasi Ruang Karya ★</summary>
 
 ```
 lib/

@@ -298,3 +298,23 @@ profiles                profiles
 
 
 ## Widget yang Digunkan
+
+
+| Kategori | Widget |
+|----------|--------|
+| Tampilan | `GetMaterialApp`, `Icon`, `Text`, `TextStyle`, `CircleAvatar`, `Image`, `CachedNetworkImage` |
+| Layout | `Scaffold`, `SafeArea`, `CustomScrollView`, `SliverAppBar`, `FlexibleSpaceBar`, `SliverToBoxAdapter`, `Padding`, `Column`, `Container`, `Wrap`, `Row`, `Expanded`, `Flexible`, `AspectRatio`, `DraggableScrollableSheet`, `SliverFillRemaining`, `SliverPadding`, `SliverList`, `SliverGrid`, `SizedBox`, `Center`, `Stack`, `Positioned`, `GridView`, `ListView`, `ListView.separated`, `ClipRRect`, `IntrinsicHeight`, `SingleChildScrollView`, `Divider` |
+| Interaksi | `TextButton`, `TextField`, `ElevatedButton`, `OutlinedButton.icon`, `ElevatedButton.icon`, `GestureDetector`, `InkWell`, `IconButton`, `FloatingActionButton.extended`, `FilterChip`, `PopupMenuButton`, `PopupMenuItem` |
+| Animasi / Scroll | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `NeverScrollableScrollPhysics`, `ScrollController`, `ScrollDirection`, `Shimmer.fromColors` |
+| State Management | `StatefulWidget`, `State`, `StatelessWidget`, `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt` |
+| Navigasi | `GetMaterialApp`, `GetPage`, `Get.back`, `Get.toNamed`, `Get.offAllNamed`, `Get.snackbar`, `Get.changeThemeMode`, `RouteSettings`, `GetMiddleware`, `showDialog`, `showModalBottomSheet` |
+| Dependency Injection | `BindingsBuilder`, `Get.lazyPut`, `Get.find`, `Get.put` |
+| Form / Input | `InputDecoration`, `OutlineInputBorder`, `TextEditingController` |
+| Dialog & Picker | `AlertDialog`, `Dialog`, `showDatePicker`, `showTimePicker` |
+| Media & Interaction | `InteractiveViewer` |
+| Kalender | `TableCalendar` |
+| Visualisasi Data | `PieChart`, `PieChartData`, `PieChartSectionData` |
+| Visibility / Control | `Visibility` |
+| Styling / Dekorasi | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
+| Loading / Feedback | `CircularProgressIndicator`, `Shimmer.fromColors` |
+| Inisialisasi | `WidgetsFlutterBinding` |

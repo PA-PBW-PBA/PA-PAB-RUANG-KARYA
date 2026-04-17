@@ -124,9 +124,9 @@ lib/
 | Column     | Type      | Description |
 |------------|----------|-------------|
 | id         | uuid     | Primary key absensi |
-| event_id   | uuid     | ID event yang dihadiri (relasi ke tabel `events`) |
-| user_id    | uuid     | ID user yang hadir (relasi ke `profiles`) |
-| status     | text     | Status kehadiran (hadir, izin, alpha) |
+| event_id   | uuid     | ID event yang dihadiri |
+| user_id    | uuid     | ID user yang hadir |
+| status     | text     | Status kehadiran |
 | created_by | uuid     | ID user yang mencatat absensi |
 | created_at | timestamp | Waktu data dibuat |
 
@@ -146,8 +146,8 @@ lib/
 | Column      | Type | Description |
 |------------|------|-------------|
 | id         | uuid | Primary key relasi event dan divisi |
-| event_id   | uuid | ID event (relasi ke tabel `events`) |
-| division_id| uuid | ID divisi (relasi ke tabel `divisions`) |
+| event_id   | uuid | ID event |
+| division_id| uuid | ID divisi |
 
 ### Table: `events`
 

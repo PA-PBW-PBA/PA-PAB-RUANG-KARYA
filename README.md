@@ -119,6 +119,144 @@ lib/
 
 ## Database Schema
 
+### Table: `attendances`
+
+| Column     | Type      | Description |
+|------------|----------|-------------|
+| id         | uuid     | Primary key absensi |
+| event_id   | uuid     | ID event yang dihadiri (relasi ke tabel `events`) |
+| user_id    | uuid     | ID user yang hadir (relasi ke `profiles`) |
+| status     | text     | Status kehadiran (hadir, izin, alpha) |
+| created_by | uuid     | ID user yang mencatat absensi |
+| created_at | timestamp | Waktu data dibuat |
+
+
+### Table: `divisions`
+
+| Column      | Type       | Description |
+|------------|------------|-------------|
+| id         | uuid       | Primary key divisi |
+| name       | text       | Nama divisi |
+| description| text       | Deskripsi divisi |
+| color_hex  | text       | Kode warna divisi dalam format HEX |
+| created_at | timestamp  | Waktu data divisi dibuat |
+
+### Table: `event_divisions`
+
+| Column      | Type | Description |
+|------------|------|-------------|
+| id         | uuid | Primary key relasi event dan divisi |
+| event_id   | uuid | ID event (relasi ke tabel `events`) |
+| division_id| uuid | ID divisi (relasi ke tabel `divisions`) |
+
+### Table: `events`
+
+| Column      | Type       | Description |
+|------------|------------|-------------|
+| id         | uuid       | Primary key event |
+| title      | text       | Judul event |
+| description| text       | Deskripsi event |
+| location   | text       | Lokasi event |
+| start_time | timestamp  | Waktu mulai event |
+| end_time   | timestamp  | Waktu selesai event |
+| created_by | uuid       | ID user pembuat event |
+| created_at | timestamp  | Waktu event dibuat |
+| updated_at | timestamp  | Waktu terakhir update event |
+| is_public  | boolean    | Status apakah event bersifat publik |
+
+### Table: `gallery`
+
+| Column       | Type      | Description |
+|--------------|----------|-------------|
+| id           | uuid     | Primary key data galeri |
+| division_id  | uuid     | ID divisi pemilik gambar |
+| image_url    | text     | URL gambar |
+| caption      | text     | Keterangan gambar |
+| uploaded_by  | uuid     | ID user yang mengupload gambar |
+| created_at   | timestamp| Waktu gambar diupload |
+
+### Table: `kas`
+
+| Column           | Type      | Description |
+|------------------|----------|-------------|
+| id               | uuid     | Primary key data kas |
+| division_id      | uuid     | ID divisi terkait transaksi |
+| type             | text     | Jenis transaksi (masuk / keluar) |
+| amount           | numeric  | Jumlah uang |
+| description      | text     | Keterangan transaksi |
+| transaction_date | date     | Tanggal transaksi |
+| created_by       | uuid     | ID user yang mencatat transaksi |
+| created_at       | timestamp| Waktu data dibuat |
+
+### Table: `member_divisions`
+
+| Column      | Type      | Description |
+|-------------|----------|-------------|
+| id          | uuid     | Primary key data |
+| user_id     | uuid     | ID user anggota |
+| division_id | uuid     | ID divisi tempat user bergabung |
+| created_at  | timestamp| Waktu data dibuat |
+
+
+### Table: `profiles`
+
+| Column         | Type       | Description |
+|----------------|-----------|-------------|
+| id             | uuid      | Primary key user |
+| nim            | text      | Nomor induk mahasiswa |
+| full_name      | text      | Nama lengkap user |
+| email          | text      | Email user |
+| phone          | text      | Nomor telepon user |
+| angkatan       | text      | Tahun angkatan |
+| avatar_url     | text      | URL foto profil |
+| role           | text      | Peran user (admin atau anggota) |
+| is_bendahara   | boolean   | Status apakah user bendahara |
+| is_active      | boolean   | Status apakah user aktif |
+| is_first_login | boolean   | Status login pertama |
+| created_at     | timestamp | Waktu akun dibuat |
+| updated_at     | timestamp | Waktu terakhir update data |
+
+
+## Relasi Data
+
+Semua data terhubung melalui relasi antar tabel menggunakan foreign key.
+
+```
+
+User (Supabase Auth)
+        |
+        | id
+        ↓
+     profiles
+        |
+        | id
+        |
+        ├───────────────┬───────────────┬───────────────┐
+        ↓               ↓               ↓               ↓
+member_divisions   attendances       events          gallery
+        |               |               |               |
+        |               |               |               |
+        ↓               ↓               ↓               ↓
+    divisions         events        profiles        profiles
+                         ↑           (created_by)   (uploaded_by)
+                         |
+                         |
+                event_divisions
+                         |
+                         ↓
+                    divisions
+
+divisions
+   |
+   ↓
+  kas
+   |
+   ↓
+profiles
+(created_by)
+
+```
+
 ---
 
 ## Fitur Aplikasi

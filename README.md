@@ -18,7 +18,7 @@
 
 ## Deskripsi Aplikasi
 
-Ruang Karya merupakan aplikasi yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini memudahkan pengurus dalam mengelola UKM serta membantu anggota untuk mengakses berbagai informasi dalam satu sistem.
+Ruang Karya merupakan aplikasi yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini memudahkan pengurus untuk mengelola UKM serta membantu anggota mengakses berbagai informasi dalam satu sistem.
 
 Dengan adanya Ruang Karya, aktivitas UKM yang sebelumnya masih manual kini dapat dikelola dengan lebih mudah.
 

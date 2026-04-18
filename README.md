@@ -52,11 +52,6 @@ Dengan adanya Ruang Karya, aktivitas UKM yang sebelumnya masih manual kini dapat
 - Melihat dashboard monitoring aktivitas UKM
 
 
----
-
-## Nilai Tambah
-
-
 
 
 ---

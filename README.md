@@ -28,7 +28,6 @@ Dengan adanya Ruang Karya, aktivitas UKM yang sebelumnya masih manual kini dapat
 
 ### Pengunjung (Public)
 
-- Melihat informasi umum UKM
 - Melihat galeri kegiatan
 - Melihat jumlah anggota dan divisi
 - Melihat kegiatan terdekat UKM

@@ -9,12 +9,12 @@
 
 **Kelompok Alakadarnya**
 
-| **Nama**                         | **NIM**     | **Kelas**           |
-|----------------------------------|------------|----------------------|
-| Jen Agresia Misti                | 2409116007 | Sistem Informasi A   |
-| Maifariza Aulia Dyas             | 2409116032 | Sistem Informasi A   |
-| Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   |
-| Rizqy                            | 2409116039 | Sistem Informasi A   |
+| **Nama**                         | **NIM**     | **Kelas**           | **GitHub** |
+|----------------------------------|------------|----------------------|------------|
+| Jen Agresia Misti                | 2409116007 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-JenAM06-181717?logo=github)](https://github.com/JenAM06) |
+| Maifariza Aulia Dyas             | 2409116032 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-Maifariza-181717?logo=github)](https://github.com/Maifariza) |
+| Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-yardanrdtya-181717?logo=github)](https://github.com/yardanrdtya) |
+| Rizqy                            | 2409116039 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-eskykooo-181717?logo=github)](https://github.com/eskykooo) |
 
 ---
 

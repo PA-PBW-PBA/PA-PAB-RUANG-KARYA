@@ -7,9 +7,9 @@
 
 </p>
 
-### Kelompok Alakadarnya
+**Kelompok Alakadarnya**
 
-| **Nama**                         | **NIM**     | **Kelas**            |
+| **Nama**                         | **NIM**     | **Kelas**           |
 |----------------------------------|------------|----------------------|
 | Jen Agresia Misti                | 2409116007 | Sistem Informasi A   |
 | Maifariza Aulia Dyas             | 2409116032 | Sistem Informasi A   |
@@ -316,6 +316,14 @@ profiles                profiles
 | Styling | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
 | Loading | `CircularProgressIndicator`, `Shimmer.fromColors` |
 | Inisialisasi | `WidgetsFlutterBinding` |
+
+---
+
+## Slide Deck
+
+Untuk melihat slide presentasi, klik tautan di bawah ini:
+
+https://canva.link/mzoiyqbuab89r2a
 
 ---
 

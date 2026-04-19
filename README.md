@@ -16,6 +16,32 @@
 | Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   |
 | Rizqy                            | 2409116039 | Sistem Informasi A   |
 
+---
+
+## Daftar Isi ✨
+
+- [Deskripsi Aplikasi](#deskripsi-aplikasi)
+- [Fitur Aplikasi](#fitur-aplikasi)
+  - [Pengunjung (Public)](#pengunjung-public)
+  - [Anggota (User)](#anggota-user)
+  - [Admin](#admin)
+- [Struktur Folder](#struktur-folder)
+- [Database Schema](#database-schema)
+  - [Table: attendances](#table-attendances)
+  - [Table: divisions](#table-divisions)
+  - [Table: event_divisions](#table-event_divisions)
+  - [Table: events](#table-events)
+  - [Table: gallery](#table-gallery)
+  - [Table: kas](#table-kas)
+  - [Table: member_divisions](#table-member_divisions)
+  - [Table: profiles](#table-profiles)
+- [Relasi Data](#relasi-data)
+- [Widget yang Digunakan](#widget-yang-digunkan)
+- [Slide Deck](#slide-deck)
+- [Cara Menjalankan Aplikasi](#cara-menjalankan-aplikasi)
+
+---
+
 ## Deskripsi Aplikasi
 
 Ruang Karya merupakan aplikasi yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini memudahkan pengurus untuk mengelola UKM serta membantu anggota mengakses berbagai informasi dalam satu sistem.

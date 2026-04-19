@@ -25,7 +25,14 @@ class _EventFormPageState extends State<EventFormPage> {
   bool _isPublic = true;
   final List<String> _selectedDivisions = [];
 
+  // Per-field error state
+  String? _titleError;
+
   bool get _isEdit => _editEvent != null;
+
+  // Izinkan huruf, angka, spasi, dan tanda baca umum
+  static final _validTextChars =
+      RegExp(r'^[\w\s\.,\-\(\)\[\]:!?/@&\+\#]+$', unicode: true);
 
   @override
   void initState() {
@@ -47,6 +54,15 @@ class _EventFormPageState extends State<EventFormPage> {
     _locationController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  String? _validateTitle(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Nama kegiatan tidak boleh kosong';
+    if (v.length < 3) return 'Nama kegiatan terlalu pendek (min. 3 karakter)';
+    if (!_validTextChars.hasMatch(v))
+      return 'Nama mengandung karakter yang tidak diizinkan';
+    return null;
   }
 
   @override
@@ -91,10 +107,14 @@ class _EventFormPageState extends State<EventFormPage> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _titleController,
-                    decoration: const InputDecoration(
+                    autocorrect: false,
+                    onChanged: (v) =>
+                        setState(() => _titleError = _validateTitle(v)),
+                    decoration: InputDecoration(
                       labelText: 'Nama Kegiatan',
                       hintText: 'Contoh: Rapat Koordinasi Musik',
-                      prefixIcon: Icon(Icons.event_note_rounded),
+                      errorText: _titleError,
+                      prefixIcon: const Icon(Icons.event_note_rounded),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -122,6 +142,7 @@ class _EventFormPageState extends State<EventFormPage> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _locationController,
+                    autocorrect: false,
                     decoration: const InputDecoration(
                       labelText: 'Lokasi',
                       hintText: 'Contoh: Studio Ruang Karya',
@@ -315,7 +336,8 @@ class _EventFormPageState extends State<EventFormPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isActive ? color.withOpacity(0.1) : Theme.of(context).cardColor,
+          color:
+              isActive ? color.withOpacity(0.1) : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isActive ? color : Theme.of(context).dividerColor,
@@ -417,10 +439,11 @@ class _EventFormPageState extends State<EventFormPage> {
     );
     if (time == null) return;
 
-    final dt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    final dt =
+        DateTime(date.year, date.month, date.day, time.hour, time.minute);
 
     if (dt.isBefore(now)) {
-      _controller.errorMessage.value = 'Waktu tidak boleh di masa lampau ⏳';
+      _controller.errorMessage.value = 'Waktu tidak boleh di masa lampau';
       return;
     }
 
@@ -439,37 +462,33 @@ class _EventFormPageState extends State<EventFormPage> {
     final description = _descriptionController.text.trim();
     final now = DateTime.now();
 
-    if (title.isEmpty) {
-      _controller.errorMessage.value = 'Nama kegiatan tidak boleh kosong ⚠️';
-      return;
-    }
-
-    if (title.length < 3) {
-      _controller.errorMessage.value =
-          'Nama kegiatan terlalu pendek (min. 3 karakter) 📝';
-      return;
-    }
+    // Validasi title dengan inline error
+    final titleErr = _validateTitle(title);
+    setState(() => _titleError = titleErr);
+    if (titleErr != null) return;
 
     if (_startTime == null || _endTime == null) {
-      _controller.errorMessage.value = 'Waktu mulai dan selesai wajib dipilih 📅';
+      _controller.errorMessage.value = 'Waktu mulai dan selesai wajib dipilih';
       return;
     }
 
     if (!_isEdit && _startTime!.isBefore(now)) {
-      _controller.errorMessage.value = 'Waktu mulai tidak boleh di masa lampau ⏳';
+      _controller.errorMessage.value = 'Waktu mulai tidak boleh di masa lampau';
       return;
     }
 
     if (_endTime!.isBefore(_startTime!)) {
       _controller.errorMessage.value =
-          'Waktu selesai tidak boleh sebelum waktu mulai ⏰';
+          'Waktu selesai tidak boleh sebelum waktu mulai';
       return;
     }
 
     if (_selectedDivisions.isEmpty) {
-      _controller.errorMessage.value = 'Pilih minimal satu divisi terkait 👥';
+      _controller.errorMessage.value = 'Pilih minimal satu divisi terkait';
       return;
     }
+
+    _controller.errorMessage.value = '';
 
     if (!_isEdit) {
       _showSuccessNotificationDialog(title);
@@ -493,7 +512,7 @@ class _EventFormPageState extends State<EventFormPage> {
           ],
         ),
         content: Text(
-            'Kegiatan "$title" akan diterbitkan. Beritahu semua anggota melalui notifikasi sistem? 🔔'),
+            'Kegiatan "$title" akan diterbitkan. Beritahu semua anggota melalui notifikasi sistem?'),
         actions: [
           TextButton(
             onPressed: () {
@@ -509,7 +528,7 @@ class _EventFormPageState extends State<EventFormPage> {
             onPressed: () {
               Get.back();
               Get.snackbar(
-                'Notifikasi Terkirim 🚀',
+                'Notifikasi Terkirim',
                 'Anggota akan segera menerima pemberitahuan kegiatan baru.',
                 snackPosition: SnackPosition.TOP,
                 backgroundColor: AppColors.accentGreen.withOpacity(0.9),
@@ -523,7 +542,7 @@ class _EventFormPageState extends State<EventFormPage> {
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accentGreen),
-            child: const Text('Ya, Kirim 🔔'),
+            child: const Text('Ya, Kirim'),
           ),
         ],
       ),

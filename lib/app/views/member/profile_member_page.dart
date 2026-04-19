@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
-import '../../controllers/theme_controller.dart';
 import '../widgets/division_badge.dart';
 import '../widgets/member_bottom_nav.dart';
+import '../../routes/app_routes.dart';
 
 class ProfileMemberPage extends StatelessWidget {
   const ProfileMemberPage({super.key});
@@ -12,22 +12,10 @@ class ProfileMemberPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
-    final themeController = Get.find<ThemeController>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil'),
-        actions: [
-          // Dark/light mode
-          Obx(() => IconButton(
-                onPressed: themeController.toggleTheme,
-                icon: Icon(
-                  themeController.isDarkMode.value
-                      ? Icons.light_mode_outlined
-                      : Icons.dark_mode_outlined,
-                ),
-              )),
-        ],
       ),
       body: Obx(() {
         final user = authController.currentUser.value;
@@ -81,7 +69,6 @@ class ProfileMemberPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Nama & NIM
               Text(
                 user.fullName,
                 style: Theme.of(context).textTheme.headlineLarge,
@@ -94,7 +81,6 @@ class ProfileMemberPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Division badges
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
@@ -105,7 +91,6 @@ class ProfileMemberPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Info cards
               _infoCard(context, Icons.school_outlined, 'Angkatan',
                   user.angkatan ?? '-'),
               const SizedBox(height: 8),
@@ -113,7 +98,7 @@ class ProfileMemberPage extends StatelessWidget {
                   context, Icons.phone_outlined, 'Nomor HP', user.phone ?? '-'),
               const SizedBox(height: 24),
 
-              // Edit button
+              // Edit Profile button
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -124,6 +109,27 @@ class ProfileMemberPage extends StatelessWidget {
                     foregroundColor: Theme.of(context).colorScheme.primary,
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Ganti Password button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => Get.toNamed(AppRoutes.changePassword),
+                  icon: const Icon(Icons.lock_reset_rounded),
+                  label: const Text('Ganti Password'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.secondary,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

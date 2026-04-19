@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // <--- PERUBAHAN: Import untuk Clipboard
 import 'package:get/get.dart';
 import '../../controllers/member_controller.dart';
 import '../../controllers/attendance_controller.dart';
@@ -63,54 +64,20 @@ class MemberDetailPage extends StatelessWidget {
               final attendances = attendanceController.myAttendances;
               final total = attendances.length;
               final hadir = attendances.where((a) => a.isHadir).length;
-              final percentage = total == 0 ? 0 : ((hadir / total) * 100).round();
+              final percentage =
+                  total == 0 ? 0 : ((hadir / total) * 100).round();
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    
+
                     // Profil Header
                     Center(
                       child: Column(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colorScheme.primary.withOpacity(0.2),
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colorScheme.primary.withOpacity(0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 54,
-                              backgroundColor: colorScheme.primary.withOpacity(0.1),
-                              backgroundImage: member.avatarUrl != null
-                                  ? CachedNetworkImageProvider(member.avatarUrl!)
-                                  : null,
-                              child: member.avatarUrl == null
-                                  ? Text(
-                                      member.fullName.isNotEmpty
-                                          ? member.fullName[0].toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                        fontSize: 42,
-                                        fontWeight: FontWeight.w800,
-                                        color: colorScheme.primary,
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                          ),
+                          _buildAvatar(member, colorScheme),
                           const SizedBox(height: 16),
                           Text(
                             member.fullName,
@@ -138,13 +105,24 @@ class MemberDetailPage extends StatelessWidget {
                                 .toList(),
                           ),
                           const SizedBox(height: 20),
-                          _buildStatusAction(context, member, memberController),
+
+                          // --- Tombol Aksi ---
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildStatusAction(
+                                  context, member, memberController),
+                              const SizedBox(width: 12),
+                              _buildResetPasswordAction(
+                                  context, member, memberController),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 32),
 
-                    // Kehadiran Section
+                    // Ringkasan Kehadiran
                     _buildSectionHeader('RINGKASAN KEHADIRAN'),
                     const SizedBox(height: 12),
                     Container(
@@ -178,13 +156,16 @@ class MemberDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // Profil Section
+                    // Informasi Detail
                     _buildSectionHeader('INFORMASI DETAIL'),
                     const SizedBox(height: 12),
-                    _buildInfoTile(context, Icons.school_rounded, 'Angkatan', member.angkatan ?? '-'),
-                    _buildInfoTile(context, Icons.phone_android_rounded, 'Nomor HP', member.phone ?? '-'),
-                    _buildInfoTile(context, Icons.email_rounded, 'Alamat Email', member.email),
-                    
+                    _buildInfoTile(context, Icons.school_rounded, 'Angkatan',
+                        member.angkatan ?? '-'),
+                    _buildInfoTile(context, Icons.phone_android_rounded,
+                        'Nomor HP', member.phone ?? '-'),
+                    _buildInfoTile(context, Icons.email_rounded, 'Alamat Email',
+                        member.email),
+
                     const SizedBox(height: 60),
                   ],
                 ),
@@ -196,20 +177,120 @@ class MemberDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusAction(BuildContext context, UserModel member, MemberController controller) {
+  // --- WIDGET HELPER ---
+
+  Widget _buildAvatar(UserModel member, ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border:
+            Border.all(color: colorScheme.primary.withOpacity(0.2), width: 2),
+      ),
+      child: CircleAvatar(
+        radius: 54,
+        backgroundColor: colorScheme.primary.withOpacity(0.1),
+        backgroundImage: member.avatarUrl != null
+            ? CachedNetworkImageProvider(member.avatarUrl!)
+            : null,
+        child: member.avatarUrl == null
+            ? Text(
+                member.fullName.isNotEmpty
+                    ? member.fullName[0].toUpperCase()
+                    : '?',
+                style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.primary),
+              )
+            : null,
+      ),
+    );
+  }
+
+  // --- PERUBAHAN: Logika Reset Password dengan Dialog Salin ---
+  Widget _buildResetPasswordAction(
+      BuildContext context, UserModel member, MemberController controller) {
+    return OutlinedButton.icon(
+      onPressed: () {
+        Get.defaultDialog(
+          title: "Reset Password",
+          middleText: "Yakin ingin mereset password ${member.fullName}?",
+          textConfirm: "Ya, Reset",
+          textCancel: "Batal",
+          confirmTextColor: Colors.white,
+          buttonColor: Colors.amber[800],
+          onConfirm: () async {
+            Get.back(); // Tutup dialog konfirmasi
+
+            // Panggil fungsi reset dan tangkap hasilnya
+            final newPassword =
+                await controller.adminResetPassword(member.id, member.nim);
+
+            if (newPassword != null) {
+              // Jika sukses, tampilkan dialog sukses dengan opsi copy
+              Get.defaultDialog(
+                title: "Password Berhasil Di-reset",
+                content: Column(
+                  children: [
+                    const Text("Password baru saat ini:"),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        newPassword,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                    ),
+                  ],
+                ),
+                confirm: ElevatedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: newPassword));
+                    Get.back();
+                    Get.snackbar(
+                        "Disalin", "Password berhasil disalin ke clipboard!");
+                  },
+                  icon: const Icon(Icons.copy_rounded),
+                  label: const Text("Salin Password"),
+                ),
+              );
+            }
+          },
+        );
+      },
+      icon: const Icon(Icons.key_rounded, size: 18),
+      label: const Text('Reset'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.amber[800],
+        side:
+            BorderSide(color: Colors.amber[800]!.withOpacity(0.5), width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildStatusAction(
+      BuildContext context, UserModel member, MemberController controller) {
     final isActive = member.isActive;
     final color = isActive ? AppColors.accentRed : AppColors.accentGreen;
-    
+
     return OutlinedButton.icon(
       onPressed: () => _confirmToggleStatus(context, controller, member),
-      icon: Icon(isActive ? Icons.person_off_rounded : Icons.person_add_rounded, size: 18),
-      label: Text(isActive ? 'Nonaktifkan Akun' : 'Aktifkan Akun'),
+      icon: Icon(isActive ? Icons.person_off_rounded : Icons.person_add_rounded,
+          size: 18),
+      label: Text(isActive ? 'Nonaktifkan' : 'Aktifkan'),
       style: OutlinedButton.styleFrom(
         foregroundColor: color,
         side: BorderSide(color: color.withOpacity(0.5), width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        backgroundColor: color.withOpacity(0.02),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
@@ -220,11 +301,10 @@ class MemberDetailPage extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          color: AppColors.textSecondary,
-          letterSpacing: 1.5,
-        ),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textSecondary,
+            letterSpacing: 1.5),
       ),
     );
   }
@@ -232,38 +312,30 @@ class MemberDetailPage extends StatelessWidget {
   Widget _statItem(String value, String label) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
-        ),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5)),
         const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
-        ),
+        Text(label,
+            style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5)),
       ],
     );
   }
 
   Widget _statDivider() {
     return Container(
-      height: 30,
-      width: 1,
-      color: Colors.white.withOpacity(0.2),
-    );
+        height: 30, width: 1, color: Colors.white.withOpacity(0.2));
   }
 
-  Widget _buildInfoTile(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoTile(
+      BuildContext context, IconData icon, String label, String value) {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -272,22 +344,14 @@ class MemberDetailPage extends StatelessWidget {
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.08),
-              shape: BoxShape.circle,
-            ),
+                color: theme.colorScheme.primary.withOpacity(0.08),
+                shape: BoxShape.circle),
             child: Icon(icon, size: 20, color: theme.colorScheme.primary),
           ),
           const SizedBox(width: 16),
@@ -295,22 +359,14 @@ class MemberDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textSecondary,
-                    fontSize: 10,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                  ),
-                ),
+                Text(label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textSecondary,
+                        fontSize: 10)),
+                Text(value,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700, letterSpacing: -0.2)),
               ],
             ),
           ),
@@ -320,10 +376,7 @@ class MemberDetailPage extends StatelessWidget {
   }
 
   void _confirmToggleStatus(
-    BuildContext context,
-    MemberController controller,
-    UserModel member,
-  ) {
+      BuildContext context, MemberController controller, UserModel member) {
     final action = member.isActive ? 'nonaktifkan' : 'aktifkan';
     showDialog(
       context: context,
@@ -332,22 +385,18 @@ class MemberDetailPage extends StatelessWidget {
         title: Text('${action.capitalizeFirst} Anggota'),
         content: Text('Yakin ingin $action akun ${member.fullName}?'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Batal'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Batal')),
           ElevatedButton(
             onPressed: () {
               Get.back();
               controller.toggleMemberStatus(member.id, !member.isActive);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: member.isActive
-                  ? AppColors.accentRed
-                  : AppColors.accentGreen,
+              backgroundColor:
+                  member.isActive ? AppColors.accentRed : AppColors.accentGreen,
               foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(action.capitalizeFirst!),
           ),

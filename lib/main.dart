@@ -5,8 +5,9 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'app/controllers/auth_controller.dart';
-import 'app/controllers/theme_controller.dart';
+import 'app/controllers/app_config_controller.dart'; // Tambahkan import ini
 import 'app/routes/app_pages.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
@@ -30,6 +31,9 @@ void main() async {
     anonKey: supabaseKey,
   );
 
+  // Inisialisasi Controller agar data config siap saat app terbuka
+  Get.put(AppConfigController(), permanent: true);
+
   if (!kIsWeb) {
     FlutterNativeSplash.remove();
   }
@@ -42,20 +46,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inisialisasi controller yang dibutuhkan global di sini
+    // AuthController tetap diinisialisasi di sini atau di main sama saja
     Get.put(AuthController(), permanent: true);
-    final themeController = Get.put(ThemeController(), permanent: true);
 
-    return Obx(() => GetMaterialApp(
-          title: AppConstants.appName,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeController.isDarkMode.value
-              ? ThemeMode.dark
-              : ThemeMode.light,
-          initialRoute: AppPages.initial,
-          getPages: AppPages.routes,
-        ));
+    return GetMaterialApp(
+      title: AppConstants.appName,
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      themeMode: ThemeMode.light, // Selalu light mode
+      initialRoute: AppPages.initial,
+      getPages: AppPages.routes,
+    );
   }
 }

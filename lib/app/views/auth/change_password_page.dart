@@ -11,21 +11,63 @@ class ChangePasswordPage extends StatefulWidget {
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _authController = Get.find<AuthController>();
+  final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  bool _showCurrentPassword = false;
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
 
+  String? _newPassError;
+  String? _confirmPassError;
+
+  // Apakah ini first login (dari route langsung) atau ganti password dari profil
+  bool get _isFirstLogin =>
+      _authController.currentUser.value?.isFirstLogin ?? false;
+
+  // Izinkan printable ASCII saja
+  static final _validPasswordChars = RegExp(r'^[\x20-\x7E]+$');
+
   @override
   void dispose() {
+    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
+  String? _validateNewPassword(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Password baru tidak boleh kosong';
+    if (v.length < 8) return 'Password minimal 8 karakter';
+    if (!_validPasswordChars.hasMatch(v))
+      return 'Password mengandung karakter tidak valid';
+    return null;
+  }
+
+  String? _validateConfirmPassword(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Konfirmasi password tidak boleh kosong';
+    if (v != _newPasswordController.text.trim()) return 'Password tidak cocok';
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
+      appBar: _isFirstLogin
+          ? null
+          : AppBar(
+              title: const Text('Ganti Password'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () => Get.back(),
+              ),
+            ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -34,23 +76,55 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             children: [
               const SizedBox(height: 40),
               Text(
-                'Buat Password Baru',
-                style: Theme.of(context).textTheme.headlineLarge,
+                _isFirstLogin ? 'Buat Password Baru' : 'Ganti Password',
+                style: theme.textTheme.headlineLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                'Ini login pertamamu. Buat password baru untuk keamanan akunmu.',
-                style: Theme.of(context).textTheme.bodySmall,
+                _isFirstLogin
+                    ? 'Ini login pertamamu. Buat password baru untuk keamanan akunmu.'
+                    : 'Masukkan password lama dan password baru kamu.',
+                style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 32),
 
-              // New password
+              // Password lama — hanya tampil saat bukan first login
+              if (!_isFirstLogin) ...[
+                TextField(
+                  controller: _currentPasswordController,
+                  obscureText: !_showCurrentPassword,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  decoration: InputDecoration(
+                    labelText: 'Password Saat Ini',
+                    hintText: 'Masukkan password lama',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: GestureDetector(
+                      onTap: () => setState(
+                          () => _showCurrentPassword = !_showCurrentPassword),
+                      child: Icon(
+                        _showCurrentPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Password baru
               TextField(
                 controller: _newPasswordController,
                 obscureText: !_showNewPassword,
+                autocorrect: false,
+                enableSuggestions: false,
+                onChanged: (v) =>
+                    setState(() => _newPassError = _validateNewPassword(v)),
                 decoration: InputDecoration(
                   labelText: 'Password Baru',
                   hintText: 'Minimal 8 karakter',
+                  errorText: _newPassError,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: GestureDetector(
                     onTap: () =>
@@ -65,13 +139,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               const SizedBox(height: 16),
 
-              // Confirm password
+              // Konfirmasi password baru
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: !_showConfirmPassword,
+                autocorrect: false,
+                enableSuggestions: false,
+                onChanged: (v) => setState(
+                    () => _confirmPassError = _validateConfirmPassword(v)),
                 decoration: InputDecoration(
                   labelText: 'Konfirmasi Password',
                   hintText: 'Ulangi password baru',
+                  errorText: _confirmPassError,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: GestureDetector(
                     onTap: () => setState(
@@ -85,18 +164,34 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 ),
               ),
 
-              // Error
+              // Error dari controller
               Obx(() {
                 if (_authController.errorMessage.value.isEmpty) {
                   return const SizedBox.shrink();
                 }
                 return Padding(
                   padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    _authController.errorMessage.value,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                      fontSize: 13,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.error.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: colorScheme.error.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline_rounded,
+                            size: 16, color: colorScheme.error),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _authController.errorMessage.value,
+                            style: TextStyle(
+                                color: colorScheme.error, fontSize: 13),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -104,7 +199,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
               const SizedBox(height: 32),
 
-              // Button
               Obx(() => SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -131,22 +225,24 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   void _handleSubmit() {
-    final newPass = _newPasswordController.text.trim();
-    final confirmPass = _confirmPasswordController.text.trim();
+    final newPassErr = _validateNewPassword(_newPasswordController.text);
+    final confirmErr =
+        _validateConfirmPassword(_confirmPasswordController.text);
 
-    if (newPass.isEmpty || confirmPass.isEmpty) {
-      _authController.errorMessage.value = 'Semua field wajib diisi';
-      return;
-    }
-    if (newPass.length < 8) {
-      _authController.errorMessage.value = 'Password minimal 8 karakter';
-      return;
-    }
-    if (newPass != confirmPass) {
-      _authController.errorMessage.value = 'Password tidak cocok';
+    setState(() {
+      _newPassError = newPassErr;
+      _confirmPassError = confirmErr;
+    });
+
+    if (newPassErr != null || confirmErr != null) return;
+
+    // Jika bukan first login, cek password lama tidak kosong
+    if (!_isFirstLogin && _currentPasswordController.text.trim().isEmpty) {
+      _authController.errorMessage.value =
+          'Masukkan password saat ini terlebih dahulu';
       return;
     }
 
-    _authController.changePassword(newPass);
+    _authController.changePassword(_newPasswordController.text.trim());
   }
 }

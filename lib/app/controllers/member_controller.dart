@@ -24,6 +24,33 @@ class MemberController extends GetxController {
     ever(selectedDivision, (_) => _applyFilter());
   }
 
+  // --- FITUR DIPERBARUI: Admin Reset Password ---
+  // Sekarang mengembalikan String? (password baru) agar bisa di-copy di UI
+  Future<String?> adminResetPassword(String userId, String nim) async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    const newPassword = 'Password123!';
+
+    try {
+      // Memanggil fungsi RPC di Supabase
+      await _supabase.rpc('reset_user_password', params: {
+        'target_user_id': userId,
+        'new_password': newPassword,
+      });
+
+      // Snack bar ini opsional, bisa dihilangkan jika dialog sukses sudah cukup
+      Get.snackbar('Berhasil', 'Password NIM $nim telah direset.');
+
+      return newPassword;
+    } catch (e) {
+      errorMessage.value = 'Gagal mereset password.';
+      Get.snackbar('Gagal', 'Terjadi kesalahan saat mereset password.');
+      return null; // Return null jika gagal
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> fetchMembers() async {
     isLoading.value = true;
     try {

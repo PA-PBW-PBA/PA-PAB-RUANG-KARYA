@@ -20,11 +20,22 @@ class _KasFormPageState extends State<KasFormPage> {
   String _selectedDivision = AppConstants.divisions.first;
   DateTime _selectedDate = DateTime.now();
 
+  String? _nominalError;
+
   @override
   void dispose() {
     _nominalController.dispose();
     _keteranganController.dispose();
     super.dispose();
+  }
+
+  String? _validateNominal(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Nominal wajib diisi';
+    final nominal = double.tryParse(v);
+    if (nominal == null) return 'Nominal harus berupa angka';
+    if (nominal <= 0) return 'Nominal harus lebih dari 0';
+    return null;
   }
 
   @override
@@ -37,7 +48,6 @@ class _KasFormPageState extends State<KasFormPage> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // AppBar dengan Tombol Kembali
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
@@ -92,10 +102,8 @@ class _KasFormPageState extends State<KasFormPage> {
                     ],
                   ),
                   const SizedBox(height: 32),
-
                   _buildFormHeader('Detail Transaksi'),
                   const SizedBox(height: 16),
-                  // Field Nominal dengan Shadow
                   Container(
                     decoration: BoxDecoration(
                       boxShadow: [
@@ -109,23 +117,28 @@ class _KasFormPageState extends State<KasFormPage> {
                     child: TextField(
                       controller: _nominalController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      autocorrect: false,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w800),
+                      onChanged: (v) =>
+                          setState(() => _nominalError = _validateNominal(v)),
                       decoration: InputDecoration(
                         labelText: 'Nominal Transaksi',
                         hintText: '0',
+                        errorText: _nominalError,
                         prefixIcon: Container(
                           padding: const EdgeInsets.all(12),
-                          child: Text('Rp', style: TextStyle(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                          )),
+                          child: Text('Rp',
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 18,
+                              )),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   TextField(
                     controller: _keteranganController,
                     maxLines: 3,
@@ -137,8 +150,6 @@ class _KasFormPageState extends State<KasFormPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Date Picker Tile
                   GestureDetector(
                     onTap: _pickDate,
                     child: Container(
@@ -171,21 +182,24 @@ class _KasFormPageState extends State<KasFormPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Tanggal Transaksi',
-                                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(fontWeight: FontWeight.bold)),
                               Text(
                                 '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
-                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                                style: theme.textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),
                           const Spacer(),
-                          Icon(Icons.edit_calendar_rounded, size: 20, color: colorScheme.primary.withOpacity(0.5)),
+                          Icon(Icons.edit_calendar_rounded,
+                              size: 20,
+                              color: colorScheme.primary.withOpacity(0.5)),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 32),
-
                   _buildFormHeader('Divisi Penanggung Jawab'),
                   const SizedBox(height: 16),
                   Wrap(
@@ -195,7 +209,8 @@ class _KasFormPageState extends State<KasFormPage> {
                       final isSelected = _selectedDivision == division;
                       final color = AppColors.getDivisionColor(division);
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedDivision = division),
+                        onTap: () =>
+                            setState(() => _selectedDivision = division),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
@@ -204,7 +219,8 @@ class _KasFormPageState extends State<KasFormPage> {
                             color: isSelected ? color : color.withOpacity(0.06),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: isSelected ? color : color.withOpacity(0.15),
+                              color:
+                                  isSelected ? color : color.withOpacity(0.15),
                               width: 1.5,
                             ),
                           ),
@@ -212,7 +228,9 @@ class _KasFormPageState extends State<KasFormPage> {
                             division,
                             style: TextStyle(
                               color: isSelected ? Colors.white : color,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
                               fontSize: 13,
                             ),
                           ),
@@ -220,7 +238,6 @@ class _KasFormPageState extends State<KasFormPage> {
                       );
                     }).toList(),
                   ),
-
                   Obx(() {
                     if (_controller.errorMessage.value.isEmpty) {
                       return const SizedBox.shrink();
@@ -276,7 +293,8 @@ class _KasFormPageState extends State<KasFormPage> {
               onPressed: _controller.isLoading.value ? null : _handleSave,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
               child: _controller.isLoading.value
                   ? const SizedBox(
@@ -285,8 +303,9 @@ class _KasFormPageState extends State<KasFormPage> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Simpan Transaksi', 
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  : const Text('Simpan Transaksi',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             )),
       ),
     );
@@ -324,13 +343,15 @@ class _KasFormPageState extends State<KasFormPage> {
             color: isActive ? color : color.withOpacity(0.15),
             width: 2,
           ),
-          boxShadow: isActive ? [
-            BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
-          ] : null,
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : null,
         ),
         child: Column(
           children: [
@@ -360,8 +381,8 @@ class _KasFormPageState extends State<KasFormPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-            ),
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
           ),
           child: child!,
         );
@@ -371,19 +392,15 @@ class _KasFormPageState extends State<KasFormPage> {
   }
 
   void _handleSave() {
-    if (_nominalController.text.trim().isEmpty) {
-      _controller.errorMessage.value = 'Nominal wajib diisi ⚠️';
-      return;
-    }
-    final nominal = double.tryParse(_nominalController.text.trim());
-    if (nominal == null || nominal <= 0) {
-      _controller.errorMessage.value = 'Nominal tidak valid ❌';
-      return;
-    }
+    final nominalErr = _validateNominal(_nominalController.text);
+    setState(() => _nominalError = nominalErr);
+    if (nominalErr != null) return;
+
+    _controller.errorMessage.value = '';
 
     _controller.createKas(
       type: _jenis,
-      amount: nominal,
+      amount: double.parse(_nominalController.text.trim()),
       description: _keteranganController.text.trim(),
       divisionName: _selectedDivision,
       transactionDate: _selectedDate,

@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
-import '../../controllers/theme_controller.dart';
 import '../widgets/admin_bottom_nav.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../routes/app_routes.dart';
 
 class ProfileAdminPage extends StatelessWidget {
   const ProfileAdminPage({super.key});
@@ -12,7 +12,6 @@ class ProfileAdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
-    final themeController = Get.find<ThemeController>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -37,18 +36,6 @@ class ProfileAdminPage extends StatelessWidget {
               ),
               titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
             ),
-            actions: [
-              Obx(() => IconButton(
-                    onPressed: themeController.toggleTheme,
-                    icon: Icon(
-                      themeController.isDarkMode.value
-                          ? Icons.light_mode_rounded
-                          : Icons.dark_mode_rounded,
-                      color: colorScheme.primary,
-                    ),
-                  )),
-              const SizedBox(width: 8),
-            ],
           ),
           SliverToBoxAdapter(
             child: Obx(() {
@@ -60,7 +47,7 @@ class ProfileAdminPage extends StatelessWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    
+
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -102,13 +89,16 @@ class ProfileAdminPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
                       decoration: BoxDecoration(
                         color: colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        user.isBendahara ? 'Administrator — Bendahara' : 'Administrator — BPH',
+                        user.isBendahara
+                            ? 'Administrator — Bendahara'
+                            : 'Administrator — BPH',
                         style: TextStyle(
                           color: colorScheme.primary,
                           fontSize: 12,
@@ -120,27 +110,77 @@ class ProfileAdminPage extends StatelessWidget {
 
                     _buildSectionHeader('INFORMASI AKUN'),
                     const SizedBox(height: 16),
-                    _buildInfoTile(context, Icons.badge_rounded, 'NIM / ID Pengguna', user.nim),
-                    _buildInfoTile(context, Icons.email_rounded, 'Alamat Email', user.email),
+                    _buildInfoTile(context, Icons.badge_rounded,
+                        'NIM / ID Pengguna', user.nim),
+                    _buildInfoTile(context, Icons.email_rounded, 'Alamat Email',
+                        user.email),
                     if (user.phone != null)
-                      _buildInfoTile(context, Icons.phone_android_rounded, 'Nomor WhatsApp', user.phone!),
-                    
+                      _buildInfoTile(context, Icons.phone_android_rounded,
+                          'Nomor WhatsApp', user.phone!),
+
                     const SizedBox(height: 32),
                     _buildSectionHeader('PENGATURAN'),
                     const SizedBox(height: 16),
-                    
-                    // desain logout
+
+                    // Ganti Password
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Get.toNamed(AppRoutes.changePassword),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: colorScheme.primary.withOpacity(0.15)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.lock_reset_rounded,
+                                    color: colorScheme.primary, size: 20),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                'Ganti Password',
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(Icons.chevron_right_rounded,
+                                  color: colorScheme.primary, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Logout
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () => _confirmLogout(context, authController),
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
                           decoration: BoxDecoration(
                             color: AppColors.accentRed.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.accentRed.withOpacity(0.15)),
+                            border: Border.all(
+                                color: AppColors.accentRed.withOpacity(0.15)),
                           ),
                           child: Row(
                             children: [
@@ -150,7 +190,8 @@ class ProfileAdminPage extends StatelessWidget {
                                   color: AppColors.accentRed.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.logout_rounded, color: AppColors.accentRed, size: 20),
+                                child: const Icon(Icons.logout_rounded,
+                                    color: AppColors.accentRed, size: 20),
                               ),
                               const SizedBox(width: 16),
                               const Text(
@@ -162,13 +203,14 @@ class ProfileAdminPage extends StatelessWidget {
                                 ),
                               ),
                               const Spacer(),
-                              const Icon(Icons.chevron_right_rounded, color: AppColors.accentRed, size: 20),
+                              const Icon(Icons.chevron_right_rounded,
+                                  color: AppColors.accentRed, size: 20),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 120),
                   ],
                 ),
@@ -196,7 +238,8 @@ class ProfileAdminPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoTile(
+      BuildContext context, IconData icon, String label, String value) {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -220,9 +263,14 @@ class ProfileAdminPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+              Text(label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary)),
               const SizedBox(height: 2),
-              Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text(value,
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w700)),
             ],
           ),
         ],
@@ -236,7 +284,8 @@ class ProfileAdminPage extends StatelessWidget {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Konfirmasi Keluar'),
-        content: const Text('Apakah Anda yakin ingin mengakhiri sesi admin saat ini?'),
+        content: const Text(
+            'Apakah Anda yakin ingin mengakhiri sesi admin saat ini?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -250,7 +299,8 @@ class ProfileAdminPage extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accentRed,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Keluar'),
           ),

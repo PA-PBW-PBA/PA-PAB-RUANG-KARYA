@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
-import '../controllers/theme_controller.dart';
 import '../controllers/member_controller.dart';
 import '../controllers/event_controller.dart';
 import '../controllers/gallery_controller.dart';
@@ -74,6 +73,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.changePassword,
       page: () => const ChangePasswordPage(),
+      middlewares: [AuthMiddleware()],
       binding: BindingsBuilder(() => Get.lazyPut(() => AuthController())),
     ),
 
@@ -105,10 +105,7 @@ class AppPages {
       name: AppRoutes.profileMember,
       page: () => const ProfileMemberPage(),
       middlewares: [AuthMiddleware()],
-      binding: BindingsBuilder(() {
-        Get.lazyPut(() => AuthController());
-        Get.lazyPut(() => ThemeController());
-      }),
+      binding: BindingsBuilder(() => Get.lazyPut(() => AuthController())),
     ),
     GetPage(
       name: AppRoutes.memberListReadonly,
@@ -126,7 +123,6 @@ class AppPages {
         Get.lazyPut(() => MemberController());
         Get.lazyPut(() => EventController());
         Get.lazyPut(() => KasController());
-        Get.lazyPut(() => ThemeController());
       }),
     ),
     GetPage(
@@ -184,9 +180,6 @@ class AppPages {
       name: AppRoutes.profileAdmin,
       page: () => const ProfileAdminPage(),
       middlewares: [AuthMiddleware(requiredRole: 'admin')],
-      binding: BindingsBuilder(() {
-        Get.lazyPut(() => ThemeController());
-      }),
     ),
     GetPage(
       name: AppRoutes.memberDetail,

@@ -27,6 +27,17 @@ class _MemberFormPageState extends State<MemberFormPage> {
   bool _showPassword = false;
   bool get _isEdit => _editMember != null;
 
+  // Per-field error state
+  String? _nameError;
+  String? _nimError;
+  String? _emailError;
+  String? _phoneError;
+
+  static final _validNameChars = RegExp(r"^[a-zA-Z\s'\-\.]+$");
+  static final _validNimChars = RegExp(r'^[0-9]+$');
+  static final _validEmailChars = RegExp(r'^[a-zA-Z0-9@._\-]+$');
+  static final _validPhoneChars = RegExp(r'^[0-9+\-\s\(\)]+$');
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +60,37 @@ class _MemberFormPageState extends State<MemberFormPage> {
     _angkatanController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  String? _validateName(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Nama lengkap tidak boleh kosong';
+    if (!_validNameChars.hasMatch(v)) return 'Nama hanya boleh huruf dan spasi';
+    return null;
+  }
+
+  String? _validateNim(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'NIM tidak boleh kosong';
+    if (!_validNimChars.hasMatch(v)) return 'NIM hanya boleh angka';
+    if (v.length < 5) return 'NIM terlalu pendek';
+    return null;
+  }
+
+  String? _validateEmail(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return 'Email tidak boleh kosong';
+    if (!_validEmailChars.hasMatch(v)) return 'Format email tidak valid';
+    if (!v.contains('@')) return 'Email harus mengandung @';
+    return null;
+  }
+
+  String? _validatePhone(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return null; // Phone opsional
+    if (!_validPhoneChars.hasMatch(v))
+      return 'Nomor HP mengandung karakter tidak valid';
+    return null;
   }
 
   @override
@@ -104,7 +146,8 @@ class _MemberFormPageState extends State<MemberFormPage> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: colorScheme.primary.withOpacity(0.1),
+                                      color:
+                                          colorScheme.primary.withOpacity(0.1),
                                       blurRadius: 20,
                                       offset: const Offset(0, 10),
                                     ),
@@ -114,14 +157,15 @@ class _MemberFormPageState extends State<MemberFormPage> {
                                   radius: 50,
                                   backgroundColor:
                                       colorScheme.primary.withOpacity(0.08),
-                                  child: _controller.pickedAvatarFile.value == null
-                                      ? Icon(
-                                          Icons.person_rounded,
-                                          color: colorScheme.primary
-                                              .withOpacity(0.5),
-                                          size: 50,
-                                        )
-                                      : null,
+                                  child:
+                                      _controller.pickedAvatarFile.value == null
+                                          ? Icon(
+                                              Icons.person_rounded,
+                                              color: colorScheme.primary
+                                                  .withOpacity(0.5),
+                                              size: 50,
+                                            )
+                                          : null,
                                 ),
                               )),
                           Positioned(
@@ -148,36 +192,65 @@ class _MemberFormPageState extends State<MemberFormPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
                   _buildFormHeader('Informasi Pribadi'),
                   const SizedBox(height: 16),
-
-                  _buildField(context, 'Nama Lengkap', _nameController,
-                      hint: 'Masukkan nama lengkap',
-                      icon: Icons.person_outline_rounded),
+                  _buildField(
+                    context,
+                    'Nama Lengkap',
+                    _nameController,
+                    hint: 'Masukkan nama lengkap',
+                    icon: Icons.person_outline_rounded,
+                    errorText: _nameError,
+                    onChanged: (v) =>
+                        setState(() => _nameError = _validateName(v)),
+                  ),
                   const SizedBox(height: 16),
-                  _buildField(context, 'NIM', _nimController,
-                      hint: 'Masukkan NIM',
-                      icon: Icons.badge_outlined,
-                      keyboardType: TextInputType.number,
-                      enabled: !_isEdit),
+                  _buildField(
+                    context,
+                    'NIM',
+                    _nimController,
+                    hint: 'Masukkan NIM',
+                    icon: Icons.badge_outlined,
+                    errorText: _nimError,
+                    onChanged: (v) =>
+                        setState(() => _nimError = _validateNim(v)),
+                    keyboardType: TextInputType.number,
+                    enabled: !_isEdit,
+                  ),
                   const SizedBox(height: 16),
-                  _buildField(context, 'Email', _emailController,
-                      hint: 'Masukkan email',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      enabled: !_isEdit),
+                  _buildField(
+                    context,
+                    'Email',
+                    _emailController,
+                    hint: 'Masukkan email',
+                    icon: Icons.email_outlined,
+                    errorText: _emailError,
+                    onChanged: (v) =>
+                        setState(() => _emailError = _validateEmail(v)),
+                    keyboardType: TextInputType.emailAddress,
+                    enabled: !_isEdit,
+                  ),
                   const SizedBox(height: 16),
-                  _buildField(context, 'Nomor HP', _phoneController,
-                      hint: 'Masukkan nomor HP',
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone),
+                  _buildField(
+                    context,
+                    'Nomor HP',
+                    _phoneController,
+                    hint: 'Masukkan nomor HP',
+                    icon: Icons.phone_outlined,
+                    errorText: _phoneError,
+                    onChanged: (v) =>
+                        setState(() => _phoneError = _validatePhone(v)),
+                    keyboardType: TextInputType.phone,
+                  ),
                   const SizedBox(height: 16),
-                  _buildField(context, 'Angkatan', _angkatanController,
-                      hint: 'Contoh: 2024',
-                      icon: Icons.school_outlined,
-                      keyboardType: TextInputType.number),
-
+                  _buildField(
+                    context,
+                    'Angkatan',
+                    _angkatanController,
+                    hint: 'Contoh: 2024',
+                    icon: Icons.school_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
                   if (!_isEdit) ...[
                     const SizedBox(height: 24),
                     _buildFormHeader('Keamanan'),
@@ -185,6 +258,8 @@ class _MemberFormPageState extends State<MemberFormPage> {
                     TextField(
                       controller: _passwordController,
                       obscureText: !_showPassword,
+                      autocorrect: false,
+                      enableSuggestions: false,
                       decoration: InputDecoration(
                         labelText: 'Password Default',
                         hintText: 'Kosongkan untuk pakai NIM',
@@ -201,7 +276,6 @@ class _MemberFormPageState extends State<MemberFormPage> {
                       ),
                     ),
                   ],
-
                   const SizedBox(height: 32),
                   _buildFormHeader('Divisi Organisasi'),
                   const SizedBox(height: 16),
@@ -227,7 +301,8 @@ class _MemberFormPageState extends State<MemberFormPage> {
                             color: isSelected ? color : color.withOpacity(0.06),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: isSelected ? color : color.withOpacity(0.15),
+                              color:
+                                  isSelected ? color : color.withOpacity(0.15),
                               width: 1.5,
                             ),
                           ),
@@ -235,8 +310,9 @@ class _MemberFormPageState extends State<MemberFormPage> {
                             division,
                             style: TextStyle(
                               color: isSelected ? Colors.white : color,
-                              fontWeight:
-                                  isSelected ? FontWeight.w700 : FontWeight.w600,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
                               fontSize: 13,
                             ),
                           ),
@@ -244,7 +320,6 @@ class _MemberFormPageState extends State<MemberFormPage> {
                       );
                     }).toList(),
                   ),
-
                   Obx(() {
                     if (_controller.errorMessage.value.isEmpty) {
                       return const SizedBox.shrink();
@@ -277,7 +352,6 @@ class _MemberFormPageState extends State<MemberFormPage> {
                       ),
                     );
                   }),
-
                   const SizedBox(height: 100),
                 ],
               ),
@@ -339,6 +413,8 @@ class _MemberFormPageState extends State<MemberFormPage> {
     TextEditingController controller, {
     String? hint,
     IconData? icon,
+    String? errorText,
+    ValueChanged<String>? onChanged,
     TextInputType? keyboardType,
     bool enabled = true,
   }) {
@@ -346,27 +422,45 @@ class _MemberFormPageState extends State<MemberFormPage> {
       controller: controller,
       keyboardType: keyboardType,
       enabled: enabled,
+      autocorrect: false,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        errorText: errorText,
         prefixIcon: icon != null ? Icon(icon) : null,
         filled: !enabled,
-        fillColor: enabled ? null : Theme.of(context).dividerColor.withOpacity(0.1),
+        fillColor:
+            enabled ? null : Theme.of(context).dividerColor.withOpacity(0.1),
       ),
     );
   }
 
   void _handleSave() {
-    if (_nameController.text.trim().isEmpty ||
-        _nimController.text.trim().isEmpty ||
-        _emailController.text.trim().isEmpty) {
-      _controller.errorMessage.value = 'Nama, NIM, dan Email wajib diisi';
-      return;
-    }
+    // Validasi semua field
+    final nameErr = _validateName(_nameController.text);
+    final nimErr = _isEdit ? null : _validateNim(_nimController.text);
+    final emailErr = _isEdit ? null : _validateEmail(_emailController.text);
+    final phoneErr = _validatePhone(_phoneController.text);
+
+    setState(() {
+      _nameError = nameErr;
+      _nimError = nimErr;
+      _emailError = emailErr;
+      _phoneError = phoneErr;
+    });
+
+    if (nameErr != null ||
+        nimErr != null ||
+        emailErr != null ||
+        phoneErr != null) return;
+
     if (_selectedDivisions.isEmpty) {
       _controller.errorMessage.value = 'Pilih minimal satu divisi';
       return;
     }
+
+    _controller.errorMessage.value = '';
 
     if (_isEdit) {
       _controller.updateMember(

@@ -79,9 +79,11 @@ class EventCard extends StatelessWidget {
                   ],
 
                   Text(
-                    event.title,
+                    event.title.length > 10
+                        ? '${event.title.substring(0, 10)}...'
+                        : event.title,
                     style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),

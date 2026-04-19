@@ -20,6 +20,8 @@
 
 ## Daftar Isi ✧
 
+
+- [Informasi Singkat UKM](#informasi-singkat-ukm)
 - [Deskripsi Aplikasi](#deskripsi-aplikasi)
 - [Fitur Aplikasi](#fitur-aplikasi)
   - [Pengunjung (Public)](#pengunjung-public)
@@ -36,17 +38,25 @@
   - [Table: member_divisions](#table-member_divisions)
   - [Table: profiles](#table-profiles)
 - [Relasi Data](#relasi-data)
-- [Widget yang Digunakan](#widget-yang-digunkan)
+- [Widget yang Digunakan](#widget-yang-digunakan)
 - [Slide Deck](#slide-deck)
 - [Cara Menjalankan Aplikasi](#cara-menjalankan-aplikasi)
 
 ---
 
+## Informasi Singkat UKM
+
+UKM Seni dan Kreativitas FEB merupakan salah satu unit kegiatan mahasiswa di Fakultas Ekonomi dan Bisnis yang menjadi wadah bagi mahasiswa untuk menyalurkan minat dan bakat di bidang seni. UKM ini memiliki beberapa divisi seperti musik, tari, DKV, dan kreatif event yang masing-masing aktif dalam berbagai kegiatan.
+
+UKM ini aktif dalam berbagai kegiatan seperti latihan rutin, mentoring, dan event. Selain untuk mengembangkan kemampuan, kegiatan-kegiatan ini juga jadi ajang mempererat kebersamaan antar anggota. UKM Seni dan Kreativitas FEB juga sering ikut serta dalam acara kampus maupun di luar kampus.
+
+---
+
 ## Deskripsi Aplikasi
 
-Ruang Karya merupakan aplikasi yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini memudahkan pengurus untuk mengelola UKM serta membantu anggota mengakses berbagai informasi dalam satu sistem.
+Ruang Karya merupakan aplikasi manajemen UKM yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini hadir sebagai solusi untuk mengatasi pengelolaan yang masih dilakukan secara manual dengan menyatukan berbagai kebutuhan UKM ke dalam satu platform.
 
-Dengan adanya Ruang Karya, aktivitas UKM yang sebelumnya masih manual kini dapat dikelola dengan lebih mudah.
+Melalui Ruang Karya, pengurus dapat mengelola data anggota, kegiatan, serta keuangan dengan lebih mudah. Di sisi lain, anggota juga dapat mengakses informasi kegiatan, melihat galeri, dan memantau aktivitas UKM dengan cepat.
 
 ---
 
@@ -321,7 +331,7 @@ profiles                profiles
 
 ---
 
-## Widget yang Digunkan
+## Widget yang Digunakan
 
 
 | Kategori | Widget |

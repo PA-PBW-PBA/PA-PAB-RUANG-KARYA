@@ -3,8 +3,7 @@
 <p align="center"><em>Satu Ruang, Beragam Karya</em></p>
 
 <p align="center">
-  <img width="1672" height="941" alt="f9ed6bb2-455b-428a-8e72-25a2d1a6983b" src="https://github.com/user-attachments/assets/3652e2de-3b16-42f6-a49b-51da27b0728d" /
-
+  <img width="1600" height="900" alt="INII" src="https://github.com/user-attachments/assets/4dd51350-43a9-4446-a586-4a86d693829d" />
 </p>
 
 **Kelompok Alakadarnya**

@@ -18,7 +18,7 @@
 
 ---
 
-## Daftar Isi ✨
+## Daftar Isi ✧
 
 - [Deskripsi Aplikasi](#deskripsi-aplikasi)
 - [Fitur Aplikasi](#fitur-aplikasi)

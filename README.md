@@ -71,23 +71,21 @@ Melalui Ruang Karya, pengurus dapat mengelola data anggota, kegiatan, serta keua
 ### Anggota (User)
 
 - Login ke dalam sistem
-- Melihat kalender kegiatan (rapat, mentoring, event)
+- Melihat kalender kegiatan
 - Melihat galeri kegiatan
 - Melihat data anggota
 - Mengelola profil pribadi
-
+- Mengecek riwayat kehadiran
 
 ### Admin
 
 - Login ke dashboard admin
-- Mengelola data anggota (CRUD)
+- Mengelola data anggota
 - Mengelola absensi kegiatan
 - Mengelola data keuangan kas
 - Mengelola kegiatan melalui kalender
 - Mengelola galeri kegiatan
 - Melihat dashboard monitoring aktivitas UKM
-
-
 
 
 ---

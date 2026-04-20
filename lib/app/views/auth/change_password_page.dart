@@ -41,8 +41,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final v = value.trim();
     if (v.isEmpty) return 'Password baru tidak boleh kosong';
     if (v.length < 8) return 'Password minimal 8 karakter';
-    if (!_validPasswordChars.hasMatch(v))
+    if (!_validPasswordChars.hasMatch(v)) {
       return 'Password mengandung karakter tidak valid';
+    }
     return null;
   }
 

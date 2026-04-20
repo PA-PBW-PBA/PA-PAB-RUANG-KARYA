@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/event_controller.dart';
 import '../../controllers/gallery_controller.dart';
@@ -12,8 +13,70 @@ import '../widgets/admin_bottom_nav.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 
-class DashboardAdminPage extends StatelessWidget {
+class DashboardAdminPage extends StatefulWidget {
   const DashboardAdminPage({super.key});
+
+  @override
+  State<DashboardAdminPage> createState() => _DashboardAdminPageState();
+}
+
+class _DashboardAdminPageState extends State<DashboardAdminPage> {
+  // Statistik absensi: eventTitle → {hadir, izin, tidakHadir}
+  final _attendanceStats = <Map<String, dynamic>>[].obs;
+  final _loadingStats = false.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAttendanceStats();
+  }
+
+  Future<void> _fetchAttendanceStats() async {
+    _loadingStats.value = true;
+    try {
+      final supabase = Supabase.instance.client;
+      // Ambil 5 kegiatan terakhir yang sudah punya data absensi
+      final response = await supabase
+          .from('attendances')
+          .select('event_id, status, events(title)')
+          .order('created_at', ascending: false)
+          .limit(200);
+
+      // Group by event
+      final Map<String, Map<String, dynamic>> grouped = {};
+      for (final row in response) {
+        final eventId = row['event_id'] as String;
+        final title = row['events']?['title'] as String? ?? eventId;
+        final status = row['status'] as String;
+
+        grouped.putIfAbsent(
+            eventId,
+            () => {
+                  'title': title,
+                  'hadir': 0,
+                  'izin': 0,
+                  'tidakHadir': 0,
+                  'total': 0,
+                });
+        grouped[eventId]!['total'] = (grouped[eventId]!['total'] as int) + 1;
+        if (status == 'hadir') {
+          grouped[eventId]!['hadir'] = (grouped[eventId]!['hadir'] as int) + 1;
+        } else if (status == 'izin') {
+          grouped[eventId]!['izin'] = (grouped[eventId]!['izin'] as int) + 1;
+        } else {
+          grouped[eventId]!['tidakHadir'] =
+              (grouped[eventId]!['tidakHadir'] as int) + 1;
+        }
+      }
+
+      // Ambil 5 event terbaru saja
+      _attendanceStats.value = grouped.values.take(5).toList();
+    } catch (_) {
+      // silent fail — stats bersifat tambahan
+    } finally {
+      _loadingStats.value = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,10 +240,27 @@ class DashboardAdminPage extends StatelessWidget {
                     );
                   }),
                   const SizedBox(height: 32),
-                  _buildSectionHeader(context, title: 'Distribusi Anggota'),
+
+                  // ── Distribusi Anggota per Divisi ──────────────────────────
+                  _buildSectionHeader(context, title: 'Anggota per Divisi'),
                   const SizedBox(height: 12),
                   _buildModernDivisionGrid(context, memberController),
                   const SizedBox(height: 32),
+
+                  // ── Statistik Absensi ──────────────────────────────────────
+                  _buildSectionHeader(context, title: 'Statistik Absensi'),
+                  const SizedBox(height: 4),
+                  Text(
+                    '5 kegiatan terakhir yang sudah direkap',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildAttendanceStats(context),
+                  const SizedBox(height: 32),
+
+                  // ── Galeri Terbaru ─────────────────────────────────────────
                   _buildSectionHeader(
                     context,
                     title: 'Galeri Terbaru',
@@ -215,8 +295,8 @@ class DashboardAdminPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: GalleryCard(
-                            gallery: galleryController.gallery[i]),
+                        child:
+                            GalleryCard(gallery: galleryController.gallery[i]),
                       ),
                     );
                   }),
@@ -230,6 +310,141 @@ class DashboardAdminPage extends StatelessWidget {
       bottomNavigationBar: const AdminBottomNav(currentIndex: 0),
     );
   }
+
+  // ── Statistik Absensi Widget ──────────────────────────────────────────────
+  Widget _buildAttendanceStats(BuildContext context) {
+    final theme = Theme.of(context);
+    return Obx(() {
+      if (_loadingStats.value) {
+        return Container(
+          height: 80,
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator(strokeWidth: 2),
+        );
+      }
+      if (_attendanceStats.isEmpty) {
+        return _buildEmptyState('Belum ada data absensi');
+      }
+
+      return Column(
+        children: _attendanceStats.map((stat) {
+          final total = stat['total'] as int;
+          final hadir = stat['hadir'] as int;
+          final izin = stat['izin'] as int;
+          final tidakHadir = stat['tidakHadir'] as int;
+          final pct = total == 0 ? 0.0 : hadir / total;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: theme.dividerColor.withOpacity(0.5),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        stat['title'] as String,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      '${(pct * 100).round()}% hadir',
+                      style: TextStyle(
+                        color: pct >= 0.75
+                            ? AppColors.success
+                            : pct >= 0.5
+                                ? AppColors.warning
+                                : AppColors.accentRed,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Progress bar kehadiran
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: pct,
+                    minHeight: 6,
+                    backgroundColor: AppColors.divider.withOpacity(0.3),
+                    valueColor: AlwaysStoppedAnimation(
+                      pct >= 0.75
+                          ? AppColors.success
+                          : pct >= 0.5
+                              ? AppColors.warning
+                              : AppColors.accentRed,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Legenda angka
+                Row(
+                  children: [
+                    _statPill('Hadir', hadir, AppColors.success),
+                    const SizedBox(width: 8),
+                    _statPill('Izin', izin, AppColors.warning),
+                    const SizedBox(width: 8),
+                    _statPill('Absen', tidakHadir, AppColors.accentRed),
+                    const Spacer(),
+                    Text(
+                      '$total peserta',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
+
+  Widget _statPill(String label, int count, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$label $count',
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  // ── Existing widgets (unchanged) ──────────────────────────────────────────
 
   Widget _buildPremiumAdminCard(BuildContext context,
       MemberController memberController, KasController kasController) {
@@ -308,7 +523,8 @@ class DashboardAdminPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                        border:
+                            Border.all(color: Colors.white.withOpacity(0.1)),
                       ),
                       child: Row(
                         children: [
@@ -430,7 +646,8 @@ class DashboardAdminPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: color.withOpacity(0.15), width: 1.5),
+                  border:
+                      Border.all(color: color.withOpacity(0.15), width: 1.5),
                   boxShadow: [
                     BoxShadow(
                       color: color.withOpacity(0.08),
@@ -476,9 +693,10 @@ class DashboardAdminPage extends StatelessWidget {
         itemBuilder: (_, i) {
           final division = AppConstants.divisions[i];
           final color = AppColors.getDivisionColor(division);
-          final count = memberList
-              .where((m) => m.divisions.contains(division))
-              .length;
+          final count =
+              memberList.where((m) => m.divisions.contains(division)).length;
+          final totalMembers = memberList.length;
+          final pct = totalMembers == 0 ? 0.0 : count / totalMembers;
 
           return InkWell(
             onTap: () => Get.toNamed(AppRoutes.memberList, arguments: division),
@@ -536,9 +754,21 @@ class DashboardAdminPage extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const Text(
-                        'Total Anggota',
-                        style: TextStyle(
+                      const SizedBox(height: 4),
+                      // Mini progress bar proporsi anggota
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: pct,
+                          minHeight: 4,
+                          backgroundColor: color.withOpacity(0.1),
+                          valueColor: AlwaysStoppedAnimation(color),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${(pct * 100).round()}% dari total',
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 10,
                           fontWeight: FontWeight.w500,

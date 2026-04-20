@@ -7,6 +7,7 @@ import '../../routes/app_routes.dart';
 import '../widgets/event_card.dart';
 import '../widgets/gallery_card.dart';
 import '../widgets/member_bottom_nav.dart';
+import '../widgets/division_badge.dart';
 import '../../../core/theme/app_colors.dart';
 
 class HomeMemberPage extends StatelessWidget {
@@ -126,6 +127,7 @@ class HomeMemberPage extends StatelessWidget {
                   _buildSectionHeader(
                     context,
                     title: 'Kegiatan Mendatang',
+                    // "Lihat Semua" → halaman list kegiatan (bukan kalender)
                     onSeeAll: () => Get.toNamed(AppRoutes.eventVisitor),
                   ),
                   const SizedBox(height: 12),
@@ -299,31 +301,12 @@ class HomeMemberPage extends StatelessWidget {
                             letterSpacing: 1,
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: user.divisions
-                              .map((d) => Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                          color:
-                                              Colors.white.withOpacity(0.2)),
-                                    ),
-                                    child: Text(
-                                      d,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ))
-                              .toList(),
+                        const SizedBox(height: 16),
+                        // Chip kompak, tidak overflow
+                        DivisionChipRow(
+                          divisions: user.divisions,
+                          maxVisible: 3,
+                          size: 26,
                         ),
                       ],
                     ),
@@ -379,38 +362,46 @@ class HomeMemberPage extends StatelessWidget {
       {
         'icon': Icons.event_available_rounded,
         'label': 'Kegiatan',
+        // → List kegiatan + search (bukan kalender)
         'route': AppRoutes.eventVisitor,
-        'color': AppColors.primary
+        'color': AppColors.primary,
+        'hint': 'Semua kegiatan',
       },
       {
         'icon': Icons.calendar_today_rounded,
         'label': 'Jadwalku',
+        // → Kalender jadwal pribadi
         'route': AppRoutes.eventMember,
-        'color': AppColors.accentBlue
+        'color': AppColors.accentBlue,
+        'hint': 'Kalender jadwal',
       },
       {
         'icon': Icons.assignment_turned_in_rounded,
         'label': 'Absensi',
         'route': AppRoutes.attendanceHistory,
-        'color': AppColors.success
+        'color': AppColors.success,
+        'hint': '',
       },
       {
         'icon': Icons.collections_rounded,
         'label': 'Galeri',
         'route': AppRoutes.galleryMember,
-        'color': AppColors.accentRed
+        'color': AppColors.accentRed,
+        'hint': '',
       },
       {
         'icon': Icons.groups_rounded,
         'label': 'Anggota',
         'route': AppRoutes.memberListReadonly,
-        'color': AppColors.accentPurple
+        'color': AppColors.accentPurple,
+        'hint': '',
       },
       {
         'icon': Icons.manage_accounts_rounded,
         'label': 'Profil',
         'route': AppRoutes.profileMember,
-        'color': AppColors.warning
+        'color': AppColors.warning,
+        'hint': '',
       },
     ];
 
@@ -465,6 +456,16 @@ class HomeMemberPage extends StatelessWidget {
                     letterSpacing: -0.2,
                   ),
                 ),
+                // Sub-label kecil untuk Kegiatan & Jadwalku
+                if ((item['hint'] as String).isNotEmpty)
+                  Text(
+                    item['hint'] as String,
+                    style: TextStyle(
+                      color: color.withOpacity(0.6),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
               ],
             ),
           ),

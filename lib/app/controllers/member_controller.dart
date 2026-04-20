@@ -24,28 +24,21 @@ class MemberController extends GetxController {
     ever(selectedDivision, (_) => _applyFilter());
   }
 
-  // --- FITUR DIPERBARUI: Admin Reset Password ---
-  // Sekarang mengembalikan String? (password baru) agar bisa di-copy di UI
   Future<String?> adminResetPassword(String userId, String nim) async {
     isLoading.value = true;
     errorMessage.value = '';
     const newPassword = 'Password123!';
-
     try {
-      // Memanggil fungsi RPC di Supabase
       await _supabase.rpc('reset_user_password', params: {
         'target_user_id': userId,
         'new_password': newPassword,
       });
-
-      // Snack bar ini opsional, bisa dihilangkan jika dialog sukses sudah cukup
       Get.snackbar('Berhasil', 'Password NIM $nim telah direset.');
-
       return newPassword;
     } catch (e) {
       errorMessage.value = 'Gagal mereset password.';
       Get.snackbar('Gagal', 'Terjadi kesalahan saat mereset password.');
-      return null; // Return null jika gagal
+      return null;
     } finally {
       isLoading.value = false;
     }
@@ -81,13 +74,11 @@ class MemberController extends GetxController {
 
   void _applyFilter() {
     var result = members.toList();
-
     if (selectedDivision.value != 'Semua') {
       result = result
           .where((m) => m.divisions.contains(selectedDivision.value))
           .toList();
     }
-
     if (searchQuery.value.isNotEmpty) {
       final query = searchQuery.value.toLowerCase();
       result = result
@@ -96,7 +87,6 @@ class MemberController extends GetxController {
               m.nim.toLowerCase().contains(query))
           .toList();
     }
-
     filteredMembers.value = result;
   }
 
@@ -116,57 +106,96 @@ class MemberController extends GetxController {
     if (file != null) pickedAvatarFile.value = file;
   }
 
+  /// Tambah anggota baru via Supabase Edge Function "create-member".
+  ///
+  /// Email auth dibangun otomatis: NIM@ruangkarya.id
+  /// Password default = NIM jika kosong.
+  /// Edge Function menggunakan SERVICE_ROLE_KEY di server,
+  /// sehingga bisa akses auth.users tanpa masalah permission.
   Future<void> createMember({
     required String nim,
     required String fullName,
-    required String email,
+    required String password,
     required String phone,
     required String angkatan,
-    required String password,
     required List<String> divisions,
   }) async {
     isLoading.value = true;
     errorMessage.value = '';
 
+    final effectivePassword =
+        password.trim().isEmpty ? nim.trim() : password.trim();
+
     try {
-      final authResponse = await _supabase.auth.admin.createUser(
-        AdminUserAttributes(
-          email: email,
-          password: password,
-          userMetadata: {'role': 'anggota'},
-          emailConfirm: true,
-        ),
+      // Panggil Edge Function "create-member"
+      final response = await _supabase.functions.invoke(
+        'create-member',
+        body: {
+          'nim': nim.trim(),
+          'full_name': fullName.trim(),
+          'password': effectivePassword,
+          'phone': phone.trim(),
+          'angkatan': angkatan.trim(),
+        },
       );
 
-      final userId = authResponse.user?.id;
-      if (userId == null) throw Exception('Gagal membuat akun');
+      // functions.invoke melempar FunctionException jika status != 2xx
+      final data = response.data as Map<String, dynamic>?;
+      final userId = data?['id'] as String?;
 
-      String? avatarUrl;
-      if (pickedAvatarFile.value != null) {
-        avatarUrl = await _uploadAvatar(userId);
+      if (userId == null) {
+        errorMessage.value = 'Respons server tidak valid. Coba lagi.';
+        return;
       }
 
-      await _supabase.from('profiles').insert({
-        'id': userId,
-        'nim': nim,
-        'full_name': fullName,
-        'email': email,
-        'phone': phone,
-        'angkatan': angkatan,
-        'role': 'anggota',
-        'avatar_url': avatarUrl,
-        'is_active': true,
-        'is_first_login': true,
-      });
+      // Upload avatar jika dipilih
+      if (pickedAvatarFile.value != null) {
+        final avatarUrl = await _uploadAvatar(userId);
+        if (avatarUrl != null) {
+          await _supabase.from('profiles').update({
+            'avatar_url': avatarUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          }).eq('id', userId);
+        }
+      }
 
+      // Insert divisi
       await _insertDivisions(userId, divisions);
 
       pickedAvatarFile.value = null;
       await fetchMembers();
       Get.back();
-      Get.snackbar('Berhasil', 'Anggota berhasil ditambahkan');
+      Get.snackbar(
+        'Berhasil',
+        'Anggota $fullName ditambahkan.\n'
+            'Login: NIM $nim  |  Password: $effectivePassword',
+        duration: const Duration(seconds: 5),
+      );
+    } on FunctionException catch (e) {
+      // Error dari Edge Function (status 4xx/5xx)
+      final body = e.details;
+      String msg;
+      if (body is Map && body['error'] != null) {
+        msg = body['error'].toString();
+      } else {
+        msg = e.toString();
+      }
+
+      if (msg.contains('sudah terdaftar') || msg.contains('sudah memiliki')) {
+        errorMessage.value = msg;
+      } else if (msg.contains('admin')) {
+        errorMessage.value =
+            'Akses ditolak. Pastikan kamu login sebagai admin.';
+      } else {
+        errorMessage.value = 'Gagal: $msg';
+      }
     } catch (e) {
-      errorMessage.value = 'Gagal menambah anggota. Coba lagi.';
+      final msg = e.toString();
+      if (msg.contains('network') || msg.contains('socket')) {
+        errorMessage.value = 'Periksa koneksi internet lalu coba lagi.';
+      } else {
+        errorMessage.value = 'Gagal menambah anggota. Coba lagi.';
+      }
     } finally {
       isLoading.value = false;
     }
@@ -175,7 +204,6 @@ class MemberController extends GetxController {
   Future<void> updateMember({
     required String id,
     required String fullName,
-    required String email,
     required String phone,
     required String angkatan,
     required List<String> divisions,
@@ -189,16 +217,15 @@ class MemberController extends GetxController {
         avatarUrl = await _uploadAvatar(id);
       }
 
-      final updateData = {
+      final updateData = <String, dynamic>{
         'full_name': fullName,
-        'email': email,
-        'phone': phone,
-        'angkatan': angkatan,
+        'phone': phone.isEmpty ? null : phone,
+        'angkatan': angkatan.isEmpty ? null : angkatan,
+        'updated_at': DateTime.now().toIso8601String(),
       };
       if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
 
       await _supabase.from('profiles').update(updateData).eq('id', id);
-
       await _supabase.from('member_divisions').delete().eq('user_id', id);
       await _insertDivisions(id, divisions);
 
@@ -215,24 +242,61 @@ class MemberController extends GetxController {
 
   Future<void> deleteMember(String id) async {
     try {
-      await _supabase
-          .from('profiles')
-          .update({'is_active': false}).eq('id', id);
+      await _supabase.from('profiles').update({
+        'is_active': false,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', id);
       await fetchMembers();
-      Get.snackbar('Berhasil', 'Anggota berhasil dihapus');
+      Get.snackbar('Berhasil', 'Anggota berhasil dinonaktifkan');
     } catch (e) {
-      Get.snackbar('Gagal', 'Gagal menghapus anggota');
+      Get.snackbar('Gagal', 'Gagal menonaktifkan anggota');
+    }
+  }
+
+  /// Toggle status BPH — hanya admin penuh yang boleh memanggil ini.
+  /// Memanggil Edge Function action "set_bph".
+  Future<void> setBph(String memberId, bool isBph) async {
+    isLoading.value = true;
+    try {
+      final response = await _supabase.functions.invoke(
+        'create-member',
+        body: {
+          'action': 'set_bph',
+          'target_id': memberId,
+          'is_bph': isBph,
+        },
+      );
+      final data = response.data as Map<String, dynamic>?;
+      if (data?['success'] == true) {
+        await fetchMembers();
+        Get.snackbar(
+          'Berhasil',
+          isBph ? 'Anggota dijadikan BPH' : 'Status BPH anggota dicabut',
+        );
+      } else {
+        Get.snackbar('Gagal', data?['error'] ?? 'Terjadi kesalahan');
+      }
+    } on FunctionException catch (e) {
+      final msg = (e.details as Map?)?['error'] ?? 'Gagal mengubah status BPH';
+      Get.snackbar('Gagal', msg.toString());
+    } catch (_) {
+      Get.snackbar('Gagal', 'Terjadi kesalahan. Coba lagi.');
+    } finally {
+      isLoading.value = false;
     }
   }
 
   Future<void> toggleMemberStatus(String id, bool isActive) async {
     try {
-      await _supabase
-          .from('profiles')
-          .update({'is_active': isActive}).eq('id', id);
+      await _supabase.from('profiles').update({
+        'is_active': isActive,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', id);
       await fetchMembers();
-      final status = isActive ? 'diaktifkan' : 'dinonaktifkan';
-      Get.snackbar('Berhasil', 'Anggota berhasil $status');
+      Get.snackbar(
+          'Berhasil',
+          'Anggota berhasil '
+              '${isActive ? 'diaktifkan' : 'dinonaktifkan'}');
       Get.back();
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal mengubah status anggota');
@@ -245,11 +309,9 @@ class MemberController extends GetxController {
       final bytes = await file.readAsBytes();
       final ext = file.path.split('.').last;
       final path = '$userId/avatar.$ext';
-
-      await _supabase.storage
-          .from(AppConstants.bucketAvatars)
-          .uploadBinary(path, bytes, fileOptions: FileOptions(upsert: true));
-
+      await _supabase.storage.from(AppConstants.bucketAvatars).uploadBinary(
+          path, bytes,
+          fileOptions: const FileOptions(upsert: true));
       return _supabase.storage
           .from(AppConstants.bucketAvatars)
           .getPublicUrl(path);
@@ -260,19 +322,13 @@ class MemberController extends GetxController {
 
   Future<void> _insertDivisions(String userId, List<String> divisions) async {
     if (divisions.isEmpty) return;
-
     final divisionResponse = await _supabase
         .from('divisions')
         .select('id, name')
         .inFilter('name', divisions);
-
     final rows = divisionResponse
-        .map((d) => {
-              'user_id': userId,
-              'division_id': d['id'],
-            })
+        .map((d) => {'user_id': userId, 'division_id': d['id']})
         .toList();
-
     await _supabase.from('member_divisions').insert(rows);
   }
 }

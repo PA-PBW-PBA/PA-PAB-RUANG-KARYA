@@ -36,35 +36,23 @@ class AppPages {
   static const initial = AppRoutes.splash;
 
   static final routes = [
-    // Visitor
-    GetPage(
-      name: AppRoutes.splash,
-      page: () => const HomeVisitorPage(),
-    ),
-    GetPage(
-      name: AppRoutes.homeVisitor,
-      page: () => const HomeVisitorPage(),
-    ),
+    // ── Visitor ────────────────────────────────────────────────
+    GetPage(name: AppRoutes.splash, page: () => const HomeVisitorPage()),
+    GetPage(name: AppRoutes.homeVisitor, page: () => const HomeVisitorPage()),
     GetPage(
       name: AppRoutes.eventVisitor,
       page: () => const EventVisitorPage(),
       binding: BindingsBuilder(() => Get.lazyPut(() => EventController())),
     ),
-    GetPage(
-      name: AppRoutes.eventDetail,
-      page: () => const EventDetailPage(),
-    ),
+    GetPage(name: AppRoutes.eventDetail, page: () => const EventDetailPage()),
     GetPage(
       name: AppRoutes.galleryVisitor,
       page: () => const GalleryVisitorPage(),
       binding: BindingsBuilder(() => Get.lazyPut(() => GalleryController())),
     ),
-    GetPage(
-      name: AppRoutes.divisionInfo,
-      page: () => const DivisionInfoPage(),
-    ),
+    GetPage(name: AppRoutes.divisionInfo, page: () => const DivisionInfoPage()),
 
-    // Auth
+    // ── Auth ───────────────────────────────────────────────────
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginPage(),
@@ -77,7 +65,7 @@ class AppPages {
       binding: BindingsBuilder(() => Get.lazyPut(() => AuthController())),
     ),
 
-    // Member
+    // ── Member ─────────────────────────────────────────────────
     GetPage(
       name: AppRoutes.homeMember,
       page: () => const HomeMemberPage(),
@@ -114,7 +102,7 @@ class AppPages {
       binding: BindingsBuilder(() => Get.lazyPut(() => MemberController())),
     ),
 
-    // Admin
+    // ── Admin & BPH (requiredRole: 'admin') ────────────────────
     GetPage(
       name: AppRoutes.dashboardAdmin,
       page: () => const DashboardAdminPage(),
@@ -136,6 +124,15 @@ class AppPages {
       page: () => const MemberFormPage(),
       middlewares: [AuthMiddleware(requiredRole: 'admin')],
       binding: BindingsBuilder(() => Get.lazyPut(() => MemberController())),
+    ),
+    GetPage(
+      name: AppRoutes.memberDetail,
+      page: () => const MemberDetailPage(),
+      middlewares: [AuthMiddleware(requiredRole: 'admin')],
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => MemberController());
+        Get.lazyPut(() => AttendanceController());
+      }),
     ),
     GetPage(
       name: AppRoutes.eventList,
@@ -165,30 +162,23 @@ class AppPages {
       binding: BindingsBuilder(() => Get.lazyPut(() => GalleryController())),
     ),
     GetPage(
+      name: AppRoutes.profileAdmin,
+      page: () => const ProfileAdminPage(),
+      middlewares: [AuthMiddleware(requiredRole: 'admin')],
+    ),
+
+    // ── Keuangan — hanya admin penuh (requiredRole: 'admin_only') ──
+    GetPage(
       name: AppRoutes.kasPage,
       page: () => const KasPage(),
-      middlewares: [AuthMiddleware()],
+      middlewares: [AuthMiddleware(requiredRole: 'admin_only')],
       binding: BindingsBuilder(() => Get.lazyPut(() => KasController())),
     ),
     GetPage(
       name: AppRoutes.kasForm,
       page: () => const KasFormPage(),
-      middlewares: [AuthMiddleware(requiredRole: 'admin')],
+      middlewares: [AuthMiddleware(requiredRole: 'admin_only')],
       binding: BindingsBuilder(() => Get.lazyPut(() => KasController())),
-    ),
-    GetPage(
-      name: AppRoutes.profileAdmin,
-      page: () => const ProfileAdminPage(),
-      middlewares: [AuthMiddleware(requiredRole: 'admin')],
-    ),
-    GetPage(
-      name: AppRoutes.memberDetail,
-      page: () => const MemberDetailPage(),
-      middlewares: [AuthMiddleware(requiredRole: 'admin')],
-      binding: BindingsBuilder(() {
-        Get.lazyPut(() => MemberController());
-        Get.lazyPut(() => AttendanceController());
-      }),
     ),
   ];
 }

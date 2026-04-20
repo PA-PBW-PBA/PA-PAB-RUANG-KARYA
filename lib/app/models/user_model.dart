@@ -50,24 +50,25 @@ class UserModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nim': nim,
-      'full_name': fullName,
-      'email': email,
-      'phone': phone,
-      'angkatan': angkatan,
-      'avatar_url': avatarUrl,
-      'role': role,
-      'is_bendahara': isBendahara,
-      'is_active': isActive,
-      'is_first_login': isFirstLogin,
-      'created_at': createdAt.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nim': nim,
+        'full_name': fullName,
+        'email': email,
+        'phone': phone,
+        'angkatan': angkatan,
+        'avatar_url': avatarUrl,
+        'role': role,
+        'is_bendahara': isBendahara,
+        'is_active': isActive,
+        'is_first_login': isFirstLogin,
+        'created_at': createdAt.toIso8601String(),
+      };
 
-  bool get isAdmin => role == 'admin';
+  // Role: 'admin' | 'bph' | 'anggota'
+  bool get isAdmin => role == 'admin'; // login email, semua akses
+  bool get isBph => role == 'bph'; // login NIM, akses admin minus keuangan
   bool get isAnggota => role == 'anggota';
-  bool get canManageKas => isAdmin && isBendahara;
+  bool get canAccessAdmin => isAdmin || isBph; // bisa masuk halaman admin
+  bool get canManageKas => isAdmin; // hanya admin penuh
 }

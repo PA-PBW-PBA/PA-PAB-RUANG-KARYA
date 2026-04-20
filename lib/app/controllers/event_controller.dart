@@ -1,9 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/event_model.dart';
-import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../routes/app_routes.dart';
 
 class EventController extends GetxController {
   final _supabase = Supabase.instance.client;
@@ -12,6 +10,10 @@ class EventController extends GetxController {
   final errorMessage = ''.obs;
   final events = <EventModel>[].obs;
   final filteredEvents = <EventModel>[].obs;
+
+  // --- BARU: Variabel untuk menyimpan list divisi dari DB ---
+  var divisions = <String>['Semua'].obs;
+
   final searchQuery = ''.obs;
   final selectedDivision = 'Semua'.obs;
   final selectedDay = Rxn<DateTime>();
@@ -21,90 +23,75 @@ class EventController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchEvents();
-    _setupRealtimeListener();
     selectedDay.value = DateTime.now();
+
+    fetchEvents();
+    fetchDivisions(); // Panggil fungsi untuk mengambil list divisi
+    _setupRealtimeListener();
+
     ever(searchQuery, (_) => _applyFilter());
     ever(selectedDivision, (_) => _applyFilter());
     ever(selectedDay, (_) => _applyFilter());
   }
 
+  // --- BARU: Fungsi Fetch Divisi dari Supabase ---
+  Future<void> fetchDivisions() async {
+    try {
+      // Mengambil data dari tabel 'divisions'
+      final response =
+          await _supabase.from('divisions').select('name').order('name');
+
+      // Mengubah response menjadi List<String>
+      final List<String> names =
+          (response as List).map((e) => e['name'] as String).toList();
+
+      // Update data divisi, tambahkan 'Semua' di awal
+      divisions.value = ['Semua', ...names];
+    } catch (e) {
+      debugPrint("Gagal memuat list divisi: $e");
+    }
+  }
+
+  // --- FUNGSI RESET ---
+  void resetFilters() {
+    selectedDay.value = null;
+    selectedDivision.value = 'Semua';
+    searchQuery.value = '';
+    _applyFilter();
+  }
+
+  // --- REALTIME LISTENER ---
   void _setupRealtimeListener() {
-    _supabase
-        .from('events')
-        .stream(primaryKey: ['id'])
-        .listen((data) {
-          // Detect new events (INSERT only)
-          if (events.isNotEmpty && data.length > events.length) {
-            final newEvent = data.last;
+    _supabase.from('events').stream(primaryKey: ['id']).listen((data) {
+      events.value = data.map<EventModel>((json) {
+        final divisions = (json['event_divisions'] as List?)
+                ?.map((e) => e['divisions']?['name'] as String?)
+                .whereType<String>()
+                .toList() ??
+            [];
+        final eventData = Map<String, dynamic>.from(json);
+        eventData['divisions'] = divisions;
+        return EventModel.fromJson(eventData);
+      }).toList();
 
-            // Show notification if event is created by someone else
-            if (newEvent['created_by'] != _supabase.auth.currentUser?.id) {
-              _showSystemNotification(newEvent['title']);
-            }
-          }
-          
-          // Update events list directly instead of refetching
-          events.value = data
-              .map<EventModel>((json) {
-                final divisions = (json['event_divisions'] as List?)
-                    ?.map((e) => e['divisions']?['name'] as String?)
-                    .whereType<String>()
-                    .toList() ?? [];
-                final eventData = Map<String, dynamic>.from(json);
-                eventData['divisions'] = divisions;
-                return EventModel.fromJson(eventData);
-              })
-              .toList();
-          
-          _applyFilter();
-        });
+      _applyFilter();
+    });
   }
 
-  void _showSystemNotification(String title) {
-    Get.snackbar(
-      'Kegiatan Baru! 🔔',
-      'Baru saja diterbitkan: $title. Cek jadwal sekarang!',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.primary.withOpacity(0.9),
-      colorText: Colors.white,
-      icon: const Icon(Icons.notifications_active, color: Colors.white),
-      duration: const Duration(seconds: 5),
-      mainButton: TextButton(
-        onPressed: () {
-          if (_supabase.auth.currentSession != null) {
-            Get.toNamed(AppRoutes.eventMember);
-          } else {
-            Get.toNamed(AppRoutes.eventVisitor);
-          }
-        },
-        child: const Text('LIHAT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
-
+  // --- FETCH DATA EVENT ---
   Future<void> fetchEvents() async {
     isLoading.value = true;
     try {
-      // cek apakah user sudah login
       final session = _supabase.auth.currentSession;
+      var query = _supabase
+          .from('events')
+          .select('*, event_divisions(divisions(name))');
 
-      late List response;
-
-      if (session != null) {
-        // anggota dan admin bisa lihat semua event
-        response = await _supabase
-            .from('events')
-            .select('*, event_divisions(divisions(name))')
-            .order('start_time');
-      } else {
-        // Pengunjung cuma bisa lihat event publik
-        response = await _supabase
-            .from('events')
-            .select('*, event_divisions(divisions(name))')
-            .eq('is_public', true)
-            .order('start_time');
+      if (session == null) {
+        query = query.eq('is_public', true);
       }
+
+      final response = await query.order('start_time');
 
       events.value = response.map<EventModel>((json) {
         final divisions = (json['event_divisions'] as List)
@@ -124,6 +111,7 @@ class EventController extends GetxController {
     }
   }
 
+  // --- LOGIKA FILTER UTAMA ---
   void _applyFilter() {
     var result = events.toList();
 
@@ -152,7 +140,10 @@ class EventController extends GetxController {
     filteredEvents.value = result;
   }
 
+  // --- FUNGSI AKSI ---
   void filterByDivision(String division) {
+    selectedDay.value =
+        null; // Reset tanggal agar user melihat semua event di divisi tsb
     selectedDivision.value = division;
   }
 
@@ -165,6 +156,7 @@ class EventController extends GetxController {
         .toList();
   }
 
+  // --- CRUD OPERATIONS ---
   Future<void> createEvent({
     required String title,
     required String location,
@@ -175,8 +167,6 @@ class EventController extends GetxController {
     required List<String> divisions,
   }) async {
     isLoading.value = true;
-    errorMessage.value = '';
-
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User tidak ditemukan');
@@ -202,7 +192,7 @@ class EventController extends GetxController {
       Get.back();
       Get.snackbar('Berhasil', 'Kegiatan berhasil ditambahkan');
     } catch (e) {
-      errorMessage.value = 'Gagal menambah kegiatan. Coba lagi.';
+      errorMessage.value = 'Gagal menambah kegiatan';
     } finally {
       isLoading.value = false;
     }
@@ -219,8 +209,6 @@ class EventController extends GetxController {
     required List<String> divisions,
   }) async {
     isLoading.value = true;
-    errorMessage.value = '';
-
     try {
       await _supabase.from('events').update({
         'title': title,
@@ -238,7 +226,7 @@ class EventController extends GetxController {
       Get.back();
       Get.snackbar('Berhasil', 'Kegiatan berhasil diperbarui');
     } catch (e) {
-      errorMessage.value = 'Gagal memperbarui kegiatan. Coba lagi.';
+      errorMessage.value = 'Gagal memperbarui kegiatan';
     } finally {
       isLoading.value = false;
     }

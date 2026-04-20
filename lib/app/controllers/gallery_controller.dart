@@ -77,7 +77,6 @@ class GalleryController extends GetxController {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User tidak ditemukan');
 
-      // Get division id
       final divisionResponse = await _supabase
           .from('divisions')
           .select('id')
@@ -85,7 +84,6 @@ class GalleryController extends GetxController {
           .single();
       final divisionId = divisionResponse['id'];
 
-      // Upload image
       final file = pickedGalleryFile.value!;
       final bytes = await file.readAsBytes();
       final ext = file.path.split('.').last;
@@ -99,7 +97,6 @@ class GalleryController extends GetxController {
       final imageUrl =
           _supabase.storage.from(AppConstants.bucketGallery).getPublicUrl(path);
 
-      // Insert to gallery table
       await _supabase.from('gallery').insert({
         'division_id': divisionId,
         'image_url': imageUrl,
@@ -112,6 +109,59 @@ class GalleryController extends GetxController {
       Get.snackbar('Berhasil', 'Foto berhasil diupload');
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal mengupload foto');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // BUG FIX #6: Method updateGallery — sebelumnya tidak ada sama sekali,
+  // sehingga tombol edit di GalleryCard tidak melakukan apa-apa.
+  Future<void> updateGallery({
+    required String id,
+    required String caption,
+    required String divisionName,
+  }) async {
+    isLoading.value = true;
+    try {
+      // Ambil division id
+      final divisionResponse = await _supabase
+          .from('divisions')
+          .select('id')
+          .eq('name', divisionName)
+          .single();
+      final divisionId = divisionResponse['id'];
+
+      final updateData = <String, dynamic>{
+        'division_id': divisionId,
+        'caption': caption.isEmpty ? null : caption,
+      };
+
+      // Upload gambar baru jika ada
+      if (pickedGalleryFile.value != null) {
+        final file = pickedGalleryFile.value!;
+        final bytes = await file.readAsBytes();
+        final ext = file.path.split('.').last;
+        final path =
+            '$divisionName/${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+        await _supabase.storage
+            .from(AppConstants.bucketGallery)
+            .uploadBinary(path, bytes);
+
+        final imageUrl = _supabase.storage
+            .from(AppConstants.bucketGallery)
+            .getPublicUrl(path);
+
+        updateData['image_url'] = imageUrl;
+        pickedGalleryFile.value = null;
+      }
+
+      await _supabase.from('gallery').update(updateData).eq('id', id);
+
+      await fetchGallery();
+      Get.snackbar('Berhasil', 'Karya berhasil diperbarui');
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal memperbarui karya');
     } finally {
       isLoading.value = false;
     }

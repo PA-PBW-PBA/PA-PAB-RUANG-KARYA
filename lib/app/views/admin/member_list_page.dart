@@ -27,9 +27,11 @@ class _MemberListPageState extends State<MemberListPage> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
         if (_isFabVisible) setState(() => _isFabVisible = false);
-      } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
         if (!_isFabVisible) setState(() => _isFabVisible = true);
       }
     });
@@ -59,7 +61,7 @@ class _MemberListPageState extends State<MemberListPage> {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              onPressed: () => Get.back(),
+              onPressed: () => Get.offNamed(AppRoutes.dashboardAdmin),
             ),
             backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
             flexibleSpace: FlexibleSpaceBar(
@@ -101,12 +103,12 @@ class _MemberListPageState extends State<MemberListPage> {
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
                   SizedBox(
                     height: 40,
                     child: ListView(
@@ -120,8 +122,8 @@ class _MemberListPageState extends State<MemberListPage> {
                         return Obx(() {
                           final isSelected =
                               controller.selectedDivision.value == division;
-                          final color = division == 'Semua' 
-                              ? colorScheme.primary 
+                          final color = division == 'Semua'
+                              ? colorScheme.primary
                               : AppColors.getDivisionColor(division);
 
                           return Padding(
@@ -134,16 +136,21 @@ class _MemberListPageState extends State<MemberListPage> {
                               backgroundColor: color.withOpacity(0.05),
                               selectedColor: color.withOpacity(0.15),
                               checkmarkColor: color,
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               side: BorderSide(
-                                color: isSelected ? color.withOpacity(0.3) : Colors.transparent,
+                                color: isSelected
+                                    ? color.withOpacity(0.3)
+                                    : Colors.transparent,
                                 width: 1.5,
                               ),
                               labelStyle: TextStyle(
-                                color: isSelected ? color : AppColors.textSecondary,
+                                color: isSelected
+                                    ? color
+                                    : AppColors.textSecondary,
                                 fontWeight: isSelected
                                     ? FontWeight.w700
                                     : FontWeight.w500,
@@ -194,6 +201,7 @@ class _MemberListPageState extends State<MemberListPage> {
                         ],
                       ),
                       child: MemberCard(
+                        showStatusBadge: true,
                         member: member,
                         onTap: () => Get.toNamed(
                           AppRoutes.memberDetail,
@@ -234,7 +242,8 @@ class _MemberListPageState extends State<MemberListPage> {
               onPressed: () => Get.toNamed(AppRoutes.memberForm),
               backgroundColor: colorScheme.primary,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               icon: const Icon(Icons.add_rounded, color: Colors.white),
               label: const Text(
                 'Tambah Anggota',
@@ -258,7 +267,8 @@ class _MemberListPageState extends State<MemberListPage> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Nonaktifkan Anggota'),
-        content: const Text('Anggota ini akan dinonaktifkan dan tidak bisa login. Lanjutkan?'),
+        content: const Text(
+            'Anggota ini akan dinonaktifkan dan tidak bisa login. Lanjutkan?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -272,7 +282,8 @@ class _MemberListPageState extends State<MemberListPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
             child: const Text('Nonaktifkan'),

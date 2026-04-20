@@ -44,8 +44,9 @@ class EventCard extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Badge internal jika bukan publik
+                  // Badge internal
                   if (!event.isPublic) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -64,70 +65,63 @@ class EventCard extends StatelessWidget {
                           Icon(Icons.lock_outline,
                               size: 10, color: AppColors.primary),
                           const SizedBox(width: 3),
-                          Text(
-                            'Internal',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          Text('Internal',
+                              style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
                     const SizedBox(height: 4),
                   ],
 
+                  // Judul — tidak dipotong paksa, pakai ellipsis wajar
                   Text(
-                    event.title.length > 10
-                        ? '${event.title.substring(0, 10)}...'
-                        : event.title,
+                    event.title,
                     style: Theme.of(context).textTheme.titleMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
+
+                  // Tanggal
                   Row(
                     children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 12,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      Icon(Icons.calendar_today_outlined,
+                          size: 12,
+                          color: Theme.of(context).colorScheme.primary),
                       const SizedBox(width: 4),
-                      Text(
-                        _formatDate(event.startTime),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                      Text(_formatDate(event.startTime),
+                          style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  if (event.location != null)
+
+                  // Lokasi
+                  if (event.location != null && event.location!.isNotEmpty)
                     Row(
                       children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 12,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        Icon(Icons.location_on_outlined,
+                            size: 12,
+                            color: Theme.of(context).colorScheme.primary),
                         const SizedBox(width: 4),
                         Expanded(
-                          child: Text(
-                            event.location!,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          child: Text(event.location!,
+                              style: Theme.of(context).textTheme.bodySmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: event.divisions
-                        .map((d) => DivisionBadge(division: d))
-                        .toList(),
+
+                  // FIX #3: Ganti Wrap(DivisionBadge) → DivisionChipRow
+                  // agar chip kompak tidak overflow ke bawah.
+                  DivisionChipRow(
+                    divisions: event.divisions,
+                    maxVisible: 3,
+                    size: 22,
                   ),
                 ],
               ),

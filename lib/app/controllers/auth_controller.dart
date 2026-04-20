@@ -14,26 +14,19 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Load user asynchronously without blocking UI
     _initializeUser();
   }
 
   Future<void> _initializeUser() async {
     final session = _supabase.auth.currentSession;
-    if (session != null) {
-      await _loadCurrentUser(session.user.id);
-    }
+    if (session != null) await _loadCurrentUser(session.user.id);
   }
 
-  // Auto deteksi apakah input email atau NIM
+  /// Input '@' → email asli (admin)
+  /// Input tanpa '@' → NIM → NIM@ruangkarya.id (bph / anggota)
   String _resolveEmail(String input) {
-    if (input.contains('@')) {
-      // Input adalah email langsung (admin)
-      return input.trim();
-    } else {
-      // Input adalah NIM (anggota) — konversi ke format email
-      return '${input.trim()}${AppConstants.supabaseEmailDomain}';
-    }
+    if (input.contains('@')) return input.trim();
+    return '${input.trim()}${AppConstants.supabaseEmailDomain}';
   }
 
   Future<void> login(String input, String password) async {
@@ -41,10 +34,8 @@ class AuthController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final email = _resolveEmail(input);
-
       final response = await _supabase.auth.signInWithPassword(
-        email: email,
+        email: _resolveEmail(input),
         password: password.trim(),
       );
 
@@ -54,8 +45,8 @@ class AuthController extends GetxController {
       }
 
       await _loadCurrentUser(response.user!.id);
-
       final user = currentUser.value;
+
       if (user == null) {
         errorMessage.value = 'Profil tidak ditemukan. Hubungi admin.';
         await _supabase.auth.signOut();
@@ -63,7 +54,7 @@ class AuthController extends GetxController {
       }
 
       if (!user.isActive) {
-        errorMessage.value = 'Akun Anda telah dinonaktifkan. Hubungi admin.';
+        errorMessage.value = 'Akun dinonaktifkan. Hubungi admin.';
         await _supabase.auth.signOut();
         currentUser.value = null;
         return;
@@ -74,45 +65,37 @@ class AuthController extends GetxController {
         return;
       }
 
-      if (user.isAdmin) {
-        Get.offAllNamed(AppRoutes.dashboardAdmin);
-      } else {
-        Get.offAllNamed(AppRoutes.homeMember);
-      }
+      _redirect(user);
     } on AuthException {
       errorMessage.value = 'NIM/email atau password salah.';
-    } catch (e) {
+    } catch (_) {
       errorMessage.value = 'Terjadi kesalahan. Coba lagi.';
     } finally {
       isLoading.value = false;
     }
   }
 
+  void _redirect(UserModel user) {
+    if (user.canAccessAdmin) {
+      Get.offAllNamed(AppRoutes.dashboardAdmin);
+    } else {
+      Get.offAllNamed(AppRoutes.homeMember);
+    }
+  }
+
   Future<void> changePassword(String newPassword) async {
     isLoading.value = true;
     errorMessage.value = '';
-
     try {
-      await _supabase.auth.updateUser(
-        UserAttributes(password: newPassword),
-      );
-
+      await _supabase.auth.updateUser(UserAttributes(password: newPassword));
       await _supabase.from('profiles').update({'is_first_login': false}).eq(
           'id', _supabase.auth.currentUser!.id);
-
       await _loadCurrentUser(_supabase.auth.currentUser!.id);
-
       final user = currentUser.value;
       if (user == null) return;
-
       Get.snackbar('Berhasil', 'Password berhasil diperbarui');
-
-      if (user.isAdmin) {
-        Get.offAllNamed(AppRoutes.dashboardAdmin);
-      } else {
-        Get.offAllNamed(AppRoutes.homeMember);
-      }
-    } catch (e) {
+      _redirect(user);
+    } catch (_) {
       errorMessage.value = 'Gagal mengubah password. Coba lagi.';
     } finally {
       isLoading.value = false;
@@ -126,22 +109,14 @@ class AuthController extends GetxController {
           .select('*, member_divisions(divisions(name))')
           .eq('id', userId)
           .single();
-
-      final rawDivisions = response['member_divisions'] as List? ?? [];
-      final divisions = rawDivisions
-          .map((e) {
-            final divData = e['divisions'];
-            if (divData == null) return null;
-            return divData['name'] as String?;
-          })
+      final divisions = (response['member_divisions'] as List? ?? [])
+          .map((e) => e['divisions']?['name'] as String?)
           .whereType<String>()
           .toList();
-
-      final userData = Map<String, dynamic>.from(response);
-      userData['divisions'] = divisions;
-
-      currentUser.value = UserModel.fromJson(userData);
-    } catch (e) {
+      final data = Map<String, dynamic>.from(response);
+      data['divisions'] = divisions;
+      currentUser.value = UserModel.fromJson(data);
+    } catch (_) {
       currentUser.value = null;
     }
   }

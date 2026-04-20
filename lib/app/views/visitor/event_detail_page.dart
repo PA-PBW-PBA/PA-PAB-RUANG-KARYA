@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/event_model.dart';
 import '../widgets/division_badge.dart';
+import '../../routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 
 class EventDetailPage extends StatelessWidget {
@@ -12,6 +14,11 @@ class EventDetailPage extends StatelessWidget {
     final EventModel event = Get.arguments as EventModel;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // FIX #1: Cek session langsung dari Supabase — tidak bergantung pada
+    // state controller yang mungkin belum di-init di konteks visitor.
+    final session = Supabase.instance.client.auth.currentSession;
+    final isLoggedIn = session != null;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -29,7 +36,8 @@ class EventDetailPage extends StatelessWidget {
               child: CircleAvatar(
                 backgroundColor: Colors.black26,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.arrow_back_rounded,
+                      color: Colors.white, size: 20),
                   onPressed: () => Get.back(),
                 ),
               ),
@@ -58,7 +66,6 @@ class EventDetailPage extends StatelessWidget {
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
@@ -72,15 +79,13 @@ class EventDetailPage extends StatelessWidget {
                         _buildStatusBadge(event.isPublic),
                         const SizedBox(width: 8),
                         ...event.divisions.map((d) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: DivisionBadge(division: d),
-                        )),
+                              padding: const EdgeInsets.only(right: 8),
+                              child: DivisionBadge(division: d),
+                            )),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // judul
                   Text(
                     event.title,
                     style: theme.textTheme.headlineLarge?.copyWith(
@@ -90,8 +95,6 @@ class EventDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // jadwal kegiatan
                   Text(
                     'Jadwal Pelaksanaan',
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -105,42 +108,40 @@ class EventDetailPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: theme.cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+                      border:
+                          Border.all(color: AppColors.divider.withOpacity(0.5)),
                     ),
                     child: Column(
                       children: [
-                        _buildRefinedInfoItem(
+                        _buildInfoItem(
                           context,
                           Icons.calendar_today_rounded,
                           'Tanggal',
                           _formatDate(event.startTime),
-                          isFirst: true,
                         ),
                         const Divider(height: 1, indent: 60),
-                        _buildRefinedInfoItem(
+                        _buildInfoItem(
                           context,
                           Icons.access_time_rounded,
                           'Waktu',
                           '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)} WIB',
                         ),
-                        if (event.location != null) ...[
+                        if (event.location != null &&
+                            event.location!.isNotEmpty) ...[
                           const Divider(height: 1, indent: 60),
-                          _buildRefinedInfoItem(
+                          _buildInfoItem(
                             context,
                             Icons.location_on_rounded,
                             'Lokasi',
                             event.location!,
-                            isLast: true,
                           ),
                         ],
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 32),
-
-                  // deskripsi event
-                  if (event.description != null && event.description!.isNotEmpty) ...[
+                  if (event.description != null &&
+                      event.description!.isNotEmpty) ...[
                     Text(
                       'Deskripsi Kegiatan',
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -164,7 +165,6 @@ class EventDetailPage extends StatelessWidget {
                       ),
                     ),
                   ],
-                  
                   const SizedBox(height: 100),
                 ],
               ),
@@ -175,14 +175,35 @@ class EventDetailPage extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: ElevatedButton(
-            onPressed: () => Get.snackbar('Info', 'Silakan login terlebih dahulu'),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-            child: const Text('Ikuti Kegiatan', style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
+          child: isLoggedIn
+              // FIX #1 — Sudah login: tombol sesuai konteks
+              ? ElevatedButton.icon(
+                  onPressed: () {
+                    // Arahkan ke kalender jadwal anggota
+                    Get.toNamed(AppRoutes.eventMember);
+                  },
+                  icon: const Icon(Icons.calendar_month_rounded,
+                      color: Colors.white),
+                  label: const Text('Lihat di Jadwalku',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                )
+              // FIX #1 — Belum login: arahkan ke halaman login
+              : ElevatedButton.icon(
+                  onPressed: () => Get.toNamed(AppRoutes.login),
+                  icon: const Icon(Icons.login_rounded, color: Colors.white),
+                  label: const Text('Login untuk Ikuti Kegiatan',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
         ),
       ),
     );
@@ -192,7 +213,9 @@ class EventDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isPublic ? AppColors.success.withOpacity(0.1) : AppColors.primary.withOpacity(0.1),
+        color: isPublic
+            ? AppColors.success.withOpacity(0.1)
+            : AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -217,14 +240,8 @@ class EventDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRefinedInfoItem(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value, {
-    bool isFirst = false,
-    bool isLast = false,
-  }) {
+  Widget _buildInfoItem(
+      BuildContext context, IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -235,30 +252,25 @@ class EventDetailPage extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+            child: Icon(icon,
+                size: 20, color: Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text(label,
+                    style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+                Text(value,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary)),
               ],
             ),
           ),
@@ -268,9 +280,19 @@ class EventDetailPage extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

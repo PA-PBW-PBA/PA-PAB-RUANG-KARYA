@@ -68,7 +68,8 @@ class HomeVisitorPage extends StatelessWidget {
                   style: TextButton.styleFrom(
                     foregroundColor: colorScheme.primary,
                     backgroundColor: colorScheme.primary.withOpacity(0.08),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -94,7 +95,10 @@ class HomeVisitorPage extends StatelessWidget {
                     context,
                     title: 'Kegiatan Terdekat',
                     subtitle: 'Jangan lewatkan momen seru kami',
-                    onSeeAll: () => Get.toNamed(AppRoutes.eventVisitor),
+                    onSeeAll: () {
+                      eventController.resetFilters(); // <--- TAMBAHKAN INI
+                      Get.toNamed(AppRoutes.eventVisitor);
+                    },
                   ),
                   const SizedBox(height: 8),
                   Obx(() {
@@ -154,7 +158,8 @@ class HomeVisitorPage extends StatelessWidget {
                       shrinkWrap: true,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
@@ -173,7 +178,8 @@ class HomeVisitorPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: GalleryCard(gallery: galleryController.gallery[i]),
+                        child:
+                            GalleryCard(gallery: galleryController.gallery[i]),
                       ),
                     );
                   }),
@@ -203,8 +209,10 @@ class HomeVisitorPage extends StatelessWidget {
           child: FloatingActionButton.extended(
             onPressed: () => Get.toNamed(AppRoutes.login),
             backgroundColor: colorScheme.primary,
-            elevation: 0, // Elevation diatur ke 0 karena kita pakai Custom Shadow di Container
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            elevation:
+                0, // Elevation diatur ke 0 karena kita pakai Custom Shadow di Container
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             label: Row(
               children: [
                 const Text(
@@ -216,7 +224,8 @@ class HomeVisitorPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_rounded, size: 20, color: Colors.white),
+                const Icon(Icons.arrow_forward_rounded,
+                    size: 20, color: Colors.white),
               ],
             ),
           ),
@@ -274,7 +283,8 @@ class HomeVisitorPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
@@ -380,7 +390,8 @@ class HomeVisitorPage extends StatelessWidget {
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
             child: Row(
               children: [
@@ -393,7 +404,8 @@ class HomeVisitorPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, size: 18, color: theme.colorScheme.primary),
+                Icon(Icons.chevron_right_rounded,
+                    size: 18, color: theme.colorScheme.primary),
               ],
             ),
           ),
@@ -442,7 +454,8 @@ class HomeVisitorPage extends StatelessWidget {
                     color: color.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(_getDivisionIcon(division), color: color, size: 20),
+                  child:
+                      Icon(_getDivisionIcon(division), color: color, size: 20),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -476,11 +489,16 @@ class HomeVisitorPage extends StatelessWidget {
 
   IconData _getDivisionIcon(String division) {
     switch (division) {
-      case 'Musik': return Icons.music_note_rounded;
-      case 'Tari': return Icons.auto_awesome_rounded;
-      case 'DKV': return Icons.palette_rounded;
-      case 'Kreatif Event': return Icons.event_available_rounded;
-      default: return Icons.category_rounded;
+      case 'Musik':
+        return Icons.music_note_rounded;
+      case 'Tari':
+        return Icons.auto_awesome_rounded;
+      case 'DKV':
+        return Icons.palette_rounded;
+      case 'Kreatif Event':
+        return Icons.event_available_rounded;
+      default:
+        return Icons.category_rounded;
     }
   }
 

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'dart:ui';
 import '../../controllers/gallery_controller.dart';
 import '../../models/gallery_model.dart';
 import '../widgets/gallery_card.dart';
@@ -60,7 +58,8 @@ class GalleryVisitorPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
                     _buildFilterChip(context, 'Semua', controller),
-                    ...AppConstants.divisions.map((d) => _buildFilterChip(context, d, controller)),
+                    ...AppConstants.divisions
+                        .map((d) => _buildFilterChip(context, d, controller)),
                   ],
                 ),
               ),
@@ -80,7 +79,8 @@ class GalleryVisitorPage extends StatelessWidget {
                     childAspectRatio: 0.85,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    (_, __) => const LoadingSkeleton(height: 160, borderRadius: 20),
+                    (_, __) =>
+                        const LoadingSkeleton(height: 160, borderRadius: 20),
                     childCount: 6,
                   ),
                 ),
@@ -136,13 +136,14 @@ class GalleryVisitorPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterChip(BuildContext context, String label, GalleryController controller) {
+  Widget _buildFilterChip(
+      BuildContext context, String label, GalleryController controller) {
     return Obx(() {
       final isSelected = controller.selectedDivision.value == label;
-      final color = label == 'Semua' 
-          ? Theme.of(context).colorScheme.primary 
+      final color = label == 'Semua'
+          ? Theme.of(context).colorScheme.primary
           : AppColors.getDivisionColor(label);
-      
+
       return Padding(
         padding: const EdgeInsets.only(right: 10),
         child: GestureDetector(
@@ -188,7 +189,8 @@ class GalleryVisitorPage extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Agar dialog mengikuti tinggi konten
+                mainAxisSize:
+                    MainAxisSize.min, // Agar dialog mengikuti tinggi konten
                 children: [
                   // Gambar dibuat Flexible agar tidak overflow jika layar pendek
                   Flexible(
@@ -197,35 +199,45 @@ class GalleryVisitorPage extends StatelessWidget {
                       child: CachedNetworkImage(
                         imageUrl: item.imageUrl,
                         fit: BoxFit.contain,
-                        placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                        placeholder: (_, __) =>
+                            const Center(child: CircularProgressIndicator()),
                         errorWidget: (_, __, ___) => const Icon(Icons.error),
                       ),
                     ),
                   ),
-                  
+
                   // Container Informasi Karya (Caption)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
-                      border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+                      border: Border(
+                          top: BorderSide(
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withOpacity(0.1))),
                     ),
-                    child: SingleChildScrollView( // Mencegah overflow pada teks panjang
+                    child: SingleChildScrollView(
+                      // Mencegah overflow pada teks panjang
                       physics: const BouncingScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.getDivisionColor(item.divisionName).withOpacity(0.1),
+                              color:
+                                  AppColors.getDivisionColor(item.divisionName)
+                                      .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               item.divisionName.toUpperCase(),
                               style: TextStyle(
-                                color: AppColors.getDivisionColor(item.divisionName),
+                                color: AppColors.getDivisionColor(
+                                    item.divisionName),
                                 fontWeight: FontWeight.w900,
                                 fontSize: 10,
                                 letterSpacing: 0.5,
@@ -235,11 +247,14 @@ class GalleryVisitorPage extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             item.caption ?? 'Tidak ada keterangan',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              height: 1.5,
-                              letterSpacing: 0.2,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.5,
+                                  letterSpacing: 0.2,
+                                ),
                           ),
                         ],
                       ),
@@ -248,7 +263,7 @@ class GalleryVisitorPage extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Tombol Close
             Positioned(
               top: 12,
@@ -258,7 +273,8 @@ class GalleryVisitorPage extends StatelessWidget {
                 child: const CircleAvatar(
                   backgroundColor: Colors.black54,
                   radius: 18,
-                  child: Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                  child:
+                      Icon(Icons.close_rounded, color: Colors.white, size: 20),
                 ),
               ),
             ),

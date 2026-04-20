@@ -3,24 +3,60 @@
 <p align="center"><em>Satu Ruang, Beragam Karya</em></p>
 
 <p align="center">
-  <img width="1672" height="941" alt="f9ed6bb2-455b-428a-8e72-25a2d1a6983b" src="https://github.com/user-attachments/assets/3652e2de-3b16-42f6-a49b-51da27b0728d" />
-
+  <img width="1600" height="900" alt="INII" src="https://github.com/user-attachments/assets/4dd51350-43a9-4446-a586-4a86d693829d" />
 </p>
 
 **Kelompok Alakadarnya**
 
-| **Nama**                         | **NIM**     | **Kelas**           |
-|----------------------------------|------------|----------------------|
-| Jen Agresia Misti                | 2409116007 | Sistem Informasi A   |
-| Maifariza Aulia Dyas             | 2409116032 | Sistem Informasi A   |
-| Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   |
-| Rizqy                            | 2409116039 | Sistem Informasi A   |
+| **Nama**                         | **NIM**     | **Kelas**           | **GitHub** |
+|----------------------------------|------------|----------------------|------------|
+| Jen Agresia Misti                | 2409116007 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-JenAM06-181717?logo=github)](https://github.com/JenAM06) |
+| Maifariza Aulia Dyas             | 2409116032 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-Maifariza-181717?logo=github)](https://github.com/Maifariza) |
+| Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-yardanrdtya-181717?logo=github)](https://github.com/yardanrdtya) |
+| Rizqy                            | 2409116039 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-eskykooo-181717?logo=github)](https://github.com/eskykooo) |
+
+
+---
+
+## Daftar Isi ✧
+
+
+- [Informasi Singkat UKM](#informasi-singkat-ukm)
+- [Deskripsi Aplikasi](#deskripsi-aplikasi)
+- [Fitur Aplikasi](#fitur-aplikasi)
+  - [Pengunjung (Public)](#pengunjung-public)
+  - [Anggota (User)](#anggota-user)
+  - [Admin](#admin)
+- [Struktur Folder](#struktur-folder)
+- [Database Schema](#database-schema)
+  - [Table: attendances](#table-attendances)
+  - [Table: divisions](#table-divisions)
+  - [Table: event_divisions](#table-event_divisions)
+  - [Table: events](#table-events)
+  - [Table: gallery](#table-gallery)
+  - [Table: kas](#table-kas)
+  - [Table: member_divisions](#table-member_divisions)
+  - [Table: profiles](#table-profiles)
+- [Relasi Data](#relasi-data)
+- [Widget yang Digunakan](#widget-yang-digunakan)
+- [Slide Deck](#slide-deck)
+- [Cara Menjalankan Aplikasi](#cara-menjalankan-aplikasi)
+
+---
+
+## Informasi Singkat UKM
+
+UKM Seni dan Kreativitas FEB merupakan salah satu unit kegiatan mahasiswa di Fakultas Ekonomi dan Bisnis yang menjadi wadah bagi mahasiswa untuk menyalurkan minat dan bakat di bidang seni. UKM ini memiliki beberapa divisi seperti musik, tari, DKV, dan kreatif event yang masing-masing aktif dalam berbagai kegiatan.
+
+UKM ini aktif dalam berbagai kegiatan seperti latihan rutin, mentoring, dan event. Selain untuk mengembangkan kemampuan, kegiatan-kegiatan ini juga jadi ajang mempererat kebersamaan antar anggota. UKM Seni dan Kreativitas FEB juga sering ikut serta dalam acara kampus maupun di luar kampus.
+
+---
 
 ## Deskripsi Aplikasi
 
-Ruang Karya merupakan aplikasi yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini memudahkan pengurus untuk mengelola UKM serta membantu anggota mengakses berbagai informasi dalam satu sistem.
+Ruang Karya merupakan aplikasi manajemen UKM yang dirancang untuk membantu aktivitas UKM Seni dan Kreativitas FEB Universitas Mulawarman. Aplikasi ini hadir sebagai solusi untuk mengatasi pengelolaan yang masih dilakukan secara manual dengan menyatukan berbagai kebutuhan UKM ke dalam satu platform.
 
-Dengan adanya Ruang Karya, aktivitas UKM yang sebelumnya masih manual kini dapat dikelola dengan lebih mudah.
+Melalui Ruang Karya, pengurus dapat mengelola data anggota, kegiatan, serta keuangan dengan lebih mudah. Di sisi lain, anggota juga dapat mengakses informasi kegiatan, melihat galeri, dan memantau aktivitas UKM dengan cepat.
 
 ---
 
@@ -35,23 +71,21 @@ Dengan adanya Ruang Karya, aktivitas UKM yang sebelumnya masih manual kini dapat
 ### Anggota (User)
 
 - Login ke dalam sistem
-- Melihat kalender kegiatan (rapat, mentoring, event)
+- Melihat kalender kegiatan
 - Melihat galeri kegiatan
 - Melihat data anggota
 - Mengelola profil pribadi
-
+- Mengecek riwayat kehadiran
 
 ### Admin
 
 - Login ke dashboard admin
-- Mengelola data anggota (CRUD)
+- Mengelola data anggota
 - Mengelola absensi kegiatan
 - Mengelola data keuangan kas
 - Mengelola kegiatan melalui kalender
 - Mengelola galeri kegiatan
 - Melihat dashboard monitoring aktivitas UKM
-
-
 
 
 ---
@@ -295,7 +329,7 @@ profiles                profiles
 
 ---
 
-## Widget yang Digunkan
+## Widget yang Digunakan
 
 
 | Kategori | Widget |
@@ -374,4 +408,15 @@ Berikut langkah-langkah untuk menjalankan aplikasi Ruang Karya
    flutter run
    ```
 
+---
+
+<p align="center">
+  <b>Ruang Karya</b> — Platform Manajemen UKM Seni dan Kreativitas
+</p>
+
+
+
+<p align="center">
+  © 2026 Ruang Karya
+</p>
 

@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+<<<<<<< HEAD
   supabase_flutter: ^2.3.0
 
   get: ^4.6.6
@@ -28,26 +29,66 @@ dependencies:
 
   fl_chart: ^0.67.0
 
+=======
+  # Supabase
+  supabase_flutter: ^2.3.0
+
+  # State Management & Navigation
+  get: ^4.6.6
+
+  # Environment Variables
+  flutter_dotenv: ^5.1.0
+
+  # Local Storage (untuk simpan tema dark/light)
+  get_storage: ^2.1.1
+
+  # Image Picker (untuk upload foto galeri & avatar)
+  image_picker: ^1.0.7
+
+  # Kalender
+  table_calendar: ^3.1.0
+
+  # Cache Image dari URL Supabase Storage
+  cached_network_image: ^3.3.1
+
+  # Launcher Icon
+  flutter_launcher_icons: ^0.13.1
+
+  # Native Splash Screen
+  flutter_native_splash: ^2.4.0
+
+  # Nilai Tambah 1 — Chart untuk statistik kas
+  fl_chart: ^0.67.0
+
+  # Nilai Tambah 2 — Shimmer loading effect
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
   shimmer: ^3.0.0
 
   url_launcher: ^6.3.0
 
+<<<<<<< HEAD
   flutter_native_splash: ^2.4.0
 
   flutter_launcher_icons: ^0.13.1
 
+=======
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
 flutter_launcher_icons:
   android: true
   ios: false
   image_path: "assets/images/logo_mark.png"
   min_sdk_android: 21
 
+<<<<<<< HEAD
 
 flutter_native_splash:
   color: "#F6F7FB" # background soft putih abu (clean)
@@ -65,6 +106,15 @@ flutter_native_splash:
     icon_background_color: "#F6F7FB"
 
 
+=======
+flutter_native_splash:
+  color: "#0A1A1C"
+  image: assets/images/logo_mark.png
+  android: true
+  ios: false
+  fullscreen: true
+
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
 flutter:
   uses-material-design: true
 

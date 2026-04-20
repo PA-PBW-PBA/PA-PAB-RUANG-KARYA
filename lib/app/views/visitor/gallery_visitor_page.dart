@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+<<<<<<< HEAD
 
 import '../../controllers/gallery_controller.dart';
 import '../../models/gallery_model.dart';
+=======
+import '../../controllers/gallery_controller.dart';
+import '../../models/gallery_model.dart';
+import '../widgets/gallery_card.dart';
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
 import '../widgets/empty_state.dart';
 import '../widgets/loading_skeleton.dart';
 import '../../../core/constants/app_constants.dart';
@@ -18,6 +24,7 @@ class GalleryVisitorPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: const Color(0xFFF7F8FC),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -166,6 +173,42 @@ class GalleryVisitorPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: SizedBox(
                 height: 46,
+=======
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // 1. SliverAppBar dengan Back Button (Konsisten dengan Admin)
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: true,
+            pinned: true,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              onPressed: () => Get.back(),
+            ),
+            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1.2,
+              title: Text(
+                'Galeri Karya',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+            ),
+          ),
+
+          // 2. Filter Divisi Section
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: SizedBox(
+                height: 40,
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -180,6 +223,7 @@ class GalleryVisitorPage extends StatelessWidget {
             ),
           ),
 
+<<<<<<< HEAD
           Obx(() {
             if (controller.isLoading.value) {
               return SliverPadding(
@@ -196,6 +240,23 @@ class GalleryVisitorPage extends StatelessWidget {
                       height: 220,
                       borderRadius: 24,
                     ),
+=======
+          // 3. Grid List Gallery
+          Obx(() {
+            if (controller.isLoading.value) {
+              return SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.85,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (_, __) =>
+                        const LoadingSkeleton(height: 160, borderRadius: 20),
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                     childCount: 6,
                   ),
                 ),
@@ -213,6 +274,7 @@ class GalleryVisitorPage extends StatelessWidget {
             }
 
             return SliverPadding(
+<<<<<<< HEAD
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -220,13 +282,40 @@ class GalleryVisitorPage extends StatelessWidget {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 0.78,
+=======
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.85,
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
                     final item = controller.filteredGallery[i];
+<<<<<<< HEAD
                     return _ModernGalleryCard(
                       item: item,
                       onTap: () => _showEnhancedFullImage(context, item),
+=======
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: GalleryCard(
+                        gallery: item,
+                        onTap: () => _showEnhancedFullImage(context, item),
+                      ),
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                     );
                   },
                   childCount: controller.filteredGallery.length,
@@ -240,10 +329,14 @@ class GalleryVisitorPage extends StatelessWidget {
   }
 
   Widget _buildFilterChip(
+<<<<<<< HEAD
     BuildContext context,
     String label,
     GalleryController controller,
   ) {
+=======
+      BuildContext context, String label, GalleryController controller) {
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
     return Obx(() {
       final isSelected = controller.selectedDivision.value == label;
       final color = label == 'Semua'
@@ -255,6 +348,7 @@ class GalleryVisitorPage extends StatelessWidget {
         child: GestureDetector(
           onTap: () => controller.filterByDivision(label),
           child: AnimatedContainer(
+<<<<<<< HEAD
             duration: const Duration(milliseconds: 220),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
             decoration: BoxDecoration(
@@ -273,12 +367,27 @@ class GalleryVisitorPage extends StatelessWidget {
                       ),
                     ]
                   : [],
+=======
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected ? color : color.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isSelected ? color : color.withOpacity(0.12),
+                width: 1.5,
+              ),
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
             ),
             child: Text(
               label,
               style: TextStyle(
                 color: isSelected ? Colors.white : color,
+<<<<<<< HEAD
                 fontWeight: FontWeight.w700,
+=======
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                 fontSize: 13,
               ),
             ),
@@ -288,6 +397,10 @@ class GalleryVisitorPage extends StatelessWidget {
     });
   }
 
+<<<<<<< HEAD
+=======
+  // FIXED: Mengatasi Pixel Overflowed dengan Flexible dan ScrollView (Mirip Versi Admin)
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
   void _showEnhancedFullImage(BuildContext context, GalleryModel item) {
     showDialog(
       context: context,
@@ -303,8 +416,15 @@ class GalleryVisitorPage extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
+<<<<<<< HEAD
                 mainAxisSize: MainAxisSize.min,
                 children: [
+=======
+                mainAxisSize:
+                    MainAxisSize.min, // Agar dialog mengikuti tinggi konten
+                children: [
+                  // Gambar dibuat Flexible agar tidak overflow jika layar pendek
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                   Flexible(
                     child: InteractiveViewer(
                       maxScale: 5.0,
@@ -313,17 +433,27 @@ class GalleryVisitorPage extends StatelessWidget {
                         fit: BoxFit.contain,
                         placeholder: (_, __) =>
                             const Center(child: CircularProgressIndicator()),
+<<<<<<< HEAD
                         errorWidget: (_, __, ___) =>
                             const Icon(Icons.broken_image_rounded),
                       ),
                     ),
                   ),
+=======
+                        errorWidget: (_, __, ___) => const Icon(Icons.error),
+                      ),
+                    ),
+                  ),
+
+                  // Container Informasi Karya (Caption)
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       border: Border(
+<<<<<<< HEAD
                         top: BorderSide(
                           color: Theme.of(context)
                               .dividerColor
@@ -332,12 +462,22 @@ class GalleryVisitorPage extends StatelessWidget {
                       ),
                     ),
                     child: SingleChildScrollView(
+=======
+                          top: BorderSide(
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withOpacity(0.1))),
+                    ),
+                    child: SingleChildScrollView(
+                      // Mencegah overflow pada teks panjang
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                       physics: const BouncingScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
+<<<<<<< HEAD
                               horizontal: 10,
                               vertical: 5,
                             ),
@@ -345,14 +485,29 @@ class GalleryVisitorPage extends StatelessWidget {
                               color: AppColors.getDivisionColor(item.divisionName)
                                   .withOpacity(0.10),
                               borderRadius: BorderRadius.circular(10),
+=======
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.getDivisionColor(item.divisionName)
+                                      .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                             ),
                             child: Text(
                               item.divisionName.toUpperCase(),
                               style: TextStyle(
+<<<<<<< HEAD
                                 color:
                                     AppColors.getDivisionColor(item.divisionName),
                                 fontWeight: FontWeight.w800,
                                 fontSize: 11,
+=======
+                                color: AppColors.getDivisionColor(
+                                    item.divisionName),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 10,
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -360,9 +515,19 @@ class GalleryVisitorPage extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             item.caption ?? 'Tidak ada keterangan',
+<<<<<<< HEAD
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   height: 1.5,
+=======
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.5,
+                                  letterSpacing: 0.2,
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                                 ),
                           ),
                         ],
@@ -372,6 +537,11 @@ class GalleryVisitorPage extends StatelessWidget {
                 ],
               ),
             ),
+<<<<<<< HEAD
+=======
+
+            // Tombol Close
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
             Positioned(
               top: 12,
               right: 12,
@@ -380,11 +550,16 @@ class GalleryVisitorPage extends StatelessWidget {
                 child: const CircleAvatar(
                   backgroundColor: Colors.black54,
                   radius: 18,
+<<<<<<< HEAD
                   child: Icon(
                     Icons.close_rounded,
                     color: Colors.white,
                     size: 20,
                   ),
+=======
+                  child:
+                      Icon(Icons.close_rounded, color: Colors.white, size: 20),
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
                 ),
               ),
             ),
@@ -394,6 +569,7 @@ class GalleryVisitorPage extends StatelessWidget {
     );
   }
 }
+<<<<<<< HEAD
 
 class _ModernGalleryCard extends StatelessWidget {
   final GalleryModel item;
@@ -552,3 +728,5 @@ class _ModernGalleryCard extends StatelessWidget {
     );
   }
 }
+=======
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b

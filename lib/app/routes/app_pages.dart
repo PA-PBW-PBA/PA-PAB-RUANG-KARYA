@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
+<<<<<<< HEAD
 import '../views/splash/splash_page.dart';
+=======
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
 import '../controllers/auth_controller.dart';
 import '../controllers/member_controller.dart';
 import '../controllers/event_controller.dart';
@@ -38,7 +41,11 @@ class AppPages {
 
   static final routes = [
     // ── Visitor ────────────────────────────────────────────────
+<<<<<<< HEAD
     GetPage(name: AppRoutes.splash, page: () => const SplashPage()),
+=======
+    GetPage(name: AppRoutes.splash, page: () => const HomeVisitorPage()),
+>>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
     GetPage(name: AppRoutes.homeVisitor, page: () => const HomeVisitorPage()),
     GetPage(
       name: AppRoutes.eventVisitor,

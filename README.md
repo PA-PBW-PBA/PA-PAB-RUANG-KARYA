@@ -414,14 +414,7 @@ Berikut langkah-langkah untuk menjalankan aplikasi Ruang Karya
   <b>Ruang Karya</b> — Platform Manajemen UKM Seni dan Kreativitas
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/FLUTTER-02569B?style=for-the-badge&logo=flutter&logoColor=white" />
-  <img src="https://img.shields.io/badge/DART-0175C2?style=for-the-badge&logo=dart&logoColor=white" />
-  <img src="https://img.shields.io/badge/SUPABASE-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" />
-  <img src="https://img.shields.io/badge/STATE-SETSTATE-purple?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/NAVIGATION-NAVIGATOR-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/ENV-FLUTTER__DOTENV-yellow?style=for-the-badge" />
-</p>
+
 
 <p align="center">
   © 2026 Ruang Karya

@@ -97,21 +97,18 @@ Melalui Ruang Karya, pengurus dapat mengelola data anggota, kegiatan, serta keua
 
 ```
 lib/
-│   main.dart
-│
+├── main.dart
 ├── app/
 │   ├── controllers/
+│   │   ├── app_config_controller.dart
 │   │   ├── attendance_controller.dart
 │   │   ├── auth_controller.dart
 │   │   ├── event_controller.dart
 │   │   ├── gallery_controller.dart
 │   │   ├── kas_controller.dart
-│   │   ├── member_controller.dart
-│   │   └── theme_controller.dart
-│   │
+│   │   └── member_controller.dart
 │   ├── middlewares/
 │   │   └── auth_middleware.dart
-│   │
 │   ├── models/
 │   │   ├── attendance_model.dart
 │   │   ├── division_model.dart
@@ -119,11 +116,9 @@ lib/
 │   │   ├── gallery_model.dart
 │   │   ├── kas_model.dart
 │   │   └── user_model.dart
-│   │
 │   ├── routes/
 │   │   ├── app_pages.dart
 │   │   └── app_routes.dart
-│   │
 │   └── views/
 │       ├── admin/
 │       │   ├── attendance_input_page.dart
@@ -137,11 +132,9 @@ lib/
 │       │   ├── member_form_page.dart
 │       │   ├── member_list_page.dart
 │       │   └── profile_admin_page.dart
-│       │
 │       ├── auth/
 │       │   ├── change_password_page.dart
 │       │   └── login_page.dart
-│       │
 │       ├── member/
 │       │   ├── attendance_history_page.dart
 │       │   ├── event_member_page.dart
@@ -149,14 +142,14 @@ lib/
 │       │   ├── home_member_page.dart
 │       │   ├── member_list_readonly_page.dart
 │       │   └── profile_member_page.dart
-│       │
+│       ├── splash/
+│       │   └── splash_page.dart
 │       ├── visitor/
 │       │   ├── division_info_page.dart
 │       │   ├── event_detail_page.dart
 │       │   ├── event_visitor_page.dart
 │       │   ├── gallery_visitor_page.dart
 │       │   └── home_visitor_page.dart
-│       │
 │       └── widgets/
 │           ├── admin_bottom_nav.dart
 │           ├── division_badge.dart
@@ -167,11 +160,9 @@ lib/
 │           ├── loading_skeleton.dart
 │           ├── member_bottom_nav.dart
 │           └── member_card.dart
-│
 └── core/
     ├── constants/
     │   └── app_constants.dart
-    │
     └── theme/
         ├── app_colors.dart
         └── app_theme.dart

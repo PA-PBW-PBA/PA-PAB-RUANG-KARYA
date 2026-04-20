@@ -15,14 +15,6 @@
 | Yardan Raditya Rafi’ Widyadhana  | 2409116037 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-yardanrdtya-181717?logo=github)](https://github.com/yardanrdtya) |
 | Rizqy                            | 2409116039 | Sistem Informasi A   | [![GitHub](https://img.shields.io/badge/GitHub-eskykooo-181717?logo=github)](https://github.com/eskykooo) |
 
----
-
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/18ee78a1-8bda-4e58-aa1d-93f6ab80a68b" height="250">
-  <img src="https://github.com/user-attachments/assets/49b07e81-08c3-4cbb-8ec8-70febcdd8d91" height="250">
-  <img src="https://github.com/user-attachments/assets/5fad8b62-9022-4709-a9e4-13916427b41c" height="250">
-</p>
 
 ---
 

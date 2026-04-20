@@ -60,8 +60,9 @@ class _EventFormPageState extends State<EventFormPage> {
     if (v.isEmpty) return 'Nama kegiatan tidak boleh kosong';
     if (v.length < 3) return 'Nama kegiatan terlalu pendek (min. 3 karakter)';
     final forbidden = RegExp(r'[<>"\\`]');
-    if (forbidden.hasMatch(v))
+    if (forbidden.hasMatch(v)) {
       return 'Nama mengandung karakter yang tidak diizinkan';
+    }
     return null;
   }
 

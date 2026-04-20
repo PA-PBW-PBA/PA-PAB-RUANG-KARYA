@@ -78,8 +78,9 @@ class _MemberFormPageState extends State<MemberFormPage> {
   String? _validatePhone(String value) {
     final v = value.trim();
     if (v.isEmpty) return null; // opsional
-    if (!_validPhoneChars.hasMatch(v))
+    if (!_validPhoneChars.hasMatch(v)) {
       return 'Nomor HP mengandung karakter tidak valid';
+    }
     return null;
   }
 
@@ -318,8 +319,9 @@ class _MemberFormPageState extends State<MemberFormPage> {
                     final caller = authController.currentUser.value;
                     final callerIsAdmin = caller?.isAdmin ?? false;
 
-                    if (!_isEdit || !callerIsAdmin)
+                    if (!_isEdit || !callerIsAdmin) {
                       return const SizedBox.shrink();
+                    }
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,7 +374,7 @@ class _MemberFormPageState extends State<MemberFormPage> {
                                 value: _isBph,
                                 onChanged: (val) =>
                                     setState(() => _isBph = val),
-                                activeColor: colorScheme.primary,
+                                activeThumbColor: colorScheme.primary,
                               ),
                             ],
                           ),

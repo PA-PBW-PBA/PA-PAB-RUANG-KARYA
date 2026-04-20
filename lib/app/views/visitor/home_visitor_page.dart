@@ -13,8 +13,8 @@ class HomeVisitorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eventController = Get.put(EventController());
-    final galleryController = Get.put(GalleryController());
+    final eventController = Get.find<EventController>();
+    final galleryController = Get.find<GalleryController>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 

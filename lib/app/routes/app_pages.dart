@@ -1,8 +1,4 @@
 import 'package:get/get.dart';
-<<<<<<< HEAD
-import '../views/splash/splash_page.dart';
-=======
->>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
 import '../controllers/auth_controller.dart';
 import '../controllers/member_controller.dart';
 import '../controllers/event_controller.dart';
@@ -10,6 +6,7 @@ import '../controllers/gallery_controller.dart';
 import '../controllers/kas_controller.dart';
 import '../controllers/attendance_controller.dart';
 import '../middlewares/auth_middleware.dart';
+import '../views/splash/splash_page.dart';
 import '../views/visitor/home_visitor_page.dart';
 import '../views/visitor/event_visitor_page.dart';
 import '../views/visitor/event_detail_page.dart';
@@ -40,13 +37,18 @@ class AppPages {
   static const initial = AppRoutes.splash;
 
   static final routes = [
-    // ── Visitor ────────────────────────────────────────────────
-<<<<<<< HEAD
+    // ── Splash ─────────────────────────────────────────────────
     GetPage(name: AppRoutes.splash, page: () => const SplashPage()),
-=======
-    GetPage(name: AppRoutes.splash, page: () => const HomeVisitorPage()),
->>>>>>> 760f72503b73442f7fa98adaeac9561a97b81f1b
-    GetPage(name: AppRoutes.homeVisitor, page: () => const HomeVisitorPage()),
+
+    // ── Visitor ────────────────────────────────────────────────
+    GetPage(
+      name: AppRoutes.homeVisitor,
+      page: () => const HomeVisitorPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => EventController());
+        Get.lazyPut(() => GalleryController());
+      }),
+    ),
     GetPage(
       name: AppRoutes.eventVisitor,
       page: () => const EventVisitorPage(),

@@ -4,8 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
-import '../visitor/home_visitor_page.dart';
-
+import '../../routes/app_routes.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -14,12 +13,12 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
-    with TickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late final AnimationController _introController;
   late final AnimationController _floatController;
   late final AnimationController _breathController;
   late final AnimationController _rotateController;
+  late final AnimationController _shimmerController;
 
   late final Animation<double> _logoScaleIn;
   late final Animation<double> _logoOpacity;
@@ -28,6 +27,7 @@ class _SplashPageState extends State<SplashPage>
   late final Animation<double> _glowOpacity;
   late final Animation<double> _logoRotation;
   late final Animation<double> _breathScale;
+  late final Animation<double> _shimmer;
 
   Timer? _timer;
 
@@ -36,14 +36,12 @@ class _SplashPageState extends State<SplashPage>
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!kIsWeb) {
-        FlutterNativeSplash.remove();
-      }
+      if (!kIsWeb) FlutterNativeSplash.remove();
     });
 
     _introController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1800),
     );
 
     _floatController = AnimationController(
@@ -58,70 +56,71 @@ class _SplashPageState extends State<SplashPage>
 
     _rotateController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 2000),
     );
 
-    _logoScaleIn = Tween<double>(begin: 0.65, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _introController,
-        curve: Curves.easeOutBack,
-      ),
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+
+    _logoScaleIn = Tween<double>(begin: 0.55, end: 1.0).animate(
+      CurvedAnimation(parent: _introController, curve: Curves.easeOutBack),
     );
 
     _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _introController,
-        curve: const Interval(0.0, 0.40, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.45, curve: Curves.easeIn),
       ),
     );
 
     _glowOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _introController,
-        curve: const Interval(0.10, 0.60, curve: Curves.easeOut),
+        curve: const Interval(0.10, 0.65, curve: Curves.easeOut),
       ),
     );
 
     _textOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _introController,
-        curve: const Interval(0.45, 0.95, curve: Curves.easeIn),
+        curve: const Interval(0.50, 1.0, curve: Curves.easeIn),
       ),
     );
 
     _textSlide = Tween<Offset>(
-      begin: const Offset(0, 0.16),
+      begin: const Offset(0, 0.20),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
         parent: _introController,
-        curve: const Interval(0.45, 1.0, curve: Curves.easeOutCubic),
+        curve: const Interval(0.50, 1.0, curve: Curves.easeOutCubic),
       ),
     );
 
-    _logoRotation = Tween<double>(begin: -0.08, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _rotateController,
-        curve: Curves.easeOutBack,
-      ),
+    _logoRotation = Tween<double>(begin: -0.06, end: 0.0).animate(
+      CurvedAnimation(parent: _rotateController, curve: Curves.easeOutBack),
     );
 
-    _breathScale = Tween<double>(begin: 1.0, end: 1.035).animate(
-      CurvedAnimation(
-        parent: _breathController,
-        curve: Curves.easeInOut,
-      ),
+    _breathScale = Tween<double>(begin: 1.0, end: 1.04).animate(
+      CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
+    );
+
+    _shimmer = Tween<double>(begin: -1.5, end: 2.5).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
     );
 
     _introController.forward();
     _rotateController.forward();
 
-    _timer = Timer(const Duration(milliseconds: 3600), () {
+    // Navigate setelah animasi selesai — data fetch dilakukan oleh binding
+    // di homeVisitor, bukan di sini, sehingga UI render terlebih dahulu.
+    _timer = Timer(const Duration(milliseconds: 3200), () {
       if (!mounted) return;
-      Get.offAll(
-        () => const HomeVisitorPage(),
-        transition: Transition.fadeIn,
-        duration: const Duration(milliseconds: 500),
+      Get.offAllNamed(
+        AppRoutes.homeVisitor,
+        // transition bawaan GetX (fadeIn)
       );
     });
   }
@@ -133,236 +132,317 @@ class _SplashPageState extends State<SplashPage>
     _floatController.dispose();
     _breathController.dispose();
     _rotateController.dispose();
+    _shimmerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
       body: AnimatedBuilder(
         animation: Listenable.merge([
           _introController,
           _floatController,
           _breathController,
           _rotateController,
+          _shimmerController,
         ]),
-        builder: (context, child) {
+        builder: (context, _) {
           final wave = math.sin(_floatController.value * math.pi);
           final wave2 = math.cos(_floatController.value * math.pi * 2);
+          final floatY = wave * 12.0;
+          final floatX = wave2 * 7.0;
 
-          final floatY = wave * 12;
-          final floatX = wave2 * 7;
+          return Container(
+            width: size.width,
+            height: size.height,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF0EEFF),
+                  Color(0xFFF6F7FB),
+                  Color(0xFFEDF4FF),
+                ],
+                stops: [0.0, 0.5, 1.0],
+              ),
+            ),
+            child: Stack(
+              children: [
+                // ── Background blobs ──────────────────────────────
+                Positioned(
+                  top: -70 + floatY,
+                  right: -30,
+                  child: _blob(220, const Color(0xFFDDD8FF), 0.75),
+                ),
+                Positioned(
+                  top: 110 - floatY,
+                  left: -50 + floatX,
+                  child: _blob(140, const Color(0xFFCFDFFF), 0.65),
+                ),
+                Positioned(
+                  bottom: -50 + floatY,
+                  left: -15,
+                  child: _blob(170, const Color(0xFFEEDFFF), 0.72),
+                ),
+                Positioned(
+                  bottom: 110 - floatY,
+                  right: -30 - floatX,
+                  child: _blob(110, const Color(0xFFD4F0E8), 0.60),
+                ),
 
-          return Stack(
-            children: [
-              Positioned(
-                top: -60 + floatY,
-                right: -20,
-                child: _softBlob(
-                  size: 230,
-                  color: const Color(0xFFEDE9FE).withOpacity(0.85),
+                // ── Decorative dots ───────────────────────────────
+                Positioned(
+                  top: 180 + floatY,
+                  left: 60 + floatX,
+                  child: _dot(Icons.auto_awesome_rounded, 20,
+                      const Color(0xFFADA6F5), 0.65),
                 ),
-              ),
-              Positioned(
-                top: 120 - floatY,
-                left: -45 + floatX,
-                child: _softBlob(
-                  size: 145,
-                  color: const Color(0xFFDCE7FF).withOpacity(0.80),
+                Positioned(
+                  top: 260 - floatY,
+                  right: 80,
+                  child: _dot(Icons.star_rounded, 13,
+                      const Color(0xFFCFB4FE), 0.60),
                 ),
-              ),
-              Positioned(
-                bottom: -45 + floatY,
-                left: -10,
-                child: _softBlob(
-                  size: 175,
-                  color: const Color(0xFFF5E8FF).withOpacity(0.86),
+                Positioned(
+                  bottom: 220 + floatY,
+                  left: 90,
+                  child: _dot(Icons.circle, 9,
+                      const Color(0xFF93C5FD), 0.50),
                 ),
-              ),
-              Positioned(
-                bottom: 120 - floatY,
-                right: -26 - floatX,
-                child: _softBlob(
-                  size: 118,
-                  color: const Color(0xFFE9F7EF).withOpacity(0.72),
+                Positioned(
+                  bottom: 160 - floatY,
+                  right: 55 + floatX,
+                  child: _dot(Icons.lens_rounded, 6,
+                      const Color(0xFFA7F3D0), 0.45),
                 ),
-              ),
 
-              Positioned(
-                top: 170 + floatY,
-                left: 70 + floatX,
-                child: _sparkle(
-                  icon: Icons.auto_awesome_rounded,
-                  size: 18,
-                  color: const Color(0xFFB7B3F6).withOpacity(0.70),
-                ),
-              ),
-              Positioned(
-                top: 250 - floatY,
-                right: 88,
-                child: _sparkle(
-                  icon: Icons.star_rounded,
-                  size: 12,
-                  color: const Color(0xFFD8B4FE).withOpacity(0.65),
-                ),
-              ),
-              Positioned(
-                bottom: 210 + floatY,
-                left: 96,
-                child: _sparkle(
-                  icon: Icons.circle,
-                  size: 8,
-                  color: const Color(0xFFA5B4FC).withOpacity(0.55),
-                ),
-              ),
-
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Transform.translate(
-                        offset: Offset(0, -floatY * 0.35),
-                        child: FadeTransition(
-                          opacity: _logoOpacity,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              FadeTransition(
-                                opacity: _glowOpacity,
-                                child: Container(
-                                  width: 182,
-                                  height: 182,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      colors: [
-                                        const Color(0xFFB7B3F6).withOpacity(0.30),
-                                        const Color(0xFFB7B3F6).withOpacity(0.02),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              ScaleTransition(
-                                scale: _logoScaleIn,
-                                child: ScaleTransition(
-                                  scale: _breathScale,
-                                  child: RotationTransition(
-                                    turns: _logoRotation,
-                                    child: Container(
-                                      width: 136,
-                                      height: 136,
-                                      padding: const EdgeInsets.all(22),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: const Color(0xFFB7B3F6)
-                                                .withOpacity(0.25),
-                                            blurRadius: 30,
-                                            offset: const Offset(0, 14),
-                                          ),
+                // ── Center content ────────────────────────────────
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo
+                        Transform.translate(
+                          offset: Offset(0, -floatY * 0.4),
+                          child: FadeTransition(
+                            opacity: _logoOpacity,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Outer glow ring
+                                FadeTransition(
+                                  opacity: _glowOpacity,
+                                  child: Container(
+                                    width: 196,
+                                    height: 196,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          const Color(0xFF8A7CFF)
+                                              .withOpacity(0.22),
+                                          const Color(0xFF8A7CFF)
+                                              .withOpacity(0.0),
                                         ],
                                       ),
-                                      child: Image.asset(
-                                        'assets/images/logo_mark.png',
-                                        fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                // Inner pulse ring
+                                ScaleTransition(
+                                  scale: _breathScale,
+                                  child: Container(
+                                    width: 158,
+                                    height: 158,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: const Color(0xFF8A7CFF)
+                                            .withOpacity(0.15),
+                                        width: 1.5,
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                // Logo card
+                                ScaleTransition(
+                                  scale: _logoScaleIn,
+                                  child: ScaleTransition(
+                                    scale: _breathScale,
+                                    child: RotationTransition(
+                                      turns: _logoRotation,
+                                      child: _logoCard(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 30),
-                      FadeTransition(
-                        opacity: _textOpacity,
-                        child: SlideTransition(
-                          position: _textSlide,
+
+                        const SizedBox(height: 36),
+
+                        // Text block
+                        FadeTransition(
+                          opacity: _textOpacity,
+                          child: SlideTransition(
+                            position: _textSlide,
+                            child: Column(
+                              children: [
+                                // Title with shimmer
+                                ShaderMask(
+                                  shaderCallback: (bounds) =>
+                                      LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: const [
+                                      Color(0xFF27314D),
+                                      Color(0xFF8A7CFF),
+                                      Color(0xFF27314D),
+                                    ],
+                                    stops: [
+                                      (_shimmer.value - 0.6)
+                                          .clamp(0.0, 1.0),
+                                      _shimmer.value.clamp(0.0, 1.0),
+                                      (_shimmer.value + 0.6)
+                                          .clamp(0.0, 1.0),
+                                    ],
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    'Ruang Karya',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                          letterSpacing: -0.8,
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF8A7CFF)
+                                        .withOpacity(0.10),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0xFF8A7CFF)
+                                          .withOpacity(0.20),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'UKM Seni & Kreativitas',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          color: const Color(0xFF6B5FE4),
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.2,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 48),
+
+                        // Loading indicator
+                        FadeTransition(
+                          opacity: _textOpacity,
                           child: Column(
                             children: [
-                              Text(
-                                'Ruang Karya',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF27314D),
-                                      letterSpacing: -0.6,
-                                    ),
+                              SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: const Color(0xFF8A7CFF),
+                                  backgroundColor:
+                                      const Color(0xFF8A7CFF).withOpacity(0.12),
+                                ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 12),
                               Text(
-                                'UKM Seni & Kreativitas',
-                                textAlign: TextAlign.center,
+                                'Memuat...',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .titleMedium
+                                    .bodySmall
                                     ?.copyWith(
-                                      color: const Color(0xFF7B859C),
-                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF8A7CFF)
+                                          .withOpacity(0.70),
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.5,
                                     ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 34),
-                      FadeTransition(
-                        opacity: _textOpacity,
-                        child: SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.6,
-                            color: const Color(0xFF8A7CFF),
-                            backgroundColor:
-                                const Color(0xFF8A7CFF).withOpacity(0.12),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _softBlob({
-    required double size,
-    required Color color,
-  }) {
+  Widget _logoCard() {
+    return Container(
+      width: 130,
+      height: 130,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF8A7CFF).withOpacity(0.28),
+            blurRadius: 36,
+            offset: const Offset(0, 16),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.9),
+            blurRadius: 8,
+            offset: const Offset(-4, -4),
+          ),
+        ],
+      ),
+      child: Image.asset(
+        'assets/images/logo_mark.png',
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
+  Widget _blob(double size, Color color, double opacity) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color,
+        color: color.withOpacity(opacity),
         shape: BoxShape.circle,
       ),
     );
   }
 
-  Widget _sparkle({
-    required IconData icon,
-    required double size,
-    required Color color,
-  }) {
-    return Icon(
-      icon,
-      size: size,
-      color: color,
-    );
+  Widget _dot(IconData icon, double size, Color color, double opacity) {
+    return Icon(icon, size: size, color: color.withOpacity(opacity));
   }
 }

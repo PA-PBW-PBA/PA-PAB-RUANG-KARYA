@@ -1,3 +1,4 @@
+import 'dart:io'; // <--- PENTING: Tambahkan ini untuk menggunakan class File
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/member_controller.dart';
@@ -25,7 +26,7 @@ class _MemberFormPageState extends State<MemberFormPage> {
 
   final List<String> _selectedDivisions = [];
   bool _showPassword = false;
-  bool _isBph = false; // status BPH, hanya bisa diubah oleh admin
+  bool _isBph = false;
   bool get _isEdit => _editMember != null;
 
   String? _nameError;
@@ -77,10 +78,8 @@ class _MemberFormPageState extends State<MemberFormPage> {
 
   String? _validatePhone(String value) {
     final v = value.trim();
-    if (v.isEmpty) return null; // opsional
-    if (!_validPhoneChars.hasMatch(v)) {
-      return 'Nomor HP mengandung karakter tidak valid';
-    }
+    if (v.isEmpty) return null;
+    if (!_validPhoneChars.hasMatch(v)) return 'Nomor HP tidak valid';
     return null;
   }
 
@@ -122,7 +121,7 @@ class _MemberFormPageState extends State<MemberFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar picker
+                  // --- AVATAR SECTION ---
                   Center(
                     child: GestureDetector(
                       onTap: _controller.pickAvatar,
@@ -141,6 +140,12 @@ class _MemberFormPageState extends State<MemberFormPage> {
                                   radius: 50,
                                   backgroundColor:
                                       colorScheme.primary.withOpacity(0.08),
+                                  // PERBAIKAN DISINI: Konversi XFile ke File
+                                  backgroundImage:
+                                      _controller.pickedAvatarFile.value != null
+                                          ? FileImage(File(_controller
+                                              .pickedAvatarFile.value!.path))
+                                          : null,
                                   child:
                                       _controller.pickedAvatarFile.value == null
                                           ? Icon(Icons.person_rounded,
@@ -175,7 +180,6 @@ class _MemberFormPageState extends State<MemberFormPage> {
                   _buildFormHeader('Informasi Pribadi'),
                   const SizedBox(height: 16),
 
-                  // Nama
                   _buildField(context, 'Nama Lengkap', _nameController,
                       hint: 'Masukkan nama lengkap',
                       icon: Icons.person_outline_rounded,
@@ -184,16 +188,16 @@ class _MemberFormPageState extends State<MemberFormPage> {
                           setState(() => _nameError = _validateName(v))),
                   const SizedBox(height: 16),
 
-                  // NIM — nonaktif saat edit
                   _buildField(context, 'NIM', _nimController,
                       hint: 'Masukkan NIM (hanya angka)',
                       icon: Icons.badge_outlined,
-                      errorText: _nimError, onChanged: (v) {
-                    setState(() => _nimError = _validateNim(v));
-                  }, keyboardType: TextInputType.number, enabled: !_isEdit),
+                      errorText: _nimError,
+                      onChanged: (v) =>
+                          setState(() => _nimError = _validateNim(v)),
+                      keyboardType: TextInputType.number,
+                      enabled: !_isEdit),
                   const SizedBox(height: 8),
 
-                  // Info email otomatis — update realtime saat NIM diketik
                   if (!_isEdit)
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: _nimController,
@@ -240,7 +244,6 @@ class _MemberFormPageState extends State<MemberFormPage> {
                     ),
                   const SizedBox(height: 16),
 
-                  // Nomor HP
                   _buildField(context, 'Nomor HP', _phoneController,
                       hint: 'Opsional',
                       icon: Icons.phone_outlined,
@@ -250,52 +253,18 @@ class _MemberFormPageState extends State<MemberFormPage> {
                       keyboardType: TextInputType.phone),
                   const SizedBox(height: 16),
 
-                  // Angkatan
                   _buildField(context, 'Angkatan', _angkatanController,
                       hint: 'Contoh: 2024',
                       icon: Icons.school_outlined,
                       keyboardType: TextInputType.number),
 
-                  // Password — hanya saat tambah baru
                   if (!_isEdit) ...[
                     const SizedBox(height: 24),
                     _buildFormHeader('Keamanan'),
-                    const SizedBox(height: 8),
-                    // Info password default
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning.withOpacity(0.07),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: AppColors.warning.withOpacity(0.2)),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.info_outline_rounded,
-                              size: 16, color: AppColors.warning),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Kosongkan agar password default = NIM anggota. '
-                              'Anggota wajib ganti password saat pertama login.',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.warning,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _passwordController,
                       obscureText: !_showPassword,
-                      autocorrect: false,
-                      enableSuggestions: false,
                       decoration: InputDecoration(
                         labelText: 'Password Default',
                         hintText: 'Kosongkan = pakai NIM',
@@ -313,15 +282,10 @@ class _MemberFormPageState extends State<MemberFormPage> {
 
                   const SizedBox(height: 32),
 
-                  // ── Toggle BPH — hanya tampil saat edit & pemanggil admin ──
                   Builder(builder: (context) {
-                    final authController = Get.find<AuthController>();
-                    final caller = authController.currentUser.value;
-                    final callerIsAdmin = caller?.isAdmin ?? false;
-
-                    if (!_isEdit || !callerIsAdmin) {
+                    final caller = Get.find<AuthController>().currentUser.value;
+                    if (caller == null || !caller.isAdmin)
                       return const SizedBox.shrink();
-                    }
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,53 +294,24 @@ class _MemberFormPageState extends State<MemberFormPage> {
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                              horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
                             color: colorScheme.primary.withOpacity(0.04),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                                 color: colorScheme.primary.withOpacity(0.15)),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.admin_panel_settings_rounded,
-                                  color: _isBph
-                                      ? colorScheme.primary
-                                      : AppColors.textSecondary,
-                                  size: 22),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Jadikan BPH',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: _isBph
-                                            ? colorScheme.primary
-                                            : AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'BPH bisa akses halaman admin kecuali keuangan',
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        color: AppColors.textSecondary,
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Switch(
-                                value: _isBph,
-                                onChanged: (val) =>
-                                    setState(() => _isBph = val),
-                                activeThumbColor: colorScheme.primary,
-                              ),
-                            ],
+                          child: SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Jadikan BPH',
+                                style: TextStyle(fontWeight: FontWeight.w700)),
+                            subtitle:
+                                const Text('BPH memiliki hak akses admin'),
+                            value: _isBph,
+                            onChanged: (val) => setState(() => _isBph = val),
+                            secondary: Icon(Icons.admin_panel_settings_rounded,
+                                color:
+                                    _isBph ? colorScheme.primary : Colors.grey),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -394,11 +329,9 @@ class _MemberFormPageState extends State<MemberFormPage> {
                       final color = AppColors.getDivisionColor(division);
                       return GestureDetector(
                         onTap: () => setState(() {
-                          if (isSelected) {
-                            _selectedDivisions.remove(division);
-                          } else {
-                            _selectedDivisions.add(division);
-                          }
+                          isSelected
+                              ? _selectedDivisions.remove(division)
+                              : _selectedDivisions.add(division);
                         }),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
@@ -408,10 +341,10 @@ class _MemberFormPageState extends State<MemberFormPage> {
                             color: isSelected ? color : color.withOpacity(0.06),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color:
-                                  isSelected ? color : color.withOpacity(0.15),
-                              width: 1.5,
-                            ),
+                                color: isSelected
+                                    ? color
+                                    : color.withOpacity(0.15),
+                                width: 1.5),
                           ),
                           child: Text(division,
                               style: TextStyle(
@@ -425,40 +358,22 @@ class _MemberFormPageState extends State<MemberFormPage> {
                     }).toList(),
                   ),
 
-                  // Error dari controller
-                  Obx(() {
-                    if (_controller.errorMessage.value.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 24),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: colorScheme.error.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color: colorScheme.error.withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.error_outline_rounded,
-                                color: colorScheme.error, size: 20),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                _controller.errorMessage.value,
+                  Obx(() => _controller.errorMessage.value.isEmpty
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 24),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colorScheme.error.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(_controller.errorMessage.value,
                                 style: TextStyle(
                                     color: colorScheme.error,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        )),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -468,16 +383,13 @@ class _MemberFormPageState extends State<MemberFormPage> {
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(
+        decoration:
+            BoxDecoration(color: theme.scaffoldBackgroundColor, boxShadow: [
+          BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
+              offset: const Offset(0, -5))
+        ]),
         child: Obx(() => ElevatedButton(
               onPressed: _controller.isLoading.value ? null : _handleSave,
               style: ElevatedButton.styleFrom(
@@ -504,26 +416,22 @@ class _MemberFormPageState extends State<MemberFormPage> {
         style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w800,
-            color: AppColors.textSecondary,
+            color: Colors.grey,
             letterSpacing: 0.5));
   }
 
   Widget _buildField(
-    BuildContext context,
-    String label,
-    TextEditingController controller, {
-    String? hint,
-    IconData? icon,
-    String? errorText,
-    ValueChanged<String>? onChanged,
-    TextInputType? keyboardType,
-    bool enabled = true,
-  }) {
+      BuildContext context, String label, TextEditingController controller,
+      {String? hint,
+      IconData? icon,
+      String? errorText,
+      ValueChanged<String>? onChanged,
+      TextInputType? keyboardType,
+      bool enabled = true}) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       enabled: enabled,
-      autocorrect: false,
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
@@ -531,8 +439,7 @@ class _MemberFormPageState extends State<MemberFormPage> {
         errorText: errorText,
         prefixIcon: icon != null ? Icon(icon) : null,
         filled: !enabled,
-        fillColor:
-            enabled ? null : Theme.of(context).dividerColor.withOpacity(0.1),
+        fillColor: enabled ? null : Colors.grey.withOpacity(0.1),
       ),
     );
   }
@@ -551,26 +458,19 @@ class _MemberFormPageState extends State<MemberFormPage> {
     });
 
     if (nameErr != null || nimErr != null || phoneErr != null) return;
-
     if (_selectedDivisions.isEmpty) {
       _controller.errorMessage.value = 'Pilih minimal satu divisi';
       return;
     }
 
     if (_isEdit) {
-      // Jika status BPH berubah, panggil setBph dulu via Edge Function
-      final authController = Get.find<AuthController>();
-      final callerIsAdmin = authController.currentUser.value?.isAdmin ?? false;
-      if (callerIsAdmin && _isBph != _editMember!.isBph) {
-        await _controller.setBph(_editMember!.id, _isBph);
-      }
-
       _controller.updateMember(
         id: _editMember!.id,
         fullName: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
         angkatan: _angkatanController.text.trim(),
         divisions: _selectedDivisions,
+        isBph: _isBph,
       );
     } else {
       _controller.createMember(

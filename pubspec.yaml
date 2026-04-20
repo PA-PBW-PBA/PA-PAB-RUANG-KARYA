@@ -39,13 +39,12 @@ dependencies:
   # Native Splash Screen
   flutter_native_splash: ^2.4.0
 
-  # Nilai Tambah 1 — Chart untuk statistik kas
-  fl_chart: ^0.67.0
-
   # Nilai Tambah 2 — Shimmer loading effect
   shimmer: ^3.0.0
 
   url_launcher: ^6.3.0
+
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

@@ -37,26 +37,40 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _launchWhatsApp() async {
+    // 1. Cek apakah masih loading
     if (_configController.isLoading.value) {
       Get.snackbar('Mohon tunggu', 'Sedang memuat data dari server...',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
+
+    // 2. Ambil nomor dari controller
     final phoneNumber = _configController.whatsappNumber.value;
+
+    // 3. Validasi apakah nomor tersedia
     if (phoneNumber.isEmpty) {
-      Get.snackbar('Error', 'Kontak admin tidak tersedia.',
+      Get.snackbar('Error',
+          'Kontak admin tidak tersedia. Pastikan koneksi internet stabil.',
           backgroundColor: Colors.red.withOpacity(0.1), colorText: Colors.red);
       return;
     }
+
+    // 4. Siapkan pesan dan URL
     const message =
         'Halo Admin, saya lupa password akun saya. Nama: ,NIM: , DIVISI: .';
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
     final url = Uri.parse(
         'https://wa.me/$cleanPhone?text=${Uri.encodeComponent(message)}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      Get.snackbar('Error', 'Gagal membuka WhatsApp',
+
+    // 5. Coba buka WhatsApp
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Tidak dapat membuka aplikasi WhatsApp';
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal membuka WhatsApp: $e',
           backgroundColor: Colors.red.withOpacity(0.1), colorText: Colors.red);
     }
   }

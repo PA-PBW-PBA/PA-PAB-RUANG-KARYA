@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../controllers/kas_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../routes/app_routes.dart';
@@ -44,7 +43,6 @@ class KasPage extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // total saldo di card
                   Obx(() {
                     final total = kasController.totalSaldo;
                     return Container(
@@ -71,7 +69,8 @@ class KasPage extends StatelessWidget {
                             right: -20,
                             top: -20,
                             child: Icon(Icons.account_balance_wallet_rounded,
-                                size: 100, color: Colors.white.withOpacity(0.1)),
+                                size: 100,
+                                color: Colors.white.withOpacity(0.1)),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,10 +86,10 @@ class KasPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Rp ${_formatAmount(total)}',
+                                kasController.formatCurrency(total),
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 32,
+                                  fontSize: 26, // Disesuaikan agar muat
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: -1,
                                 ),
@@ -119,17 +118,15 @@ class KasPage extends StatelessWidget {
                   }),
                   const SizedBox(height: 20),
 
-                  // pemasukan & pengeluaran 
+                  // Pemasukan & Pengeluaran
                   Obx(() {
-                    final pemasukan = kasController.totalPemasukan;
-                    final pengeluaran = kasController.totalPengeluaran;
                     return Row(
                       children: [
                         Expanded(
                           child: _amountCard(
                             context,
                             'Pemasukan',
-                            pemasukan,
+                            kasController.totalPemasukan,
                             AppColors.accentGreen,
                             Icons.arrow_downward_rounded,
                           ),
@@ -139,7 +136,7 @@ class KasPage extends StatelessWidget {
                           child: _amountCard(
                             context,
                             'Pengeluaran',
-                            pengeluaran,
+                            kasController.totalPengeluaran,
                             AppColors.accentRed,
                             Icons.arrow_upward_rounded,
                           ),
@@ -149,6 +146,7 @@ class KasPage extends StatelessWidget {
                   }),
                   const SizedBox(height: 32),
 
+                  // Analisis Arus Kas
                   Obx(() {
                     final pemasukan = kasController.totalPemasukan;
                     final pengeluaran = kasController.totalPengeluaran;
@@ -157,68 +155,12 @@ class KasPage extends StatelessWidget {
                     }
                     return Column(
                       children: [
-                        _buildSectionHeader(context, title: 'Analisis Arus Kas'),
+                        _buildSectionHeader(context,
+                            title: 'Analisis Arus Kas'),
                         const SizedBox(height: 24),
-                        Container(
-                          height: 240,
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(28),
-                            border: Border.all(
-                                color: theme.dividerColor.withOpacity(0.5)),
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              PieChart(
-                                PieChartData(
-                                  sections: [
-                                    PieChartSectionData(
-                                      value: pemasukan,
-                                      color: AppColors.accentGreen,
-                                      title: '',
-                                      radius: 25,
-                                      showTitle: false,
-                                    ),
-                                    PieChartSectionData(
-                                      value: pengeluaran > 0 ? pengeluaran : 0.001,
-                                      color: AppColors.accentRed,
-                                      title: '',
-                                      radius: 25,
-                                      showTitle: false,
-                                    ),
-                                  ],
-                                  sectionsSpace: 4,
-                                  centerSpaceRadius: 60,
-                                ),
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${(pemasukan + pengeluaran) > 0 ? ((pemasukan / (pemasukan + pengeluaran)) * 100).toStringAsFixed(0) : '0'}%',
-                                    style: theme.textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      color: AppColors.accentGreen,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Rasio Masuk',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     );
                   }),
-                  
                   const SizedBox(height: 120),
                 ],
               ),
@@ -226,7 +168,6 @@ class KasPage extends StatelessWidget {
           ),
         ],
       ),
-      // FAB only for bendahara
       floatingActionButton: Obx(() {
         final user = authController.currentUser.value;
         if (user == null || !user.canManageKas) return const SizedBox.shrink();
@@ -234,29 +175,20 @@ class KasPage extends StatelessWidget {
           onPressed: () => Get.toNamed(AppRoutes.kasForm),
           backgroundColor: colorScheme.primary,
           elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           icon: const Icon(Icons.add_card_rounded, color: Colors.white),
-          label: const Text(
-            'Transaksi Baru',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          label: const Text('Transaksi Baru',
+              style: TextStyle(color: Colors.white)),
         );
       }),
       bottomNavigationBar: AdminBottomNav(currentIndex: 4),
     );
   }
 
-  Widget _amountCard(
-    BuildContext context,
-    String label,
-    double amount,
-    Color color,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
+  Widget _amountCard(BuildContext context, String label, double amount,
+      Color color, IconData icon) {
+    final kasController = Get.find<KasController>();
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -267,58 +199,20 @@ class KasPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
+          Icon(icon, color: color, size: 18),
           const SizedBox(height: 16),
           Text(
-            'Rp ${_formatAmount(amount)}',
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
+            kasController.formatCurrency(amount), // Menggunakan helper baru
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Text(label, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );
   }
 
   Widget _buildSectionHeader(BuildContext context, {required String title}) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Text(
-          title,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatAmount(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}jt';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(0)}rb';
-    }
-    return amount.toStringAsFixed(0);
+    return Text(title,
+        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18));
   }
 }

@@ -16,21 +16,23 @@ class AppConfigController extends GetxController {
   Future<void> fetchConfig() async {
     isLoading.value = true;
     try {
-      // Kita query berdasarkan 'key', lalu ambil kolom 'value'-nya
+      // Menggunakan maybeSingle agar tidak error jika data tidak ditemukan
       final response = await supabase
           .from('app_settings')
           .select('value')
-          .eq('key',
-              'admin_whatsapp') // Filter baris yang kuncinya adalah admin_whatsapp
-          .single();
+          .eq('key', 'admin_whatsapp')
+          .maybeSingle();
 
-      // Karena hanya mengambil satu kolom 'value', langsung akses datanya
-      whatsappNumber.value = response['value']?.toString() ?? '';
-
-      print("Sukses: Data berhasil diambil -> ${whatsappNumber.value}");
+      if (response != null && response['value'] != null) {
+        whatsappNumber.value = response['value'].toString();
+        print("Sukses: Data berhasil diambil -> ${whatsappNumber.value}");
+      } else {
+        print("Warning: Key 'admin_whatsapp' tidak ditemukan di database.");
+        whatsappNumber.value = '';
+      }
     } catch (e) {
-      print("Error fetching config: $e");
-      whatsappNumber.value = ''; // Reset jika gagal
+      print("Error fatal fetching config: $e");
+      whatsappNumber.value = '';
     } finally {
       isLoading.value = false;
     }

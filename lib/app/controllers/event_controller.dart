@@ -11,7 +11,6 @@ class EventController extends GetxController {
   final events = <EventModel>[].obs;
   final filteredEvents = <EventModel>[].obs;
 
-  // --- BARU: Variabel untuk menyimpan list divisi dari DB ---
   var divisions = <String>['Semua'].obs;
 
   final searchQuery = ''.obs;
@@ -26,7 +25,7 @@ class EventController extends GetxController {
     selectedDay.value = DateTime.now();
 
     fetchEvents();
-    fetchDivisions(); // Panggil fungsi untuk mengambil list divisi
+    fetchDivisions();
     _setupRealtimeListener();
 
     ever(searchQuery, (_) => _applyFilter());
@@ -34,25 +33,45 @@ class EventController extends GetxController {
     ever(selectedDay, (_) => _applyFilter());
   }
 
-  // --- BARU: Fungsi Fetch Divisi dari Supabase ---
+  // --- VALIDASI INPUT ---
+  String? _validateInput({
+    required String title,
+    required String description,
+    required String location,
+    required DateTime startTime,
+    required DateTime endTime,
+  }) {
+    if (title.trim().isEmpty ||
+        description.trim().isEmpty ||
+        location.trim().isEmpty) {
+      return 'Mohon lengkapi semua data kegiatan.';
+    }
+    if (title.trim().length < 3) return 'Judul kegiatan terlalu pendek.';
+    if (description.trim().length < 5)
+      return 'Deskripsi kegiatan terlalu pendek.';
+    if (description.length > 1000) return 'Deskripsi terlalu panjang.';
+
+    // Validasi Waktu
+    if (startTime.isAfter(endTime)) {
+      return 'Waktu mulai tidak boleh setelah waktu selesai.';
+    }
+
+    return null;
+  }
+
+  // --- FUNGSI ASLI ---
   Future<void> fetchDivisions() async {
     try {
-      // Mengambil data dari tabel 'divisions'
       final response =
           await _supabase.from('divisions').select('name').order('name');
-
-      // Mengubah response menjadi List<String>
       final List<String> names =
           (response as List).map((e) => e['name'] as String).toList();
-
-      // Update data divisi, tambahkan 'Semua' di awal
       divisions.value = ['Semua', ...names];
     } catch (e) {
       debugPrint("Gagal memuat list divisi: $e");
     }
   }
 
-  // --- FUNGSI RESET ---
   void resetFilters() {
     selectedDay.value = null;
     selectedDivision.value = 'Semua';
@@ -60,7 +79,6 @@ class EventController extends GetxController {
     _applyFilter();
   }
 
-  // --- REALTIME LISTENER ---
   void _setupRealtimeListener() {
     _supabase.from('events').stream(primaryKey: ['id']).listen((data) {
       events.value = data.map<EventModel>((json) {
@@ -73,12 +91,10 @@ class EventController extends GetxController {
         eventData['divisions'] = divisions;
         return EventModel.fromJson(eventData);
       }).toList();
-
       _applyFilter();
     });
   }
 
-  // --- FETCH DATA EVENT ---
   Future<void> fetchEvents() async {
     isLoading.value = true;
     try {
@@ -86,10 +102,7 @@ class EventController extends GetxController {
       var query = _supabase
           .from('events')
           .select('*, event_divisions(divisions(name))');
-
-      if (session == null) {
-        query = query.eq('is_public', true);
-      }
+      if (session == null) query = query.eq('is_public', true);
 
       final response = await query.order('start_time');
 
@@ -102,7 +115,6 @@ class EventController extends GetxController {
         data['divisions'] = divisions;
         return EventModel.fromJson(data);
       }).toList();
-
       _applyFilter();
     } catch (e) {
       errorMessage.value = 'Gagal memuat data kegiatan';
@@ -111,10 +123,8 @@ class EventController extends GetxController {
     }
   }
 
-  // --- LOGIKA FILTER UTAMA ---
   void _applyFilter() {
     var result = events.toList();
-
     if (selectedDay.value != null) {
       final day = selectedDay.value!;
       result = result
@@ -124,26 +134,21 @@ class EventController extends GetxController {
               e.startTime.day == day.day)
           .toList();
     }
-
     if (selectedDivision.value != 'Semua') {
       result = result
           .where((e) => e.divisions.contains(selectedDivision.value))
           .toList();
     }
-
     if (searchQuery.value.isNotEmpty) {
       final query = searchQuery.value.toLowerCase();
       result =
           result.where((e) => e.title.toLowerCase().contains(query)).toList();
     }
-
     filteredEvents.value = result;
   }
 
-  // --- FUNGSI AKSI ---
   void filterByDivision(String division) {
-    selectedDay.value =
-        null; // Reset tanggal agar user melihat semua event di divisi tsb
+    selectedDay.value = null;
     selectedDivision.value = division;
   }
 
@@ -166,6 +171,18 @@ class EventController extends GetxController {
     required bool isPublic,
     required List<String> divisions,
   }) async {
+    // 1. Validasi
+    final error = _validateInput(
+        title: title,
+        description: description,
+        location: location,
+        startTime: startTime,
+        endTime: endTime);
+    if (error != null) {
+      Get.snackbar('Data Tidak Valid', error, backgroundColor: Colors.red[100]);
+      return;
+    }
+
     isLoading.value = true;
     try {
       final userId = _supabase.auth.currentUser?.id;
@@ -208,8 +225,39 @@ class EventController extends GetxController {
     required bool isPublic,
     required List<String> divisions,
   }) async {
+    // 1. Validasi
+    final error = _validateInput(
+        title: title,
+        description: description,
+        location: location,
+        startTime: startTime,
+        endTime: endTime);
+    if (error != null) {
+      Get.snackbar('Data Tidak Valid', error, backgroundColor: Colors.red[100]);
+      return;
+    }
+
+    // Backup untuk Optimistic Update (Rollback)
+    final index = events.indexWhere((e) => e.id == id);
+    if (index == -1) return;
+    final oldItem = events[index];
+
+    // 2. Optimistic Update (Update UI instan)
+    events[index] = oldItem.copyWith(
+      title: title,
+      description: description,
+      location: location,
+      startTime: startTime,
+      endTime: endTime,
+      isPublic: isPublic,
+      divisions: divisions,
+    );
+    events.refresh();
+    _applyFilter();
+
     isLoading.value = true;
     try {
+      // 3. Update Supabase
       await _supabase.from('events').update({
         'title': title,
         'location': location,
@@ -222,11 +270,15 @@ class EventController extends GetxController {
       await _supabase.from('event_divisions').delete().eq('event_id', id);
       await _insertEventDivisions(id, divisions);
 
-      await fetchEvents();
+      await fetchEvents(); // Sinkronisasi data final
       Get.back();
       Get.snackbar('Berhasil', 'Kegiatan berhasil diperbarui');
     } catch (e) {
-      errorMessage.value = 'Gagal memperbarui kegiatan';
+      // 4. Rollback jika gagal
+      events[index] = oldItem;
+      events.refresh();
+      _applyFilter();
+      Get.snackbar('Gagal', 'Gagal update, data dikembalikan');
     } finally {
       isLoading.value = false;
     }

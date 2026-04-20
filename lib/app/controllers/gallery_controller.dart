@@ -114,13 +114,17 @@ class GalleryController extends GetxController {
     }
   }
 
-  // BUG FIX #6: Method updateGallery — sebelumnya tidak ada sama sekali,
-  // sehingga tombol edit di GalleryCard tidak melakukan apa-apa.
+  // REVISI: Menggunakan Optimistic Update agar UI instan merespon
   Future<void> updateGallery({
     required String id,
     required String caption,
     required String divisionName,
   }) async {
+    // 1. Simpan data lama untuk backup (roll-back)
+    final index = gallery.indexWhere((element) => element.id == id);
+    if (index == -1) return;
+    final oldItem = gallery[index];
+
     isLoading.value = true;
     try {
       // Ambil division id
@@ -153,14 +157,27 @@ class GalleryController extends GetxController {
             .getPublicUrl(path);
 
         updateData['image_url'] = imageUrl;
-        pickedGalleryFile.value = null;
       }
 
+      gallery[index] = gallery[index].copyWith(
+        caption: caption,
+        divisionName: divisionName,
+        imageUrl: updateData['image_url'] ?? oldItem.imageUrl,
+      );
+      gallery.refresh();
+      _applyFilter();
+
+      // 3. Update ke database
       await _supabase.from('gallery').update(updateData).eq('id', id);
 
-      await fetchGallery();
+      pickedGalleryFile.value = null;
       Get.snackbar('Berhasil', 'Karya berhasil diperbarui');
     } catch (e) {
+      // 4. Rollback jika gagal
+      gallery[index] = oldItem;
+      gallery.refresh();
+      _applyFilter();
+
       Get.snackbar('Gagal', 'Gagal memperbarui karya');
     } finally {
       isLoading.value = false;

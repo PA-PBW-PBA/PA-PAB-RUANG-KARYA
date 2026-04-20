@@ -23,6 +23,33 @@ class EventModel {
     required this.createdAt,
   });
 
+  // --- KUNCI: Method untuk mendukung Optimistic Update ---
+  EventModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? location,
+    DateTime? startTime,
+    DateTime? endTime,
+    bool? isPublic,
+    String? createdBy,
+    List<String>? divisions,
+    DateTime? createdAt,
+  }) {
+    return EventModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      location: location ?? this.location,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      isPublic: isPublic ?? this.isPublic,
+      createdBy: createdBy ?? this.createdBy,
+      divisions: divisions ?? this.divisions,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
       id: json['id'] ?? '',

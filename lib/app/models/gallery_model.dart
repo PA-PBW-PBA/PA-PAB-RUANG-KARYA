@@ -41,4 +41,25 @@ class GalleryModel {
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  // METHOD COPYWITH (Tambahan untuk mendukung update UI instan)
+  GalleryModel copyWith({
+    String? id,
+    String? divisionId,
+    String? divisionName,
+    String? imageUrl,
+    String? caption,
+    String? uploadedBy,
+    DateTime? createdAt,
+  }) {
+    return GalleryModel(
+      id: id ?? this.id,
+      divisionId: divisionId ?? this.divisionId,
+      divisionName: divisionName ?? this.divisionName,
+      imageUrl: imageUrl ?? this.imageUrl,
+      caption: caption ?? this.caption,
+      uploadedBy: uploadedBy ?? this.uploadedBy,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

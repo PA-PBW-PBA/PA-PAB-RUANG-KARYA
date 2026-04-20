@@ -328,14 +328,21 @@ profiles                profiles
 | **Tampilan** | `GetMaterialApp`, `Icon`, `Text`, `TextStyle`, `CircleAvatar`, `Image`, `CachedNetworkImage` |
 | **Layout** | `Scaffold`, `SafeArea`, `CustomScrollView`, `SliverAppBar`, `FlexibleSpaceBar`, `SliverToBoxAdapter`, `Padding`, `Column`, `Container`, `Wrap`, `Row`, `Expanded`, `Flexible`, `AspectRatio`, `DraggableScrollableSheet`, `SliverFillRemaining`, `SliverPadding`, `SliverList`, `SliverGrid`, `SizedBox`, `Center`, `Stack`, `Positioned`, `GridView`, `ListView`, `ListView.separated`, `ClipRRect`, `IntrinsicHeight`, `SingleChildScrollView`, `Divider`, `Card`, `ListTile` |
 | **Interaksi** | `TextButton`, `TextField`, `ElevatedButton`, `OutlinedButton.icon`, `ElevatedButton.icon`, `GestureDetector`, `InkWell`, `IconButton`, `FloatingActionButton.extended`, `FilterChip`, `PopupMenuButton`, `PopupMenuItem`, `RefreshIndicator` |
-| **State Management** | `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt`, `onInit`, `refresh()`, `ever() (Worker)` |
+| **Animasi** | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `NeverScrollableScrollPhysics`, `ScrollController`, `ScrollDirection`, `Shimmer.fromColors` |
+| **State Management** | `StatefulWidget`, `State`, `StatelessWidget`, `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt`, `onInit`, `refresh()`, `ever() (Worker)` |
+| **Navigasi** | `GetPage`, `Get.back`, `Get.toNamed`, `Get.offAllNamed`, `Get.snackbar`, `Get.changeThemeMode`, `RouteSettings`, `GetMiddleware`, `showDialog`, `showModalBottomSheet`, `BottomNavigationBar`, `IndexedStack` |
 | **Backend (Supabase)** | `SupabaseClient`, `auth.signInWithPassword`, `auth.signOut`, `auth.updateUser`, `from().select()`, `insert()`, `update()`, `delete()`, `stream() (Realtime)`, `eq()`, `order()`, `maybeSingle()`, `inFilter()` |
-| **Navigasi** | `GetPage`, `Get.back`, `Get.toNamed`, `Get.offAllNamed`, `Get.snackbar`, `GetMiddleware`, `BottomNavigationBar`, `IndexedStack` |
+| **Dependency** | `BindingsBuilder`, `Get.lazyPut`, `Get.find`, `Get.put` |
 | **Form & Input** | `Form`, `TextFormField`, `DropdownButtonFormField`, `InputDecoration`, `OutlineInputBorder`, `TextEditingController`, `FocusNode` |
-| **Animasi** | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `ScrollController`, `Shimmer.fromColors` |
-| **Logic & UX** | `Optimistic Update`, `Manual Validation`, `AuthException`, `UserAttributes`, `copyWith`, `whereType<String>()`, `try-catch-finally` |
-| **Fitur Khusus** | `TableCalendar` (Kalender), `PieChart` (Visualisasi), `InteractiveViewer` (Media), `PopScope` (Kontrol Back) |
-| **Styling & UI** | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient`, `CircularProgressIndicator`, `WidgetsFlutterBinding` |
+| **Dialog** | `AlertDialog`, `Dialog`, `showDatePicker`, `showTimePicker` |
+| **Logic & UX** | `try-catch-finally`, `Optimistic Update`, `Manual Validation`, `AuthException`, `UserAttributes`, `copyWith`, `whereType<String>()` |
+| **Media** | `InteractiveViewer` |
+| **Kalender** | `TableCalendar` |
+| **Visualisasi** | `PieChart`, `PieChartData`, `PieChartSectionData` |
+| **Kontrol** | `Visibility`, `PopScope` |
+| **Styling** | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
+| **Loading** | `CircularProgressIndicator`, `Shimmer.fromColors` |
+| **Inisialisasi** | `WidgetsFlutterBinding` |
 
 ---
 

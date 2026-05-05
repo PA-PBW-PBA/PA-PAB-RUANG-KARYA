@@ -60,7 +60,7 @@ class AttendanceController extends GetxController {
           .map<AttendanceModel>((json) => AttendanceModel.fromJson(json))
           .toList();
     } catch (e) {
-      // handle error
+      Get.snackbar('Gagal', 'Gagal memuat riwayat absensi anggota.');
     } finally {
       isLoading.value = false;
     }

@@ -5,6 +5,7 @@ import '../../controllers/gallery_controller.dart';
 import '../../models/gallery_model.dart';
 import '../widgets/gallery_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/division_filter_bar.dart';
 import '../widgets/loading_skeleton.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
@@ -57,9 +58,11 @@ class GalleryVisitorPage extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
-                    _buildFilterChip(context, 'Semua', controller),
-                    ...AppConstants.divisions
-                        .map((d) => _buildFilterChip(context, d, controller)),
+                    DivisionFilterBar(
+                      divisions: ['Semua', ...AppConstants.divisions],
+                      selected: controller.selectedDivision,
+                      onSelected: controller.filterByDivision,
+                    ),
                   ],
                 ),
               ),

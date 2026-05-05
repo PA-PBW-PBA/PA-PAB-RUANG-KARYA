@@ -35,7 +35,7 @@ class GalleryController extends GetxController {
 
       _applyFilter();
     } catch (e) {
-      // Handle error
+      Get.snackbar('Gagal', 'Gagal memuat galeri. Periksa koneksi internet.');
     } finally {
       isLoading.value = false;
     }

@@ -9,6 +9,7 @@ import '../widgets/gallery_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/loading_skeleton.dart';
 import '../../../core/constants/app_constants.dart';
+import '../widgets/division_filter_bar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/admin_bottom_nav.dart';
 
@@ -84,54 +85,10 @@ class _GalleryAdminPageState extends State<GalleryAdminPage> {
               child: Column(
                 children: [
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        'Semua',
-                        ...AppConstants.divisions,
-                      ].map((division) {
-                        return Obx(() {
-                          final isSelected =
-                              controller.selectedDivision.value == division;
-                          final color = division == 'Semua'
-                              ? colorScheme.primary
-                              : AppColors.getDivisionColor(division);
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: FilterChip(
-                              label: Text(division),
-                              selected: isSelected,
-                              onSelected: (_) =>
-                                  controller.filterByDivision(division),
-                              backgroundColor: color.withOpacity(0.05),
-                              selectedColor: color.withOpacity(0.15),
-                              checkmarkColor: color,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              side: BorderSide(
-                                color: isSelected
-                                    ? color.withOpacity(0.3)
-                                    : Colors.transparent,
-                              ),
-                              labelStyle: TextStyle(
-                                color: isSelected
-                                    ? color
-                                    : AppColors.textSecondary,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                fontSize: 13,
-                              ),
-                            ),
-                          );
-                        });
-                      }).toList(),
-                    ),
+                  DivisionFilterBar(
+                    divisions: ['Semua', ...AppConstants.divisions],
+                    selected: controller.selectedDivision,
+                    onSelected: controller.filterByDivision,
                   ),
                   const SizedBox(height: 20),
                 ],

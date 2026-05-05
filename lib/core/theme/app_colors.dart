@@ -1,49 +1,59 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // warna primer dan skunder
-  static const Color primary = Color(0xFF6366F1); // Indigo
-  static const Color primaryLight = Color(0xFF818CF8);
-  static const Color primaryDark = Color(0xFF4F46E5);
-  
-  static const Color secondary = Color(0xFFF59E0B); // Amber
-  static const Color secondaryLight = Color(0xFFFBBF24);
-  static const Color secondaryDark = Color(0xFFD97706);
+  // === WARNA PRIMER — dari logo, versi pastel soft ===
+  static const Color primary = Color(0xFFE8C840); // Butter Yellow (logo kuning)
+  static const Color primaryLight = Color(0xFFF2D96A);
+  static const Color primaryDark = Color(0xFFC8A820);
 
-  // warna aksen
-  static const Color accentRed = Color(0xFFEF4444);
-  static const Color accentGreen = Color(0xFF10B981);
-  static const Color accentBlue = Color(0xFF3B82F6);
-  static const Color accentPurple = Color(0xFF8B5CF6);
+  // === WARNA SEKUNDER — Teal/Cyan dari logo ===
+  static const Color secondary = Color(0xFF72C8C8); // Soft Teal (logo cyan)
+  static const Color secondaryLight = Color(0xFF96D8D8);
+  static const Color secondaryDark = Color(0xFF4AABAB);
 
-  // warna background
-  static const Color background = Color(0xFFF8FAFC);
-  static const Color backgroundDark = Color(0xFF0F172A);
+  // === AKSEN — dari logo lainnya ===
+  static const Color accentMagenta =
+      Color(0xFFE87090); // Soft Magenta-Pink (logo merah)
+  static const Color accentLime =
+      Color(0xFFB0CC50); // Soft Lime Green (logo hijau)
+  static const Color accentYellow = Color(0xFFEDD870); // Light Butter
+  static const Color accentTeal = Color(0xFF80D0D0); // Light Teal
 
+  // === ALIAS KOMPATIBILITAS — nama lama tetap bisa dipakai ===
+  static const Color accentGreen = Color(0xFF80CC80); // alias → success
+  static const Color accentRed = Color(0xFFE87090); // alias → danger
+  static const Color accentBlue = Color(0xFF72C8C8); // alias → secondary
+  static const Color accentPurple = Color(0xFFE87090); // alias → accentMagenta
+  static const Color accentOrange = Color(0xFFEDD870); // alias → accentYellow
+
+  // === BACKGROUND ===
+  static const Color background = Color(0xFFF8F7F2); // Warm Cream White
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF1E293B);
 
-  // warna teks
-  static const Color textPrimary = Color(0xFF1E293B);
-  static const Color textPrimaryDark = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textSecondaryDark = Color(0xFF94A3B8);
+  // === SURFACE TINT ===
+  static const Color surfaceYellow = Color(0xFFFFFAE0);
+  static const Color surfaceTeal = Color(0xFFE8F8F8);
+  static const Color surfaceMagenta = Color(0xFFFFEEF2);
+  static const Color surfaceLime = Color(0xFFF4FADC);
 
-  // warna status
-  static const Color success = Color(0xFF22C55E);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color danger = Color(0xFFEF4444);
-  static const Color info = Color(0xFF3B82F6);
+  // === TEKS ===
+  static const Color textPrimary = Color(0xFF222218);
+  static const Color textSecondary = Color(0xFF8A8870);
 
-  // Divider
-  static const Color divider = Color(0xFFE2E8F0);
-  static const Color dividerDark = Color(0xFF334155);
+  // === STATUS ===
+  static const Color success = Color(0xFF80CC80);
+  static const Color warning = Color(0xFFE8C840);
+  static const Color danger = Color(0xFFE87090);
+  static const Color info = Color(0xFF72C8C8);
 
-  // warna divisi
-  static const Color divisionMusik = Color(0xFF6366F1);
-  static const Color divisionTari = Color(0xFFEC4899);
-  static const Color divisionDKV = Color(0xFF14B8A6);
-  static const Color divisionKreatifEvent = Color(0xFFF97316);
+  // === DIVIDER ===
+  static const Color divider = Color(0xFFEAE8DC);
+
+  // === WARNA DIVISI ===
+  static const Color divisionMusik = Color(0xFF72C8C8);
+  static const Color divisionTari = Color(0xFFE87090);
+  static const Color divisionDKV = Color(0xFFB0CC50);
+  static const Color divisionKreatifEvent = Color(0xFFE8C840);
 
   static Color getDivisionColor(String division) {
     switch (division) {
@@ -56,7 +66,22 @@ class AppColors {
       case 'Kreatif Event':
         return divisionKreatifEvent;
       default:
-        return primary;
+        return secondary;
+    }
+  }
+
+  static Color getDivisionSurface(String division) {
+    switch (division) {
+      case 'Musik':
+        return surfaceTeal;
+      case 'Tari':
+        return surfaceMagenta;
+      case 'DKV':
+        return surfaceLime;
+      case 'Kreatif Event':
+        return surfaceYellow;
+      default:
+        return surfaceTeal;
     }
   }
 }

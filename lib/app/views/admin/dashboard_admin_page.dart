@@ -197,11 +197,11 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                       )),
                   const SizedBox(height: 24),
                   _buildPremiumAdminCard(
-                      context, memberController, kasController),
+                      context, memberController, kasController, authController),
                   const SizedBox(height: 32),
                   _buildSectionHeader(context, title: 'Manajemen Inti'),
                   const SizedBox(height: 12),
-                  _buildModernManagementGrid(context),
+                  _buildModernManagementGrid(context, authController),
                   const SizedBox(height: 32),
                   _buildSectionHeader(
                     context,
@@ -446,8 +446,12 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
 
   // ── Existing widgets (unchanged) ──────────────────────────────────────────
 
-  Widget _buildPremiumAdminCard(BuildContext context,
-      MemberController memberController, KasController kasController) {
+  Widget _buildPremiumAdminCard(
+      BuildContext context,
+      MemberController memberController,
+      KasController kasController,
+      AuthController authController) {
+    final canManageKas = authController.currentUser.value?.canManageKas ?? false;
     return Obx(() => Container(
           width: double.infinity,
           height: 180,
@@ -501,19 +505,21 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                           Icons.people_alt_rounded,
                           AppColors.primaryLight,
                         ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          color: Colors.white12,
-                        ),
-                        _buildStatItem(
-                          context,
-                          'Saldo Kas Aktif',
-                          'Rp ${_formatAmount(kasController.totalSaldo)}',
-                          Icons.account_balance_wallet_rounded,
-                          AppColors.secondaryLight,
-                        ),
+                        if (canManageKas) ...[
+                          Container(
+                            height: 40,
+                            width: 1,
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            color: Colors.white12,
+                          ),
+                          _buildStatItem(
+                            context,
+                            'Saldo Kas Aktif',
+                            'Rp ${_formatAmount(kasController.totalSaldo)}',
+                            Icons.account_balance_wallet_rounded,
+                            AppColors.secondaryLight,
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -593,33 +599,45 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     );
   }
 
-  Widget _buildModernManagementGrid(BuildContext context) {
-    final items = [
+  Widget _buildModernManagementGrid(
+      BuildContext context, AuthController authController) {
+    final canManageKas =
+        authController.currentUser.value?.canManageKas ?? false;
+
+    final allItems = [
       {
         'icon': Icons.group_add_rounded,
         'label': 'Anggota',
         'route': AppRoutes.memberList,
-        'color': AppColors.primary
+        'color': AppColors.primary,
+        'requiresKas': false,
       },
       {
         'icon': Icons.event_note_rounded,
         'label': 'Kegiatan',
         'route': AppRoutes.eventList,
-        'color': AppColors.secondary
+        'color': AppColors.secondary,
+        'requiresKas': false,
       },
       {
         'icon': Icons.add_photo_alternate_rounded,
         'label': 'Galeri',
         'route': AppRoutes.galleryAdmin,
-        'color': AppColors.accentGreen
+        'color': AppColors.accentGreen,
+        'requiresKas': false,
       },
       {
         'icon': Icons.payments_rounded,
         'label': 'Kas',
         'route': AppRoutes.kasPage,
-        'color': AppColors.accentRed
+        'color': AppColors.accentRed,
+        'requiresKas': true,
       },
     ];
+
+    final items = allItems
+        .where((item) => !(item['requiresKas'] as bool) || canManageKas)
+        .toList();
 
     return GridView.builder(
       shrinkWrap: true,

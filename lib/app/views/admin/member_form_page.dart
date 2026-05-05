@@ -284,8 +284,9 @@ class _MemberFormPageState extends State<MemberFormPage> {
 
                   Builder(builder: (context) {
                     final caller = Get.find<AuthController>().currentUser.value;
-                    if (caller == null || !caller.isAdmin)
+                    if (caller == null || !caller.isAdmin) {
                       return const SizedBox.shrink();
+                    }
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

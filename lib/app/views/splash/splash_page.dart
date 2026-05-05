@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../controllers/auth_controller.dart';
 import '../../routes/app_routes.dart';
 
 class SplashPage extends StatefulWidget {
@@ -114,15 +116,45 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _introController.forward();
     _rotateController.forward();
 
-    // Navigate setelah animasi selesai — data fetch dilakukan oleh binding
-    // di homeVisitor, bukan di sini, sehingga UI render terlebih dahulu.
+    // Navigate setelah animasi selesai — cek session untuk auto-login
     _timer = Timer(const Duration(milliseconds: 3200), () {
       if (!mounted) return;
-      Get.offAllNamed(
-        AppRoutes.homeVisitor,
-        // transition bawaan GetX (fadeIn)
-      );
+      _navigateBasedOnSession();
     });
+  }
+
+  Future<void> _navigateBasedOnSession() async {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) {
+      Get.offAllNamed(AppRoutes.homeVisitor);
+      return;
+    }
+
+    // Session ada — pastikan data user sudah di-load oleh AuthController
+    final authController = Get.find<AuthController>();
+    // Tunggu sebentar jika user belum ter-load (race condition saat cold start)
+    if (authController.currentUser.value == null) {
+      await authController.reloadCurrentUser();
+    }
+
+    final user = authController.currentUser.value;
+    if (user == null || !user.isActive) {
+      // Session ada tapi profil tidak ditemukan / nonaktif → logout
+      await Supabase.instance.client.auth.signOut();
+      Get.offAllNamed(AppRoutes.homeVisitor);
+      return;
+    }
+
+    if (user.isFirstLogin) {
+      Get.offAllNamed(AppRoutes.changePassword);
+      return;
+    }
+
+    if (user.canAccessAdmin) {
+      Get.offAllNamed(AppRoutes.dashboardAdmin);
+    } else {
+      Get.offAllNamed(AppRoutes.homeMember);
+    }
   }
 
   @override

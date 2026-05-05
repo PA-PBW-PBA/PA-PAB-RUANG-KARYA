@@ -53,7 +53,6 @@ class MyApp extends StatelessWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      themeMode: ThemeMode.light, // Selalu light mode
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
     );

@@ -5,6 +5,7 @@ import '../../controllers/event_controller.dart';
 import '../../models/event_model.dart';
 import '../widgets/event_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/division_filter_bar.dart';
 
 class EventVisitorPage extends StatefulWidget {
   const EventVisitorPage({super.key});
@@ -80,51 +81,12 @@ class _EventVisitorPageState extends State<EventVisitorPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Chip Filter Divisi - Dinamis dari Controller
-                  SizedBox(
-                    height: 40,
-                    child: Obx(() => ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: controller.divisions.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 8),
-                          itemBuilder: (context, index) {
-                            final division = controller.divisions[index];
-                            return Obx(() {
-                              final isSelected =
-                                  controller.selectedDivision.value == division;
-                              return ChoiceChip(
-                                label: Text(division),
-                                selected: isSelected,
-                                onSelected: (val) {
-                                  if (val) {
-                                    controller.filterByDivision(division);
-                                  }
-                                },
-                                selectedColor:
-                                    colorScheme.primary.withOpacity(0.2),
-                                backgroundColor: theme.cardColor,
-                                labelStyle: TextStyle(
-                                  color: isSelected
-                                      ? colorScheme.primary
-                                      : Colors.grey.shade600,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? colorScheme.primary
-                                        : Colors.grey.shade300,
-                                  ),
-                                ),
-                              );
-                            });
-                          },
-                        )),
-                  ),
+                  // Chip Filter Divisi — pakai widget reusable DivisionFilterBar
+                  Obx(() => DivisionFilterBar(
+                    divisions: controller.divisions.toList(),
+                    selected: controller.selectedDivision,
+                    onSelected: controller.filterByDivision,
+                  )),
                   const SizedBox(height: 16),
 
                   // Kalender / List Header

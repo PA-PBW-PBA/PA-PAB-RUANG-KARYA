@@ -9,6 +9,7 @@ class EventModel {
   final String createdBy;
   final List<String> divisions;
   final DateTime createdAt;
+  final List<String> imageUrls; // <-- Foto kegiatan
 
   EventModel({
     required this.id,
@@ -21,9 +22,9 @@ class EventModel {
     required this.createdBy,
     this.divisions = const [],
     required this.createdAt,
+    this.imageUrls = const [],
   });
 
-  // --- KUNCI: Method untuk mendukung Optimistic Update ---
   EventModel copyWith({
     String? id,
     String? title,
@@ -35,6 +36,7 @@ class EventModel {
     String? createdBy,
     List<String>? divisions,
     DateTime? createdAt,
+    List<String>? imageUrls,
   }) {
     return EventModel(
       id: id ?? this.id,
@@ -47,6 +49,7 @@ class EventModel {
       createdBy: createdBy ?? this.createdBy,
       divisions: divisions ?? this.divisions,
       createdAt: createdAt ?? this.createdAt,
+      imageUrls: imageUrls ?? this.imageUrls,
     );
   }
 
@@ -65,6 +68,9 @@ class EventModel {
       createdAt: DateTime.parse(
         json['created_at'] ?? DateTime.now().toIso8601String(),
       ),
+      imageUrls: json['image_urls'] != null
+          ? List<String>.from(json['image_urls'])
+          : [],
     );
   }
 
@@ -79,6 +85,7 @@ class EventModel {
       'is_public': isPublic,
       'created_by': createdBy,
       'created_at': createdAt.toIso8601String(),
+      'image_urls': imageUrls,
     };
   }
 }

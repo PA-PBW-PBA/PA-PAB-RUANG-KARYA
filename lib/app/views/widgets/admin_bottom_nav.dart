@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -10,38 +11,60 @@ class AdminBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = [
+    final authController = Get.find<AuthController>();
+    final user = authController.currentUser.value;
+    final canManageKas = user?.canManageKas ?? false;
+
+    final allItems = [
       {
         'icon': Icons.home_outlined,
         'label': 'Beranda',
         'route': AppRoutes.dashboardAdmin,
+        'requiresKas': false,
       },
       {
         'icon': Icons.people_outline,
         'label': 'Anggota',
         'route': AppRoutes.memberList,
+        'requiresKas': false,
       },
       {
         'icon': Icons.event_outlined,
         'label': 'Kegiatan',
         'route': AppRoutes.eventList,
+        'requiresKas': false,
       },
       {
         'icon': Icons.photo_library_outlined,
         'label': 'Galeri',
         'route': AppRoutes.galleryAdmin,
+        'requiresKas': false,
       },
       {
         'icon': Icons.account_balance_wallet_outlined,
         'label': 'Kas',
         'route': AppRoutes.kasPage,
+        'requiresKas': true,
       },
       {
         'icon': Icons.person_outline,
         'label': 'Profil',
         'route': AppRoutes.profileAdmin,
+        'requiresKas': false,
       },
     ];
+
+    // Filter: BPH tidak melihat item Kas
+    final items = allItems
+        .where((item) => !(item['requiresKas'] as bool) || canManageKas)
+        .toList();
+
+    // Hitung ulang index aktif berdasarkan route saat ini
+    final currentRoute = Get.currentRoute;
+    int activeIndex = items.indexWhere(
+      (item) => item['route'] == currentRoute,
+    );
+    if (activeIndex < 0) activeIndex = currentIndex;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -59,7 +82,7 @@ class AdminBottomNav extends StatelessWidget {
         children: items.asMap().entries.map((entry) {
           final i = entry.key;
           final item = entry.value;
-          final isActive = i == currentIndex;
+          final isActive = i == activeIndex;
 
           return GestureDetector(
             onTap: () {

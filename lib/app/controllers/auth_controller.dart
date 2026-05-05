@@ -17,6 +17,11 @@ class AuthController extends GetxController {
     _initializeUser();
   }
 
+  Future<void> reloadCurrentUser() async {
+    final session = _supabase.auth.currentSession;
+    if (session != null) await _loadCurrentUser(session.user.id);
+  }
+
   Future<void> _initializeUser() async {
     final session = _supabase.auth.currentSession;
     if (session != null) await _loadCurrentUser(session.user.id);

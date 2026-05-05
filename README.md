@@ -97,21 +97,18 @@ Melalui Ruang Karya, pengurus dapat mengelola data anggota, kegiatan, serta keua
 
 ```
 lib/
-│   main.dart
-│
+├── main.dart
 ├── app/
 │   ├── controllers/
+│   │   ├── app_config_controller.dart
 │   │   ├── attendance_controller.dart
 │   │   ├── auth_controller.dart
 │   │   ├── event_controller.dart
 │   │   ├── gallery_controller.dart
 │   │   ├── kas_controller.dart
-│   │   ├── member_controller.dart
-│   │   └── theme_controller.dart
-│   │
+│   │   └── member_controller.dart
 │   ├── middlewares/
 │   │   └── auth_middleware.dart
-│   │
 │   ├── models/
 │   │   ├── attendance_model.dart
 │   │   ├── division_model.dart
@@ -119,11 +116,9 @@ lib/
 │   │   ├── gallery_model.dart
 │   │   ├── kas_model.dart
 │   │   └── user_model.dart
-│   │
 │   ├── routes/
 │   │   ├── app_pages.dart
 │   │   └── app_routes.dart
-│   │
 │   └── views/
 │       ├── admin/
 │       │   ├── attendance_input_page.dart
@@ -137,11 +132,9 @@ lib/
 │       │   ├── member_form_page.dart
 │       │   ├── member_list_page.dart
 │       │   └── profile_admin_page.dart
-│       │
 │       ├── auth/
 │       │   ├── change_password_page.dart
 │       │   └── login_page.dart
-│       │
 │       ├── member/
 │       │   ├── attendance_history_page.dart
 │       │   ├── event_member_page.dart
@@ -149,14 +142,14 @@ lib/
 │       │   ├── home_member_page.dart
 │       │   ├── member_list_readonly_page.dart
 │       │   └── profile_member_page.dart
-│       │
+│       ├── splash/
+│       │   └── splash_page.dart
 │       ├── visitor/
 │       │   ├── division_info_page.dart
 │       │   ├── event_detail_page.dart
 │       │   ├── event_visitor_page.dart
 │       │   ├── gallery_visitor_page.dart
 │       │   └── home_visitor_page.dart
-│       │
 │       └── widgets/
 │           ├── admin_bottom_nav.dart
 │           ├── division_badge.dart
@@ -167,11 +160,9 @@ lib/
 │           ├── loading_skeleton.dart
 │           ├── member_bottom_nav.dart
 │           └── member_card.dart
-│
 └── core/
     ├── constants/
     │   └── app_constants.dart
-    │
     └── theme/
         ├── app_colors.dart
         └── app_theme.dart
@@ -332,24 +323,26 @@ profiles                profiles
 ## Widget yang Digunakan
 
 
-| Kategori | Widget |
-|----------|--------|
-| Tampilan | `GetMaterialApp`, `Icon`, `Text`, `TextStyle`, `CircleAvatar`, `Image`, `CachedNetworkImage` |
-| Layout | `Scaffold`, `SafeArea`, `CustomScrollView`, `SliverAppBar`, `FlexibleSpaceBar`, `SliverToBoxAdapter`, `Padding`, `Column`, `Container`, `Wrap`, `Row`, `Expanded`, `Flexible`, `AspectRatio`, `DraggableScrollableSheet`, `SliverFillRemaining`, `SliverPadding`, `SliverList`, `SliverGrid`, `SizedBox`, `Center`, `Stack`, `Positioned`, `GridView`, `ListView`, `ListView.separated`, `ClipRRect`, `IntrinsicHeight`, `SingleChildScrollView`, `Divider` |
-| Interaksi | `TextButton`, `TextField`, `ElevatedButton`, `OutlinedButton.icon`, `ElevatedButton.icon`, `GestureDetector`, `InkWell`, `IconButton`, `FloatingActionButton.extended`, `FilterChip`, `PopupMenuButton`, `PopupMenuItem` |
-| Animasi | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `NeverScrollableScrollPhysics`, `ScrollController`, `ScrollDirection`, `Shimmer.fromColors` |
-| State | `StatefulWidget`, `State`, `StatelessWidget`, `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt` |
-| Navigasi | `GetMaterialApp`, `GetPage`, `Get.back`, `Get.toNamed`, `Get.offAllNamed`, `Get.snackbar`, `Get.changeThemeMode`, `RouteSettings`, `GetMiddleware`, `showDialog`, `showModalBottomSheet` |
-| Dependency | `BindingsBuilder`, `Get.lazyPut`, `Get.find`, `Get.put` |
-| Form | `InputDecoration`, `OutlineInputBorder`, `TextEditingController` |
-| Dialog | `AlertDialog`, `Dialog`, `showDatePicker`, `showTimePicker` |
-| Media | `InteractiveViewer` |
-| Kalender | `TableCalendar` |
-| Visualisasi | `PieChart`, `PieChartData`, `PieChartSectionData` |
-| Kontrol | `Visibility` |
-| Styling | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
-| Loading | `CircularProgressIndicator`, `Shimmer.fromColors` |
-| Inisialisasi | `WidgetsFlutterBinding` |
+| Kategori | Widget / Component |
+|----------|-------------------|
+| **Tampilan** | `GetMaterialApp`, `Icon`, `Text`, `TextStyle`, `CircleAvatar`, `Image`, `CachedNetworkImage` |
+| **Layout** | `Scaffold`, `SafeArea`, `CustomScrollView`, `SliverAppBar`, `FlexibleSpaceBar`, `SliverToBoxAdapter`, `Padding`, `Column`, `Container`, `Wrap`, `Row`, `Expanded`, `Flexible`, `AspectRatio`, `DraggableScrollableSheet`, `SliverFillRemaining`, `SliverPadding`, `SliverList`, `SliverGrid`, `SizedBox`, `Center`, `Stack`, `Positioned`, `GridView`, `ListView`, `ListView.separated`, `ClipRRect`, `IntrinsicHeight`, `SingleChildScrollView`, `Divider`, `Card`, `ListTile` |
+| **Interaksi** | `TextButton`, `TextField`, `ElevatedButton`, `OutlinedButton.icon`, `ElevatedButton.icon`, `GestureDetector`, `InkWell`, `IconButton`, `FloatingActionButton.extended`, `FilterChip`, `PopupMenuButton`, `PopupMenuItem`, `RefreshIndicator` |
+| **Animasi** | `AnimatedContainer`, `AnimatedOpacity`, `AnimatedCrossFade`, `BouncingScrollPhysics`, `NeverScrollableScrollPhysics`, `ScrollController`, `ScrollDirection`, `Shimmer.fromColors` |
+| **State Management** | `StatefulWidget`, `State`, `StatelessWidget`, `Obx`, `GetxController`, `RxBool`, `RxString`, `RxList`, `RxMap`, `Rxn`, `RxInt`, `onInit`, `refresh()`, `ever() (Worker)` |
+| **Navigasi** | `GetPage`, `Get.back`, `Get.toNamed`, `Get.offAllNamed`, `Get.snackbar`, `Get.changeThemeMode`, `RouteSettings`, `GetMiddleware`, `showDialog`, `showModalBottomSheet`, `BottomNavigationBar`, `IndexedStack` |
+| **Backend (Supabase)** | `SupabaseClient`, `auth.signInWithPassword`, `auth.signOut`, `auth.updateUser`, `from().select()`, `insert()`, `update()`, `delete()`, `stream() (Realtime)`, `eq()`, `order()`, `maybeSingle()`, `inFilter()` |
+| **Dependency** | `BindingsBuilder`, `Get.lazyPut`, `Get.find`, `Get.put` |
+| **Form & Input** | `Form`, `TextFormField`, `DropdownButtonFormField`, `InputDecoration`, `OutlineInputBorder`, `TextEditingController`, `FocusNode` |
+| **Dialog** | `AlertDialog`, `Dialog`, `showDatePicker`, `showTimePicker` |
+| **Logic & UX** | `try-catch-finally`, `Optimistic Update`, `Manual Validation`, `AuthException`, `UserAttributes`, `copyWith`, `whereType<String>()` |
+| **Media** | `InteractiveViewer` |
+| **Kalender** | `TableCalendar` |
+| **Visualisasi** | `PieChart`, `PieChartData`, `PieChartSectionData` |
+| **Kontrol** | `Visibility`, `PopScope` |
+| **Styling** | `BoxDecoration`, `Border`, `BorderRadius`, `BoxShadow`, `LinearGradient` |
+| **Loading** | `CircularProgressIndicator`, `Shimmer.fromColors` |
+| **Inisialisasi** | `WidgetsFlutterBinding` |
 
 ---
 

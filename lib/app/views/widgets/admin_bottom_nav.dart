@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
@@ -16,42 +17,12 @@ class AdminBottomNav extends StatelessWidget {
     final canManageKas = user?.canManageKas ?? false;
 
     final allItems = [
-      {
-        'icon': Icons.dashboard_rounded,
-        'label': 'Beranda',
-        'route': AppRoutes.dashboardAdmin,
-        'requiresKas': false,
-      },
-      {
-        'icon': Icons.groups_rounded,
-        'label': 'Anggota',
-        'route': AppRoutes.memberList,
-        'requiresKas': false,
-      },
-      {
-        'icon': Icons.event_note_rounded,
-        'label': 'Kegiatan',
-        'route': AppRoutes.eventList,
-        'requiresKas': false,
-      },
-      {
-        'icon': Icons.auto_awesome_motion_rounded,
-        'label': 'Galeri',
-        'route': AppRoutes.galleryAdmin,
-        'requiresKas': false,
-      },
-      {
-        'icon': Icons.account_balance_wallet_rounded,
-        'label': 'Kas',
-        'route': AppRoutes.kasPage,
-        'requiresKas': true,
-      },
-      {
-        'icon': Icons.person_rounded,
-        'label': 'Profil',
-        'route': AppRoutes.profileAdmin,
-        'requiresKas': false,
-      },
+      {'icon': Icons.dashboard_rounded, 'label': 'Beranda', 'route': AppRoutes.dashboardAdmin, 'requiresKas': false, 'color': AppColors.primary},
+      {'icon': Icons.groups_rounded, 'label': 'Anggota', 'route': AppRoutes.memberList, 'requiresKas': false, 'color': AppColors.accentBlue},
+      {'icon': Icons.event_note_rounded, 'label': 'Kegiatan', 'route': AppRoutes.eventList, 'requiresKas': false, 'color': AppColors.accentTeal},
+      {'icon': Icons.auto_awesome_motion_rounded, 'label': 'Galeri', 'route': AppRoutes.galleryAdmin, 'requiresKas': false, 'color': AppColors.secondary},
+      {'icon': Icons.account_balance_wallet_rounded, 'label': 'Kas', 'route': AppRoutes.kasPage, 'requiresKas': true, 'color': AppColors.accentGreen},
+      {'icon': Icons.person_rounded, 'label': 'Profil', 'route': AppRoutes.profileAdmin, 'requiresKas': false, 'color': AppColors.accentOrange},
     ];
 
     final items = allItems
@@ -62,72 +33,87 @@ class AdminBottomNav extends StatelessWidget {
     int activeIndex = items.indexWhere((item) => item['route'] == currentRoute);
     if (activeIndex < 0) activeIndex = currentIndex;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: items.asMap().entries.map((entry) {
-          final i = entry.key;
-          final item = entry.value;
-          final isActive = i == activeIndex;
-
-          return GestureDetector(
-            onTap: () {
-              if (!isActive) {
-                Get.offAllNamed(item['route'] as String);
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutExpo,
-              padding: EdgeInsets.symmetric(
-                horizontal: isActive ? 10 : 8,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? Colors.white.withOpacity(0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    item['icon'] as IconData,
-                    size: 20,
-                    color: isActive ? Colors.white : Colors.white.withOpacity(0.5),
-                  ),
-                  if (isActive && MediaQuery.of(context).size.width > 380) ...[
-                    const SizedBox(width: 6),
-                    Text(
-                      item['label'] as String,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(36),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(36),
+              border: Border.all(color: Colors.white.withOpacity(0.55), width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          );
-        }).toList(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: items.asMap().entries.map((entry) {
+                final i = entry.key;
+                final item = entry.value;
+                final isActive = i == activeIndex;
+                final activeColor = item['color'] as Color;
+
+                return GestureDetector(
+                  onTap: () {
+                    if (!isActive) Get.offAllNamed(item['route'] as String);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 280),
+                    curve: Curves.easeOutExpo,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isActive ? 14 : 10,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isActive ? activeColor : Colors.transparent,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: activeColor.withOpacity(0.4),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          item['icon'] as IconData,
+                          size: 20,
+                          color: isActive ? Colors.white : AppColors.textSecondary.withOpacity(0.5),
+                        ),
+                        if (isActive && MediaQuery.of(context).size.width > 380) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            item['label'] as String,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
       ),
     );
   }
 }
-

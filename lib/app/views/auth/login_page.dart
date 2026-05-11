@@ -6,9 +6,6 @@ import '../../controllers/app_config_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 
-// ======================================================
-// LOGIN PAGE — UI terpisah dari logic
-// ======================================================
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -40,43 +37,17 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // ======================================================
-  // VALIDASI — per fungsi
-  // ======================================================
-
-  /// Validasi field NIM/Email: tidak boleh kosong, minimal 3 karakter
-  String? _validateEmpty(String value) {
+  String? _validateInput(String value) {
     if (value.trim().isEmpty) return 'NIM atau Email tidak boleh kosong';
-    return null;
-  }
-
-  String? _validateMinLength(String value) {
     if (value.trim().length < 3) return 'Masukkan NIM atau Email yang valid';
     return null;
   }
 
-  String? _validateInput(String value) {
-    return _validateEmpty(value) ?? _validateMinLength(value);
-  }
-
-  /// Validasi password: tidak boleh kosong, minimal 6 karakter
-  String? _validatePasswordEmpty(String value) {
+  String? _validatePassword(String value) {
     if (value.isEmpty) return 'Password tidak boleh kosong';
-    return null;
-  }
-
-  String? _validatePasswordLength(String value) {
     if (value.length < 6) return 'Password minimal 6 karakter';
     return null;
   }
-
-  String? _validatePassword(String value) {
-    return _validatePasswordEmpty(value) ?? _validatePasswordLength(value);
-  }
-
-  // ======================================================
-  // AKSI
-  // ======================================================
 
   void _clearServerError() {
     if (_authController.errorMessage.value.isNotEmpty) {
@@ -86,7 +57,6 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleLogin() {
     _authController.errorMessage.value = '';
-
     final inputErr = _validateInput(_inputController.text);
     final passErr = _validatePassword(_passwordController.text);
     setState(() {
@@ -94,40 +64,30 @@ class _LoginPageState extends State<LoginPage> {
       _passwordError = passErr;
     });
     if (inputErr != null || passErr != null) return;
-
     _authController.login(
         _inputController.text.trim(), _passwordController.text.trim());
   }
 
   Future<void> _launchWhatsApp() async {
     if (_configController.isLoading.value) {
-      Get.snackbar('Mohon tunggu', 'Sedang memuat data dari server...',
+      Get.snackbar('Mohon tunggu', 'Sedang memuat data...',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
-
     final phoneNumber = _configController.whatsappNumber.value;
-
     if (phoneNumber.isEmpty) {
-      Get.snackbar(
-          'Error',
-          'Kontak admin tidak tersedia. Pastikan koneksi internet stabil.',
-          backgroundColor: Colors.red.withOpacity(0.1),
-          colorText: Colors.red);
+      Get.snackbar('Error', 'Kontak admin tidak tersedia.',
+          backgroundColor: Colors.red.withOpacity(0.1), colorText: Colors.red);
       return;
     }
-
-    const message =
-        'Halo Admin, saya lupa password akun saya. Nama: ,NIM: , DIVISI: .';
+    const message = 'Halo Admin, saya lupa password akun saya. Nama: ,NIM: , DIVISI: .';
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    final url = Uri.parse(
-        'https://wa.me/$cleanPhone?text=${Uri.encodeComponent(message)}');
-
+    final url = Uri.parse('https://wa.me/$cleanPhone?text=${Uri.encodeComponent(message)}');
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
-        throw 'Tidak dapat membuka aplikasi WhatsApp';
+        throw 'Tidak dapat membuka WhatsApp';
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal membuka WhatsApp: $e',
@@ -135,169 +95,159 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // ======================================================
-  // BUILD
-  // ======================================================
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Dekorasi lingkaran pastel di sudut
-            Positioned(
-              top: -40,
-              right: -40,
-              child: Container(
-                width: 160,
-                height: 160,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.secondary.withOpacity(0.18),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 60,
-              left: -30,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.accentPink.withValues(alpha: 0.15)
-                ),
-              ),
-            ),
-            // Konten utama
-            SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+      body: Stack(
+        children: [
+          // === COLORFUL BLOBS ===
+          // Blob 1: Violet (kiri atas)
+          Positioned(
+            top: -70,
+            left: -50,
+            child: _Blob(size: size.width * 0.68, color: AppColors.bgBlob1),
+          ),
+          // Blob 2: Sky blue (kanan atas)
+          Positioned(
+            top: -20,
+            right: -60,
+            child: _Blob(size: size.width * 0.50, color: AppColors.bgBlob4),
+          ),
+          // Blob 3: Mint green (tengah kiri)
+          Positioned(
+            top: size.height * 0.38,
+            left: -70,
+            child: _Blob(size: size.width * 0.45, color: AppColors.bgBlob3),
+          ),
+          // Blob 4: Coral/Rose (bawah kanan)
+          Positioned(
+            bottom: size.height * 0.10,
+            right: -50,
+            child: _Blob(size: size.width * 0.52, color: AppColors.bgBlob2),
+          ),
+          // Blob 5: Yellow (bawah kiri kecil)
+          Positioned(
+            bottom: -30,
+            left: size.width * 0.25,
+            child: _Blob(size: size.width * 0.32, color: AppColors.bgBlob5),
+          ),
+
+          // === KONTEN ===
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // — Tombol Back (selalu tampil — kembali ke beranda visitor)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (Navigator.canPop(context)) {
-                          Get.back();
-                        } else {
-                          Get.offAllNamed(AppRoutes.homeVisitor);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.divider),
-                        ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 18, color: AppColors.textPrimary),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // — Logo/Icon
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primary.withOpacity(0.25),
-                          AppColors.secondary.withOpacity(0.2),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(Icons.palette_rounded,
-                        color: AppColors.secondary, size: 32),
-                  ),
-                  const SizedBox(height: 28),
-
-                  Text('Selamat Datang',
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      )),
-                  const SizedBox(height: 6),
-                  Text('Masuk dengan NIM atau Email kamu',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      )),
-                  const SizedBox(height: 36),
-
-                  // — Field NIM/Email
-                  TextField(
-                    controller: _inputController,
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (v) {
-                      if (_inputError != null) {
-                        setState(() => _inputError = _validateInput(v));
+                  // Back button
+                  GestureDetector(
+                    onTap: () {
+                      if (Navigator.canPop(context)) {
+                        Get.back();
+                      } else {
+                        Get.offAllNamed(AppRoutes.homeVisitor);
                       }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white.withOpacity(0.9)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded,
+                          size: 18, color: AppColors.textPrimary),
+                    ),
+                  ),
+
+                  const SizedBox(height: 52),
+
+                  // Title
+                  Text(
+                    'Selamat\nDatang Kembali',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -1,
+                      height: 1.15,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Masuk dengan NIM atau Email kamu',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  // Email field
+                  _ColorfulTextField(
+                    controller: _inputController,
+                    hint: 'Email / NIM',
+                    icon: Icons.person_outline_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    errorText: _inputError,
+                    onChanged: (v) {
+                      if (_inputError != null) setState(() => _inputError = _validateInput(v));
                       _clearServerError();
                     },
-                    decoration: InputDecoration(
-                      labelText: 'NIM atau Email',
-                      hintText: 'Contoh: 2409116001 atau admin@ukm.id',
-                      prefixIcon: const Icon(Icons.person_outline_rounded),
-                      errorText: _inputError,
-                    ),
                   ),
-                  const SizedBox(height: 16),
 
-                  // — Field Password
-                  TextField(
+                  const SizedBox(height: 14),
+
+                  // Password field
+                  _ColorfulTextField(
                     controller: _passwordController,
+                    hint: 'Password',
+                    icon: Icons.lock_outline_rounded,
                     obscureText: !_showPassword,
-                    autocorrect: false,
-                    enableSuggestions: false,
+                    errorText: _passwordError,
                     onChanged: (v) {
-                      if (_passwordError != null) {
-                        setState(() => _passwordError = _validatePassword(v));
-                      }
+                      if (_passwordError != null) setState(() => _passwordError = _validatePassword(v));
                       _clearServerError();
                     },
                     onSubmitted: (_) => _handleLogin(),
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Masukkan password kamu',
-                      prefixIcon: const Icon(Icons.lock_outline_rounded),
-                      errorText: _passwordError,
-                      suffixIcon: IconButton(
-                        icon: Icon(_showPassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined),
-                        onPressed: () =>
-                            setState(() => _showPassword = !_showPassword),
+                    suffix: IconButton(
+                      icon: Icon(
+                        _showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                        color: AppColors.textSecondary,
+                        size: 20,
+                      ),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
+                  ),
+
+                  // Forgot password
+                  Align(
+                    alignment: Alignment.center,
+                    child: TextButton(
+                      onPressed: _launchWhatsApp,
+                      child: Text(
+                        'Forgot Password ?',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
 
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _launchWhatsApp,
-                      child: Text('Lupa password?',
-                          style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-
-                  // — Error dari server
+                  // Error banner
                   Obx(() {
                     final err = _authController.errorMessage.value;
                     if (err.isEmpty) return const SizedBox.shrink();
@@ -306,59 +256,181 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 8),
 
-                  // — Tombol Masuk
+                  // Log In button — gradient colorful
                   Obx(() => SizedBox(
                         width: double.infinity,
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: _authController.isLoading.value
-                              ? null
-                              : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                            elevation: 0,
+                        height: 56,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.primary,      // violet
+                                AppColors.secondary,    // pink
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(28),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.35),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
-                          child: _authController.isLoading.value
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Colors.white),
-                                )
-                              : const Text('Masuk',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700)),
+                          child: ElevatedButton(
+                            onPressed: _authController.isLoading.value ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                            ),
+                            child: _authController.isLoading.value
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                  )
+                                : const Text(
+                                    'Log In',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                                  ),
+                          ),
                         ),
                       )),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
+
+                  Center(
+                    child: Text(
+                      "Don't have an account? Sign up",
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ======================================================
-// WIDGET BANNER ERROR LOGIN
-// ======================================================
+// === BLOB WIDGET ===
+class _Blob extends StatelessWidget {
+  final double size;
+  final Color color;
+  const _Blob({required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withOpacity(0.55),
+      ),
+    );
+  }
+}
+
+// === COLORFUL TEXT FIELD ===
+class _ColorfulTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final bool obscureText;
+  final TextInputType keyboardType;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final Widget? suffix;
+
+  const _ColorfulTextField({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.obscureText = false,
+    this.keyboardType = TextInputType.text,
+    this.errorText,
+    this.onChanged,
+    this.onSubmitted,
+    this.suffix,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.88),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            autocorrect: false,
+            onChanged: onChanged,
+            onSubmitted: onSubmitted,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7), fontSize: 14),
+              prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
+              suffixIcon: suffix,
+              filled: false,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(22),
+                borderSide: BorderSide(color: AppColors.primary.withOpacity(0.5), width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            ),
+          ),
+        ),
+        if (errorText != null) ...[
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Text(errorText!, style: const TextStyle(color: AppColors.danger, fontSize: 12, fontWeight: FontWeight.w500)),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+// === ERROR BANNER ===
 class _LoginErrorBanner extends StatelessWidget {
   final String message;
   const _LoginErrorBanner({required this.message});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     IconData icon = Icons.error_outline_rounded;
-    Color color = colorScheme.error;
-
+    Color color = AppColors.danger;
     if (message.contains('nonaktif') || message.contains('Hubungi')) {
       icon = Icons.block_rounded;
       color = Colors.orange;
@@ -366,26 +438,19 @@ class _LoginErrorBanner extends StatelessWidget {
       icon = Icons.person_off_outlined;
       color = Colors.orange;
     }
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(message,
-                style: TextStyle(
-                    color: color,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-          ),
+          Expanded(child: Text(message, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600))),
         ],
       ),
     );

@@ -51,6 +51,7 @@ class _MemberListPageState extends State<MemberListPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBody: true,
       body: CustomScrollView(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
@@ -65,7 +66,7 @@ class _MemberListPageState extends State<MemberListPage> {
               onPressed: () => Get.offNamed(AppRoutes.dashboardAdmin),
             ),
             backgroundColor: AppColors.background,
-            flexibleSpace: FlexibleSpaceBar(
+                  flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.2,
               title: Text(
                 'Daftar Anggota',

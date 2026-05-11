@@ -32,6 +32,7 @@ class HomeMemberPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBody: true,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -41,7 +42,7 @@ class HomeMemberPage extends StatelessWidget {
             pinned: false,
             elevation: 0,
             backgroundColor: AppColors.background,
-            title: Row(
+                  title: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),

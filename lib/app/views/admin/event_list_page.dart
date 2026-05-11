@@ -49,6 +49,7 @@ class _EventListPageState extends State<EventListPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBody: true,
       body: CustomScrollView(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
@@ -63,7 +64,7 @@ class _EventListPageState extends State<EventListPage> {
               onPressed: () => Get.back(),
             ),
             backgroundColor: AppColors.background,
-            flexibleSpace: FlexibleSpaceBar(
+                  flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.2,
               title: Text(
                 'Agenda Kegiatan',

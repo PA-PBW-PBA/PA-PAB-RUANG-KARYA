@@ -354,7 +354,7 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     return Obx(() {
       if (_loadingStats.value) {
         return Container(
-          height: 100,
+          height: 120,
           alignment: Alignment.center,
           child: const CircularProgressIndicator(strokeWidth: 2),
         );
@@ -362,116 +362,52 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
       if (_attendanceStats.isEmpty) {
         return _buildEmptyState('Belum ada data absensi');
       }
-
-      return Column(
-        children: _attendanceStats.map((stat) {
-          final total = stat['total'] as int;
-          final hadir = stat['hadir'] as int;
-          final izin = stat['izin'] as int;
-          final tidakHadir = stat['tidakHadir'] as int;
-          final pct = total == 0 ? 0.0 : hadir / total;
-          final statusColor = pct >= 0.75
-              ? AppColors.success
-              : pct >= 0.5
-                  ? AppColors.warning
-                  : AppColors.accentRed;
-
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.divider, width: 1.5),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.divider, width: 1.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        stat['title'] as String,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
-                          color: AppColors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${(pct * 100).round()}% HADIR',
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    minHeight: 8,
-                    backgroundColor: AppColors.divider,
-                    valueColor: AlwaysStoppedAnimation(statusColor),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _statPill('Hadir', hadir, AppColors.success),
-                    const SizedBox(width: 8),
-                    _statPill('Izin', izin, AppColors.warning),
-                    const SizedBox(width: 8),
-                    _statPill('Absen', tidakHadir, AppColors.accentRed),
-                    const Spacer(),
-                    Text(
-                      '$total Peserta',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
+                _legendDot('Hadir', AppColors.success),
+                const SizedBox(width: 16),
+                _legendDot('Izin', AppColors.warning),
+                const SizedBox(width: 16),
+                _legendDot('Tidak Hadir', AppColors.accentRed),
               ],
             ),
-          );
-        }).toList(),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 200,
+              child: _AttendanceLineChart(stats: _attendanceStats),
+            ),
+          ],
+        ),
       );
     });
   }
 
-  Widget _statPill(String label, int count, Color color) {
+  Widget _legendDot(String label, Color color) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 6,
-          height: 6,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
         Text(
-          '$count $label',
-          style: TextStyle(
-            color: AppColors.textPrimary.withOpacity(0.7),
+          label,
+          style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -901,3 +837,172 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
   }
 }
 
+// =========================================================
+// LINE CHART WIDGET — Statistik Absensi
+// =========================================================
+
+// =========================================================
+// LINE CHART — Statistik Absensi per Kegiatan
+// =========================================================
+
+class _AttendanceLineChart extends StatelessWidget {
+  final List<Map<String, dynamic>> stats;
+
+  const _AttendanceLineChart({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    if (stats.isEmpty) return const SizedBox.shrink();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return CustomPaint(
+          size: Size(constraints.maxWidth, constraints.maxHeight),
+          painter: _LineChartPainter(stats: stats),
+        );
+      },
+    );
+  }
+}
+
+class _LineChartPainter extends CustomPainter {
+  final List<Map<String, dynamic>> stats;
+
+  _LineChartPainter({required this.stats});
+
+  // Warna
+  static const _colorHadir = Color(0xFF10B981); // success
+  static const _colorIzin = Color(0xFFF59E0B);  // warning
+  static const _colorAbsen = Color(0xFFE30A0A); // accentRed
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final n = stats.length;
+    if (n == 0) return;
+
+    const padL = 36.0;
+    const padR = 12.0;
+    const padT = 12.0;
+    const padB = 44.0;
+
+    final chartW = size.width - padL - padR;
+    final chartH = size.height - padT - padB;
+
+    // Nilai max Y
+    double maxVal = 1;
+    for (final s in stats) {
+      final v = [s['hadir'] as int, s['izin'] as int, s['tidakHadir'] as int]
+          .reduce((a, b) => a > b ? a : b)
+          .toDouble();
+      if (v > maxVal) maxVal = v;
+    }
+    final yMax = (maxVal * 1.25).ceilToDouble();
+
+    // Grid paint
+    final gridPaint = Paint()
+      ..color = const Color(0xFFEEF2F7)
+      ..strokeWidth = 1;
+
+    final labelStyle = const TextStyle(
+      color: Color(0xFF94A3B8),
+      fontSize: 9.5,
+      fontWeight: FontWeight.w600,
+    );
+
+    // --- Grid garis horizontal + label Y ---
+    const gridCount = 4;
+    for (int g = 0; g <= gridCount; g++) {
+      final y = padT + chartH - chartH * g / gridCount;
+      canvas.drawLine(Offset(padL, y), Offset(padL + chartW, y), gridPaint);
+      final val = (yMax * g / gridCount).round();
+      _text(canvas, '$val', Offset(0, y - 7), labelStyle, 32);
+    }
+
+    // --- X positions helper ---
+    double xPos(int i) =>
+        padL + (n == 1 ? chartW / 2 : chartW * i / (n - 1));
+    double yPos(int val) =>
+        padT + chartH - (yMax == 0 ? 0 : chartH * val / yMax);
+
+    // --- Draw 3 lines ---
+    final series = [
+      {'key': 'hadir', 'color': _colorHadir},
+      {'key': 'izin', 'color': _colorIzin},
+      {'key': 'tidakHadir', 'color': _colorAbsen},
+    ];
+
+    for (final s in series) {
+      final color = s['color'] as Color;
+      final key = s['key'] as String;
+      final pts = List.generate(
+        n,
+        (i) => Offset(xPos(i), yPos(stats[i][key] as int)),
+      );
+
+      // Area fill
+      if (pts.isNotEmpty) {
+        final fillPath = Path()..moveTo(pts.first.dx, padT + chartH);
+        for (final p in pts) fillPath.lineTo(p.dx, p.dy);
+        fillPath.lineTo(pts.last.dx, padT + chartH);
+        fillPath.close();
+        canvas.drawPath(
+          fillPath,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [color.withOpacity(0.15), color.withOpacity(0.0)],
+            ).createShader(Rect.fromLTWH(padL, padT, chartW, chartH))
+            ..style = PaintingStyle.fill,
+        );
+      }
+
+      // Garis smooth bezier
+      if (pts.length >= 2) {
+        final path = Path()..moveTo(pts[0].dx, pts[0].dy);
+        for (int i = 1; i < pts.length; i++) {
+          final cp1x = (pts[i].dx + pts[i - 1].dx) / 2;
+          path.cubicTo(cp1x, pts[i - 1].dy, cp1x, pts[i].dy,
+              pts[i].dx, pts[i].dy);
+        }
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = color
+            ..strokeWidth = 2.5
+            ..strokeCap = StrokeCap.round
+            ..style = PaintingStyle.stroke,
+        );
+      }
+
+      // Dots
+      for (final p in pts) {
+        canvas.drawCircle(p, 5, Paint()..color = color);
+        canvas.drawCircle(p, 3, Paint()..color = const Color(0xFFFFFFFF));
+      }
+    }
+
+    // --- X labels ---
+    for (int i = 0; i < n; i++) {
+      final title = stats[i]['title'] as String;
+      final short = title.length > 9 ? '${title.substring(0, 8)}…' : title;
+      _text(
+        canvas,
+        short,
+        Offset(xPos(i) - 22, size.height - padB + 10),
+        labelStyle,
+        44,
+      );
+    }
+  }
+
+  void _text(Canvas canvas, String t, Offset o, TextStyle style, double maxW) {
+    final tp = TextPainter(
+      text: TextSpan(text: t, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: maxW);
+    tp.paint(canvas, o);
+  }
+
+  @override
+  bool shouldRepaint(_LineChartPainter old) => old.stats != stats;
+}

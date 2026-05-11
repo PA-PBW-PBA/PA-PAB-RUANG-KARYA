@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/event_model.dart';
@@ -13,7 +14,8 @@ class EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final hasImage = event.imageUrls.isNotEmpty;
+
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.eventDetail, arguments: event),
       child: Container(
@@ -28,18 +30,25 @@ class EventCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Thumbnail / Icon
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.event_rounded,
-                color: AppColors.primary,
-                size: 32,
+            // Thumbnail — foto jika ada, icon kalau tidak
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: SizedBox(
+                width: 80,
+                height: 80,
+                child: hasImage
+                    ? CachedNetworkImage(
+                        imageUrl: event.imageUrls.first,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => Container(
+                          color: AppColors.primary.withOpacity(0.05),
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => _DefaultEventIcon(),
+                      )
+                    : _DefaultEventIcon(),
               ),
             ),
             const SizedBox(width: 16),
@@ -52,7 +61,8 @@ class EventCard extends StatelessWidget {
                     children: [
                       if (!event.isPublic) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
@@ -60,7 +70,8 @@ class EventCard extends StatelessWidget {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.lock_rounded, size: 10, color: AppColors.primary),
+                              Icon(Icons.lock_rounded,
+                                  size: 10, color: AppColors.primary),
                               SizedBox(width: 4),
                               Text(
                                 'Internal',
@@ -85,6 +96,32 @@ class EventCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // Badge jumlah foto
+                      if (hasImage)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentNeonBlue.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.photo_rounded,
+                                  size: 10, color: AppColors.accentNeonBlue),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${event.imageUrls.length}',
+                                style: const TextStyle(
+                                  color: AppColors.accentNeonBlue,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -101,7 +138,8 @@ class EventCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_rounded, size: 14, color: AppColors.textSecondary),
+                      const Icon(Icons.location_on_rounded,
+                          size: 14, color: AppColors.textSecondary),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -122,7 +160,8 @@ class EventCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.divider),
+            const Icon(Icons.arrow_forward_ios_rounded,
+                size: 16, color: AppColors.divider),
           ],
         ),
       ),
@@ -130,7 +169,26 @@ class EventCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+}
+
+class _DefaultEventIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.primary.withOpacity(0.05),
+      child: const Center(
+        child: Icon(
+          Icons.event_rounded,
+          color: AppColors.primary,
+          size: 32,
+        ),
+      ),
+    );
   }
 }

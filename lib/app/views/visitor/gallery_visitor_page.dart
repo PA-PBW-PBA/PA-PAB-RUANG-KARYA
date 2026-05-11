@@ -19,71 +19,57 @@ class GalleryVisitorPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // 1. SliverAppBar dengan Back Button (Konsisten dengan Admin)
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
             pinned: true,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
               onPressed: () => Get.back(),
             ),
-            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            backgroundColor: AppColors.background,
             flexibleSpace: FlexibleSpaceBar(
-              expandedTitleScale: 1.2,
+              expandedTitleScale: 1.3,
               title: Text(
                 'Galeri Karya',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
                 ),
               ),
               titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
 
-          // 2. Filter Divisi Section
           SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: SizedBox(
-                height: 40,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    DivisionFilterBar(
-                      divisions: ['Semua', ...AppConstants.divisions],
-                      selected: controller.selectedDivision,
-                      onSelected: controller.filterByDivision,
-                    ),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: DivisionFilterBar(
+                divisions: ['Semua', ...AppConstants.divisions],
+                selected: controller.selectedDivision,
+                onSelected: controller.filterByDivision,
               ),
             ),
           ),
 
-          // 3. Grid List Gallery
           Obx(() {
             if (controller.isLoading.value) {
               return SliverPadding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.85,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: 0.8,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    (_, __) =>
-                        const LoadingSkeleton(height: 160, borderRadius: 20),
+                    (_, __) => const LoadingSkeleton(height: 160, borderRadius: 28),
                     childCount: 6,
                   ),
                 ),
@@ -101,32 +87,20 @@ class GalleryVisitorPage extends StatelessWidget {
             }
 
             return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.85,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: 0.8,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
                     final item = controller.filteredGallery[i];
-                    return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: GalleryCard(
-                        gallery: item,
-                        onTap: () => _showEnhancedFullImage(context, item),
-                      ),
+                    return GalleryCard(
+                      gallery: item,
+                      onTap: () => _showEnhancedFullImage(context, item),
                     );
                   },
                   childCount: controller.filteredGallery.length,
@@ -139,145 +113,81 @@ class GalleryVisitorPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterChip(
-      BuildContext context, String label, GalleryController controller) {
-    return Obx(() {
-      final isSelected = controller.selectedDivision.value == label;
-      final color = label == 'Semua'
-          ? Theme.of(context).colorScheme.primary
-          : AppColors.getDivisionColor(label);
-
-      return Padding(
-        padding: const EdgeInsets.only(right: 10),
-        child: GestureDetector(
-          onTap: () => controller.filterByDivision(label),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? color : color.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isSelected ? color : color.withOpacity(0.12),
-                width: 1.5,
-              ),
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : color,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  // FIXED: Mengatasi Pixel Overflowed dengan Flexible dan ScrollView (Mirip Versi Admin)
   void _showEnhancedFullImage(BuildContext context, GalleryModel item) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Stack(
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(32),
+                color: Colors.white,
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
-                mainAxisSize:
-                    MainAxisSize.min, // Agar dialog mengikuti tinggi konten
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Gambar dibuat Flexible agar tidak overflow jika layar pendek
                   Flexible(
                     child: InteractiveViewer(
                       maxScale: 5.0,
                       child: CachedNetworkImage(
                         imageUrl: item.imageUrl,
                         fit: BoxFit.contain,
-                        placeholder: (_, __) =>
-                            const Center(child: CircularProgressIndicator()),
-                        errorWidget: (_, __, ___) => const Icon(Icons.error),
                       ),
                     ),
                   ),
-
-                  // Container Informasi Karya (Caption)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      border: Border(
-                          top: BorderSide(
-                              color: Theme.of(context)
-                                  .dividerColor
-                                  .withOpacity(0.1))),
+                    padding: const EdgeInsets.all(28),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
                     ),
-                    child: SingleChildScrollView(
-                      // Mencegah overflow pada teks panjang
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color:
-                                  AppColors.getDivisionColor(item.divisionName)
-                                      .withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              item.divisionName.toUpperCase(),
-                              style: TextStyle(
-                                color: AppColors.getDivisionColor(
-                                    item.divisionName),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 10,
-                                letterSpacing: 0.5,
-                              ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.getDivisionColor(item.divisionName).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            item.divisionName.toUpperCase(),
+                            style: TextStyle(
+                              color: AppColors.getDivisionColor(item.divisionName),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 10,
+                              letterSpacing: 1,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            item.caption ?? 'Tidak ada keterangan',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.5,
-                                  letterSpacing: 0.2,
-                                ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          item.caption ?? 'Tidak ada keterangan',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            height: 1.6,
+                            fontSize: 15,
+                            color: AppColors.textPrimary,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-
-            // Tombol Close
             Positioned(
-              top: 12,
-              right: 12,
-              child: GestureDetector(
-                onTap: () => Get.back(),
-                child: const CircleAvatar(
+              top: 16,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Get.back(),
+                icon: const CircleAvatar(
                   backgroundColor: Colors.black54,
-                  radius: 18,
-                  child:
-                      Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                  child: Icon(Icons.close_rounded, color: Colors.white),
                 ),
               ),
             ),

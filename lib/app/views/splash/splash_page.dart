@@ -195,9 +195,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFFF0EEFF),
-                  Color(0xFFF6F7FB),
-                  Color(0xFFEDF4FF),
+                  Color(0xFF0F172A), // primaryDark
+                  Color(0xFF1E293B), // primary
+                  Color(0xFF0F172A),
                 ],
                 stops: [0.0, 0.5, 1.0],
               ),
@@ -208,22 +208,22 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 Positioned(
                   top: -70 + floatY,
                   right: -30,
-                  child: _blob(220, const Color(0xFFDDD8FF), 0.75),
+                  child: _blob(220, const Color(0xFF8B5CF6), 0.15),
                 ),
                 Positioned(
                   top: 110 - floatY,
                   left: -50 + floatX,
-                  child: _blob(140, const Color(0xFFCFDFFF), 0.65),
+                  child: _blob(140, const Color(0xFF00BFFF), 0.12),
                 ),
                 Positioned(
                   bottom: -50 + floatY,
                   left: -15,
-                  child: _blob(170, const Color(0xFFEEDFFF), 0.72),
+                  child: _blob(170, const Color(0xFFFF2D55), 0.10),
                 ),
                 Positioned(
                   bottom: 110 - floatY,
                   right: -30 - floatX,
-                  child: _blob(110, const Color(0xFFD4F0E8), 0.60),
+                  child: _blob(110, const Color(0xFFFFD700), 0.08),
                 ),
 
                 // ── Decorative dots ───────────────────────────────
@@ -231,25 +231,25 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   top: 180 + floatY,
                   left: 60 + floatX,
                   child: _dot(Icons.auto_awesome_rounded, 20,
-                      const Color(0xFFADA6F5), 0.65),
+                      const Color(0xFF8B5CF6), 0.4),
                 ),
                 Positioned(
                   top: 260 - floatY,
                   right: 80,
                   child: _dot(Icons.star_rounded, 13,
-                      const Color(0xFFCFB4FE), 0.60),
+                      const Color(0xFFFF2D55), 0.35),
                 ),
                 Positioned(
                   bottom: 220 + floatY,
                   left: 90,
                   child: _dot(Icons.circle, 9,
-                      const Color(0xFF93C5FD), 0.50),
+                      const Color(0xFF00BFFF), 0.3),
                 ),
                 Positioned(
                   bottom: 160 - floatY,
                   right: 55 + floatX,
                   child: _dot(Icons.lens_rounded, 6,
-                      const Color(0xFFA7F3D0), 0.45),
+                      const Color(0xFFFFD700), 0.25),
                 ),
 
                 // ── Center content ────────────────────────────────
@@ -277,9 +277,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                       shape: BoxShape.circle,
                                       gradient: RadialGradient(
                                         colors: [
-                                          const Color(0xFF8A7CFF)
-                                              .withOpacity(0.22),
-                                          const Color(0xFF8A7CFF)
+                                          const Color(0xFF00BFFF)
+                                              .withOpacity(0.15),
+                                          const Color(0xFF00BFFF)
                                               .withOpacity(0.0),
                                         ],
                                       ),
@@ -295,8 +295,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: const Color(0xFF8A7CFF)
-                                            .withOpacity(0.15),
+                                        color: Colors.white.withOpacity(0.1),
                                         width: 1.5,
                                       ),
                                     ),
@@ -334,9 +333,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                     begin: Alignment.centerLeft,
                                     end: Alignment.centerRight,
                                     colors: const [
-                                      Color(0xFF27314D),
-                                      Color(0xFF8A7CFF),
-                                      Color(0xFF27314D),
+                                      Colors.white,
+                                      Color(0xFF00BFFF),
+                                      Colors.white,
                                     ],
                                     stops: [
                                       (_shimmer.value - 0.6)
@@ -353,35 +352,33 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                         .textTheme
                                         .headlineMedium
                                         ?.copyWith(
-                                          fontWeight: FontWeight.w800,
+                                          fontWeight: FontWeight.w900,
                                           color: Colors.white,
-                                          letterSpacing: -0.8,
+                                          letterSpacing: -1.0,
                                         ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 12),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 6),
+                                      horizontal: 18, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF8A7CFF)
-                                        .withOpacity(0.10),
-                                    borderRadius: BorderRadius.circular(20),
+                                    color: Colors.white.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(24),
                                     border: Border.all(
-                                      color: const Color(0xFF8A7CFF)
-                                          .withOpacity(0.20),
+                                      color: Colors.white.withOpacity(0.1),
                                     ),
                                   ),
                                   child: Text(
-                                    'UKM Seni & Kreativitas',
+                                    'Satu Ruang, Beragam Karya',
                                     textAlign: TextAlign.center,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleSmall
                                         ?.copyWith(
-                                          color: const Color(0xFF6B5FE4),
+                                          color: Colors.white.withOpacity(0.8),
                                           fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.2,
+                                          letterSpacing: 0.5,
                                         ),
                                   ),
                                 ),
@@ -390,7 +387,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                           ),
                         ),
 
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 56),
 
                         // Loading indicator
                         FadeTransition(
@@ -398,26 +395,25 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                           child: Column(
                             children: [
                               SizedBox(
-                                width: 32,
-                                height: 32,
+                                width: 28,
+                                height: 28,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: const Color(0xFF8A7CFF),
+                                  strokeWidth: 2.0,
+                                  color: const Color(0xFF00BFFF),
                                   backgroundColor:
-                                      const Color(0xFF8A7CFF).withOpacity(0.12),
+                                      Colors.white.withOpacity(0.05),
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 16),
                               Text(
-                                'Memuat...',
+                                'Memasuki Ruang Kreativitas...',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: const Color(0xFF8A7CFF)
-                                          .withOpacity(0.70),
+                                      color: Colors.white.withOpacity(0.4),
                                       fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 1.0,
                                     ),
                               ),
                             ],

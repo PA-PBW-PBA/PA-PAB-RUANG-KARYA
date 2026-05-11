@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import '../../controllers/kas_controller.dart';
 import '../../controllers/auth_controller.dart';
@@ -18,168 +19,191 @@ class KasPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Laporan Kas',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.reverse) {
+            if (kasController.isFabVisible.value) {
+              kasController.isFabVisible.value = false;
+            }
+          } else if (notification.direction == ScrollDirection.forward) {
+            if (!kasController.isFabVisible.value) {
+              kasController.isFabVisible.value = true;
+            }
+          }
+          return true;
+        },
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 120,
+              floating: true,
+              pinned: true,
+              elevation: 0,
+              backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  'Laporan Kas',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Obx(() {
+                      final total = kasController.totalSaldo;
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(28),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [colorScheme.primary, AppColors.primaryDark],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(32),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.primary.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              right: -20,
+                              top: -20,
+                              child: Icon(Icons.account_balance_wallet_rounded,
+                                  size: 100,
+                                  color: Colors.white.withOpacity(0.1)),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'TOTAL SALDO AKTIF',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  kasController.formatCurrency(total),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26, // Disesuaikan agar muat
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -1,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Text(
+                                    'Terakhir diperbarui hari ini',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+
+                    // Pemasukan & Pengeluaran
+                    Obx(() {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _amountCard(
+                              context,
+                              'Pemasukan',
+                              kasController.totalPemasukan,
+                              AppColors.accentGreen,
+                              Icons.arrow_downward_rounded,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _amountCard(
+                              context,
+                              'Pengeluaran',
+                              kasController.totalPengeluaran,
+                              AppColors.accentRed,
+                              Icons.arrow_upward_rounded,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                    const SizedBox(height: 32),
+
+                    // Analisis Arus Kas
+                    Obx(() {
+                      final pemasukan = kasController.totalPemasukan;
+                      final pengeluaran = kasController.totalPengeluaran;
+                      if (pemasukan == 0 && pengeluaran == 0) {
+                        return const SizedBox.shrink();
+                      }
+                      return Column(
+                        children: [
+                          _buildSectionHeader(context,
+                              title: 'Analisis Arus Kas'),
+                          const SizedBox(height: 24),
+                        ],
+                      );
+                    }),
+                    const SizedBox(height: 120),
+                  ],
                 ),
               ),
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Obx(() {
-                    final total = kasController.totalSaldo;
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(28),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [colorScheme.primary, AppColors.primaryDark],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.primary.withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            right: -20,
-                            top: -20,
-                            child: Icon(Icons.account_balance_wallet_rounded,
-                                size: 100,
-                                color: Colors.white.withOpacity(0.1)),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'TOTAL SALDO AKTIF',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                kasController.formatCurrency(total),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26, // Disesuaikan agar muat
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -1,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Text(
-                                  'Terakhir diperbarui hari ini',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 20),
-
-                  // Pemasukan & Pengeluaran
-                  Obx(() {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: _amountCard(
-                            context,
-                            'Pemasukan',
-                            kasController.totalPemasukan,
-                            AppColors.accentGreen,
-                            Icons.arrow_downward_rounded,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _amountCard(
-                            context,
-                            'Pengeluaran',
-                            kasController.totalPengeluaran,
-                            AppColors.accentRed,
-                            Icons.arrow_upward_rounded,
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                  const SizedBox(height: 32),
-
-                  // Analisis Arus Kas
-                  Obx(() {
-                    final pemasukan = kasController.totalPemasukan;
-                    final pengeluaran = kasController.totalPengeluaran;
-                    if (pemasukan == 0 && pengeluaran == 0) {
-                      return const SizedBox.shrink();
-                    }
-                    return Column(
-                      children: [
-                        _buildSectionHeader(context,
-                            title: 'Analisis Arus Kas'),
-                        const SizedBox(height: 24),
-                      ],
-                    );
-                  }),
-                  const SizedBox(height: 120),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: Obx(() {
         final user = authController.currentUser.value;
         if (user == null || !user.canManageKas) return const SizedBox.shrink();
-        return FloatingActionButton.extended(
-          onPressed: () => Get.toNamed(AppRoutes.kasForm),
-          backgroundColor: colorScheme.primary,
-          elevation: 6,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          icon: const Icon(Icons.add_card_rounded, color: Colors.white),
-          label: const Text('Transaksi Baru',
-              style: TextStyle(color: Colors.white)),
+
+        return AnimatedScale(
+          scale: kasController.isFabVisible.value ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedOpacity(
+            opacity: kasController.isFabVisible.value ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: FloatingActionButton.extended(
+              onPressed: () => Get.toNamed(AppRoutes.kasForm),
+              backgroundColor: colorScheme.primary,
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              icon: const Icon(Icons.add_card_rounded, color: Colors.white),
+              label: const Text('Transaksi Baru',
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ),
         );
       }),
       bottomNavigationBar: AdminBottomNav(currentIndex: 4),

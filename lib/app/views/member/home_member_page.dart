@@ -9,6 +9,7 @@ import '../widgets/gallery_card.dart';
 import '../widgets/member_bottom_nav.dart';
 import '../widgets/division_badge.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 
 class HomeMemberPage extends StatelessWidget {
   const HomeMemberPage({super.key});
@@ -19,7 +20,6 @@ class HomeMemberPage extends StatelessWidget {
     final eventController = Get.put(EventController());
     final galleryController = Get.put(GalleryController());
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     final hour = DateTime.now().hour;
     final greeting = hour < 11
@@ -31,7 +31,7 @@ class HomeMemberPage extends StatelessWidget {
                 : 'Selamat Malam';
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -40,22 +40,51 @@ class HomeMemberPage extends StatelessWidget {
             floating: true,
             pinned: false,
             elevation: 0,
-            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
-            title: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Image.asset(
-                'assets/images/logo_mark.png',
-                height: 32,
-                errorBuilder: (_, __, ___) => Icon(
-                  Icons.palette_rounded,
-                  color: colorScheme.primary,
-                  size: 28,
+            backgroundColor: AppColors.background,
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Image.asset(
+                    'assets/images/logo_mark.png',
+                    height: 28,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.palette_rounded,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppConstants.appName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    Text(
+                      'Seni & Kreativitas',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.secondary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             actions: [
               Obx(() => Padding(
-                    padding: const EdgeInsets.only(right: 20, top: 8),
+                    padding: const EdgeInsets.only(right: 16),
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.profileMember),
                       child: Container(
@@ -63,12 +92,13 @@ class HomeMemberPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: colorScheme.primary.withOpacity(0.3),
-                              width: 1.5),
+                            color: AppColors.primary.withOpacity(0.1),
+                            width: 1.5,
+                          ),
                         ),
                         child: CircleAvatar(
-                          radius: 18,
-                          backgroundColor: colorScheme.primary.withOpacity(0.1),
+                          radius: 20,
+                          backgroundColor: AppColors.primary.withOpacity(0.05),
                           child: Text(
                             authController.currentUser.value?.fullName
                                         .isNotEmpty ==
@@ -76,9 +106,9 @@ class HomeMemberPage extends StatelessWidget {
                                 ? authController.currentUser.value!.fullName[0]
                                     .toUpperCase()
                                 : '?',
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w800,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w900,
                               fontSize: 16,
                             ),
                           ),
@@ -90,11 +120,11 @@ class HomeMemberPage extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
                   Obx(() => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -102,7 +132,7 @@ class HomeMemberPage extends StatelessWidget {
                             greeting,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -110,49 +140,58 @@ class HomeMemberPage extends StatelessWidget {
                           Text(
                             '${authController.currentUser.value?.fullName.split(' ').first ?? 'Anggota'}!',
                             style: theme.textTheme.headlineLarge?.copyWith(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1,
                             ),
                           ),
                         ],
                       )),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   _buildPremiumMemberCard(context, authController),
-                  const SizedBox(height: 32),
-                  _buildSectionHeader(context, title: 'Akses Cepat'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 40),
+                  _buildSectionHeader(
+                    context,
+                    title: 'Akses Cepat',
+                    subtitle: 'Layanan UKM untuk kamu',
+                    accentColor: AppColors.accentPurple,
+                  ),
+                  const SizedBox(height: 16),
                   _buildModernQuickAccess(context),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
                     title: 'Kegiatan Mendatang',
-                    // "Lihat Semua" → halaman list kegiatan (bukan kalender)
-                    onSeeAll: () => Get.toNamed(AppRoutes.eventVisitor),
+                    subtitle: 'Jangan lewatkan keseruannya',
+                    accentColor: AppColors.accentPink,
+                    onSeeAll: () {
+                      eventController.resetFilters();
+                      Get.toNamed(AppRoutes.eventMember);
+                    },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (eventController.events.isEmpty) {
                       return _buildEmptyState('Belum ada kegiatan mendatang');
                     }
                     return SizedBox(
-                      height: 180,
+                      height: 200,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        separatorBuilder: (_, __) => const SizedBox(width: 20),
                         itemBuilder: (_, i) => Container(
-                          width: 280,
+                          width: 300,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 12,
+                                color: AppColors.primary.withOpacity(0.06),
+                                blurRadius: 15,
                                 spreadRadius: 1,
-                                offset: const Offset(0, 4),
+                                offset: const Offset(0, 10),
                               ),
                             ],
                           ),
@@ -161,38 +200,39 @@ class HomeMemberPage extends StatelessWidget {
                       ),
                     );
                   }),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
                     title: 'Galeri Karya',
+                    subtitle: 'Inspirasi dari rekan-rekanmu',
+                    accentColor: AppColors.accentOrange,
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryMember),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
                       return _buildEmptyState('Galeri masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.only(bottom: 20),
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.85,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 0.8,
                       ),
                       itemCount: galleryController.gallery.take(4).length,
                       itemBuilder: (_, i) => Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: AppColors.primary.withOpacity(0.05),
                               blurRadius: 15,
-                              spreadRadius: 1,
-                              offset: const Offset(0, 6),
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
@@ -201,7 +241,7 @@ class HomeMemberPage extends StatelessWidget {
                       ),
                     );
                   }),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
@@ -220,20 +260,15 @@ class HomeMemberPage extends StatelessWidget {
 
       return Container(
         width: double.infinity,
-        height: 200,
+        height: 220,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, Color(0xFF4F46E5)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(28),
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.4),
-              blurRadius: 25,
-              spreadRadius: 2,
-              offset: const Offset(0, 12),
+              color: AppColors.primary.withOpacity(0.3),
+              blurRadius: 30,
+              offset: const Offset(0, 15),
             ),
           ],
         ),
@@ -241,109 +276,84 @@ class HomeMemberPage extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              top: -30,
-              right: -30,
+              top: -40,
+              right: -40,
               child: CircleAvatar(
-                radius: 70,
-                backgroundColor: Colors.white.withOpacity(0.08),
+                radius: 100,
+                backgroundColor: AppColors.secondary.withOpacity(0.1),
               ),
             ),
             Positioned(
-              bottom: 20,
-              right: 60,
+              bottom: -20,
+              left: -20,
               child: Container(
-                width: 100,
-                height: 100,
+                width: 150,
+                height: 150,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                      color: Colors.white.withOpacity(0.05), width: 20),
+                  color: AppColors.accentPink.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(40),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(28),
-              child: Row(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'KARTU ANGGOTA DIGITAL',
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'MEMBER DIGITAL',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white,
                             fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w900,
                             letterSpacing: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          user.fullName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            height: 1.2,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          user.nim,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14,
-                            fontFamily: 'monospace',
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Chip kompak, tidak overflow
-                        DivisionChipRow(
-                          divisions: user.divisions,
-                          maxVisible: 3,
-                          size: 26,
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    user.fullName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    user.nim,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 20),
+                  Row(
                     children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.3), width: 2),
-                        ),
-                        child: Center(
-                          child: Text(
-                            user.fullName.isNotEmpty
-                                ? user.fullName[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Angkatan ${user.angkatan ?? '-'}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                      _buildCardStat('ANGKATAN', user.angkatan ?? '-'),
+                      const SizedBox(width: 32),
+                      Expanded(
+                        child: DivisionChipRow(
+                          divisions: user.divisions,
+                          maxVisible: 2,
+                          size: 24,
                         ),
                       ),
                     ],
@@ -357,51 +367,68 @@ class HomeMemberPage extends StatelessWidget {
     });
   }
 
+  Widget _buildCardStat(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.4),
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildModernQuickAccess(BuildContext context) {
     final items = [
       {
         'icon': Icons.event_available_rounded,
         'label': 'Kegiatan',
-        // → List kegiatan + search (bukan kalender)
-        'route': AppRoutes.eventVisitor,
-        'color': AppColors.primary,
-        'hint': 'Semua kegiatan',
-      },
-      {
-        'icon': Icons.calendar_today_rounded,
-        'label': 'Jadwalku',
-        // → Kalender jadwal pribadi
         'route': AppRoutes.eventMember,
-        'color': AppColors.accentBlue,
-        'hint': 'Kalender jadwal',
+        'color': AppColors.accentPink,
       },
       {
         'icon': Icons.assignment_turned_in_rounded,
         'label': 'Absensi',
         'route': AppRoutes.attendanceHistory,
         'color': AppColors.success,
-        'hint': '',
       },
       {
         'icon': Icons.collections_rounded,
         'label': 'Galeri',
         'route': AppRoutes.galleryMember,
-        'color': AppColors.accentRed,
-        'hint': '',
+        'color': AppColors.accentOrange,
       },
       {
         'icon': Icons.groups_rounded,
         'label': 'Anggota',
         'route': AppRoutes.memberListReadonly,
-        'color': AppColors.accentPurple,
-        'hint': '',
+        'color': AppColors.secondary,
       },
       {
         'icon': Icons.manage_accounts_rounded,
         'label': 'Profil',
         'route': AppRoutes.profileMember,
-        'color': AppColors.warning,
-        'hint': '',
+        'color': AppColors.accentPurple,
+      },
+      {
+        'icon': Icons.info_outline_rounded,
+        'label': 'Divisi',
+        'route': AppRoutes.divisionInfo,
+        'color': AppColors.accentYellow,
       },
     ];
 
@@ -413,7 +440,7 @@ class HomeMemberPage extends StatelessWidget {
         crossAxisCount: 3,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.95,
+        childAspectRatio: 1.0,
       ),
       itemCount: items.length,
       itemBuilder: (_, i) {
@@ -421,19 +448,12 @@ class HomeMemberPage extends StatelessWidget {
         final color = item['color'] as Color;
         return InkWell(
           onTap: () => Get.toNamed(item['route'] as String),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(28),
           child: Container(
             decoration: BoxDecoration(
-              color: color.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: color.withOpacity(0.12), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: color.withOpacity(0.24),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: color.withOpacity(0.22), width: 1.5),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -441,31 +461,27 @@ class HomeMemberPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.18),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Icon(item['icon'] as IconData, color: color, size: 24),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
                   item['label'] as String,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     fontSize: 12,
-                    letterSpacing: -0.2,
                   ),
                 ),
-                // Sub-label kecil untuk Kegiatan & Jadwalku
-                if ((item['hint'] as String).isNotEmpty)
-                  Text(
-                    item['hint'] as String,
-                    style: TextStyle(
-                      color: color.withOpacity(0.6),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
               ],
             ),
           ),
@@ -474,39 +490,63 @@ class HomeMemberPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context,
-      {required String title, VoidCallback? onSeeAll}) {
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required Color accentColor,
+    VoidCallback? onSeeAll,
+  }) {
     final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          title,
-          style: theme.textTheme.titleLarge
-              ?.copyWith(fontWeight: FontWeight.w800, fontSize: 18),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 22),
+              child: Text(
+                subtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
         ),
         if (onSeeAll != null)
           TextButton(
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              foregroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
-            child: Row(
-              children: [
-                Text(
-                  'Lihat Semua',
-                  style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded,
-                    size: 18, color: theme.colorScheme.primary),
-              ],
-            ),
+            child: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
           ),
       ],
     );
@@ -514,18 +554,20 @@ class HomeMemberPage extends StatelessWidget {
 
   Widget _buildEmptyState(String message) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(40),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.divider.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.divider.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(28),
       ),
       child: Center(
         child: Text(
           message,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: const TextStyle(
+              color: AppColors.textSecondary, fontWeight: FontWeight.w700),
         ),
       ),
     );
   }
 }
+

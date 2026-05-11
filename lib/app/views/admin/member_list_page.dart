@@ -9,6 +9,8 @@ import '../widgets/loading_skeleton.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/admin_bottom_nav.dart';
+import '../widgets/division_filter_bar.dart';
+import '../../models/user_model.dart';
 
 class MemberListPage extends StatefulWidget {
   const MemberListPage({super.key});
@@ -46,10 +48,9 @@ class _MemberListPageState extends State<MemberListPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
@@ -63,14 +64,14 @@ class _MemberListPageState extends State<MemberListPage> {
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => Get.offNamed(AppRoutes.dashboardAdmin),
             ),
-            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
+            backgroundColor: AppColors.background,
             flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.2,
               title: Text(
                 'Daftar Anggota',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
                 ),
               ),
               titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
@@ -78,7 +79,7 @@ class _MemberListPageState extends State<MemberListPage> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
                   const SizedBox(height: 12),
@@ -86,83 +87,54 @@ class _MemberListPageState extends State<MemberListPage> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: AppColors.primary.withOpacity(0.04),
                           blurRadius: 15,
-                          offset: const Offset(0, 5),
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
                     child: TextField(
                       onChanged: controller.searchQuery.call,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: 'Cari nama atau NIM...',
-                        prefixIcon: const Icon(Icons.search_rounded),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: AppColors.primary),
                         filled: true,
-                        fillColor: theme.cardColor,
+                        fillColor: Colors.white,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(28),
+                          borderSide: const BorderSide(
+                            color: AppColors.divider,
+                            width: 1.5,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(28),
+                          borderSide: const BorderSide(
+                            color: AppColors.divider,
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(28),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
                         ),
                         contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16),
+                            const EdgeInsets.symmetric(vertical: 20),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.zero,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        'Semua',
-                        ...AppConstants.divisions,
-                      ].map((division) {
-                        return Obx(() {
-                          final isSelected =
-                              controller.selectedDivision.value == division;
-                          final color = division == 'Semua'
-                              ? colorScheme.primary
-                              : AppColors.getDivisionColor(division);
-
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: FilterChip(
-                              label: Text(division),
-                              selected: isSelected,
-                              onSelected: (_) =>
-                                  controller.filterByDivision(division),
-                              backgroundColor: color.withOpacity(0.05),
-                              selectedColor: color.withOpacity(0.15),
-                              checkmarkColor: color,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              side: BorderSide(
-                                color: isSelected
-                                    ? color.withOpacity(0.3)
-                                    : Colors.transparent,
-                                width: 1.5,
-                              ),
-                              labelStyle: TextStyle(
-                                color: isSelected
-                                    ? color
-                                    : AppColors.textSecondary,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                fontSize: 13,
-                              ),
-                            ),
-                          );
-                        });
-                      }).toList(),
-                    ),
+                  const SizedBox(height: 20),
+                  DivisionFilterBar(
+                    divisions: ['Semua', ...AppConstants.divisions],
+                    selected: controller.selectedDivision,
+                    onSelected: controller.filterByDivision,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -183,37 +155,24 @@ class _MemberListPageState extends State<MemberListPage> {
               );
             }
             return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
                     final member = controller.filteredMembers[i];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                    return MemberCard(
+                      showStatusBadge: true,
+                      member: member,
+                      onTap: () => Get.toNamed(
+                        AppRoutes.memberDetail,
+                        arguments: member,
                       ),
-                      child: MemberCard(
-                        showStatusBadge: true,
-                        member: member,
-                        onTap: () => Get.toNamed(
-                          AppRoutes.memberDetail,
-                          arguments: member,
-                        ),
-                        onEdit: () => Get.toNamed(
-                          AppRoutes.memberForm,
-                          arguments: member,
-                        ),
-                        onDelete: () =>
-                            _confirmDelete(context, controller, member.id),
+                      onEdit: () => Get.toNamed(
+                        AppRoutes.memberForm,
+                        arguments: member,
                       ),
+                      onDelete: () =>
+                          _confirmDelete(context, controller, member),
                     );
                   },
                   childCount: controller.filteredMembers.length,
@@ -232,24 +191,26 @@ class _MemberListPageState extends State<MemberListPage> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.4),
+                  color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
             child: FloatingActionButton.extended(
               onPressed: () => Get.toNamed(AppRoutes.memberForm),
-              backgroundColor: colorScheme.primary,
+              backgroundColor: AppColors.primary,
               elevation: 0,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(22)),
               icon: const Icon(Icons.add_rounded, color: Colors.white),
               label: const Text(
-                'Tambah Anggota',
+                'TAMBAH ANGGOTA',
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
+                  letterSpacing: 1,
                 ),
               ),
             ),
@@ -261,35 +222,40 @@ class _MemberListPageState extends State<MemberListPage> {
   }
 
   void _confirmDelete(
-      BuildContext context, MemberController controller, String id) {
+      BuildContext context, MemberController controller, UserModel member) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Nonaktifkan Anggota'),
-        content: const Text(
-            'Anggota ini akan dinonaktifkan dan tidak bisa login. Lanjutkan?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+        title: Text(member.isActive ? 'Nonaktifkan' : 'Aktifkan',
+            style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text(
+            'Konfirmasi status untuk ${member.fullName}?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Batal'),
+            child: const Text('BATAL',
+                style: TextStyle(
+                    fontWeight: FontWeight.w900, color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () {
               Get.back();
-              controller.deleteMember(id);
+              controller.toggleMemberStatus(member.id, !member.isActive);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: member.isActive ? AppColors.danger : AppColors.success,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
-            child: const Text('Nonaktifkan'),
+            child: Text(member.isActive ? 'NONAKTIFKAN' : 'AKTIFKAN',
+                style: const TextStyle(fontWeight: FontWeight.w900)),
           ),
         ],
       ),
     );
   }
 }
+

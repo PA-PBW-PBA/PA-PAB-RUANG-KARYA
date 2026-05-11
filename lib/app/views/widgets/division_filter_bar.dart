@@ -45,7 +45,7 @@ class DivisionFilterBar extends StatelessWidget {
               selected: isSelected,
               onSelected: (_) => onSelected(division),
               backgroundColor: color.withOpacity(0.06),
-              selectedColor: color.withOpacity(0.15),
+              selectedColor: color.withOpacity(0.24),
               checkmarkColor: color,
               padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -54,7 +54,7 @@ class DivisionFilterBar extends StatelessWidget {
               ),
               side: BorderSide(
                 color: isSelected
-                    ? color.withOpacity(0.4)
+                    ? color.withOpacity(0.24)
                     : Colors.transparent,
               ),
               labelStyle: TextStyle(

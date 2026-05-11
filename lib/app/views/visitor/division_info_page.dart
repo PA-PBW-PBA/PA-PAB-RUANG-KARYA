@@ -19,24 +19,29 @@ class DivisionInfoPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Get.back(),
+        ),
         title: Text(
           'Divisi Kami',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
         ),
         centerTitle: true,
         elevation: 0,
+        backgroundColor: AppColors.background,
       ),
       body: ListView.separated(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         physics: const BouncingScrollPhysics(),
         itemCount: AppConstants.divisions.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 20),
+        separatorBuilder: (_, __) => const SizedBox(height: 24),
         itemBuilder: (_, i) {
           final division = AppConstants.divisions[i];
           final color = AppColors.getDivisionColor(division);
-          return _ModernDivisionCard(
+          return _CreativeDivisionCard(
             division: division,
             color: color,
             description: _descriptions[division] ?? '',
@@ -47,22 +52,22 @@ class DivisionInfoPage extends StatelessWidget {
   }
 }
 
-class _ModernDivisionCard extends StatefulWidget {
+class _CreativeDivisionCard extends StatefulWidget {
   final String division;
   final Color color;
   final String description;
 
-  const _ModernDivisionCard({
+  const _CreativeDivisionCard({
     required this.division,
     required this.color,
     required this.description,
   });
 
   @override
-  State<_ModernDivisionCard> createState() => _ModernDivisionCardState();
+  State<_CreativeDivisionCard> createState() => _CreativeDivisionCardState();
 }
 
-class _ModernDivisionCardState extends State<_ModernDivisionCard> {
+class _CreativeDivisionCardState extends State<_CreativeDivisionCard> {
   bool _isExpanded = false;
 
   @override
@@ -70,46 +75,53 @@ class _ModernDivisionCardState extends State<_ModernDivisionCard> {
     final theme = Theme.of(context);
     
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.fastOutSlowIn,
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
+        color: _isExpanded ? Colors.white : widget.color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: _isExpanded ? [
           BoxShadow(
-            color: widget.color.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: widget.color.withOpacity(0.1),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
-        ],
+        ] : [],
         border: Border.all(
-          color: widget.color.withOpacity(_isExpanded ? 0.3 : 0.1),
-          width: 1.5,
+          color: widget.color.withOpacity(_isExpanded ? 0.4 : 0.1),
+          width: 2,
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // Main Header Section
+          // Header Section
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: widget.color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
+                      color: _isExpanded ? widget.color : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.color.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       _getIcon(widget.division),
-                      color: widget.color,
-                      size: 24,
+                      color: _isExpanded ? Colors.white : widget.color,
+                      size: 28,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,24 +129,33 @@ class _ModernDivisionCardState extends State<_ModernDivisionCard> {
                         Text(
                           widget.division,
                           style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w900,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
-                          'Divisi Seni UKM',
+                          'Seni & Kreativitas',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
+                            color: widget.color,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(
-                    _isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                    color: AppColors.textSecondary,
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: widget.color.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                      color: widget.color,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -144,20 +165,28 @@ class _ModernDivisionCardState extends State<_ModernDivisionCard> {
           AnimatedCrossFade(
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Divider(height: 1),
-                  const SizedBox(height: 20),
+                  Container(
+                    height: 2,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: widget.color.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   Text(
                     widget.description,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
-                      height: 1.6,
+                      height: 1.8,
+                      fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   Row(
                     children: [
                       Expanded(
@@ -165,10 +194,10 @@ class _ModernDivisionCardState extends State<_ModernDivisionCard> {
                           context, 
                           'Anggota', 
                           Icons.people_alt_rounded,
-                          () => Get.toNamed(AppRoutes.memberList, arguments: widget.division),
+                          () => Get.toNamed(AppRoutes.memberListReadonly, arguments: widget.division),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: _buildActionBtn(
                           context, 
@@ -183,7 +212,7 @@ class _ModernDivisionCardState extends State<_ModernDivisionCard> {
               ),
             ),
             crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 400),
           ),
         ],
       ),
@@ -195,24 +224,25 @@ class _ModernDivisionCardState extends State<_ModernDivisionCard> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            border: Border.all(color: widget.color.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(14),
+            color: widget.color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: widget.color.withOpacity(0.2), width: 1.5),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: widget.color),
-              const SizedBox(width: 8),
+              Icon(icon, size: 18, color: widget.color),
+              const SizedBox(width: 10),
               Text(
                 label,
                 style: TextStyle(
                   color: widget.color,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
                 ),
               ),
             ],

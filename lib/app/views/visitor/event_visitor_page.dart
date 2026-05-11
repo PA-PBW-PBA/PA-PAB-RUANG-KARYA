@@ -6,6 +6,7 @@ import '../../models/event_model.dart';
 import '../widgets/event_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/division_filter_bar.dart';
+import '../../../core/theme/app_colors.dart';
 
 class EventVisitorPage extends StatefulWidget {
   const EventVisitorPage({super.key});
@@ -21,27 +22,25 @@ class _EventVisitorPageState extends State<EventVisitorPage> {
   Widget build(BuildContext context) {
     final controller = Get.find<EventController>();
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // 1. APPBAR - Disederhanakan agar tidak menutupi filter (Hit Test)
           SliverAppBar(
             pinned: true,
             floating: false,
             elevation: 0,
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: AppColors.background,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              onPressed: () => Get.back(), // Tombol kembali
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              onPressed: () => Get.back(),
             ),
             title: Text(
               'Kegiatan UKM',
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w900,
               ),
             ),
             actions: [
@@ -49,60 +48,79 @@ class _EventVisitorPageState extends State<EventVisitorPage> {
                 onPressed: () => setState(() => _showCalendar = !_showCalendar),
                 icon: Icon(
                   _showCalendar
-                      ? Icons.view_list_rounded
-                      : Icons.calendar_month_rounded,
-                  color: colorScheme.primary,
+                      ? Icons.grid_view_rounded
+                      : Icons.calendar_today_rounded,
+                  color: AppColors.primary,
+                  size: 22,
                 ),
               ),
+              const SizedBox(width: 8),
             ],
           ),
-
-          // 2. SEARCH & FILTER SECTION
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Search Bar
-                  TextField(
-                    onChanged: controller.searchQuery.call,
-                    decoration: InputDecoration(
-                      hintText: 'Cari kegiatan...',
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      filled: true,
-                      fillColor: theme.cardColor,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.06),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      onChanged: controller.searchQuery.call,
+                      decoration: InputDecoration(
+                        hintText: 'Cari kegiatan seru...',
+                        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 18),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                  // Chip Filter Divisi — pakai widget reusable DivisionFilterBar
+                  // Chip Filter Divisi
                   Obx(() => DivisionFilterBar(
                     divisions: controller.divisions.toList(),
                     selected: controller.selectedDivision,
                     onSelected: controller.filterByDivision,
                   )),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Kalender / List Header
                   AnimatedCrossFade(
-                    duration: const Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 400),
                     crossFadeState: _showCalendar
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
                     firstChild: Column(
                       children: [
-                        Card(
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            side: BorderSide(
-                                color: theme.dividerColor.withOpacity(0.1)),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(32),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.06),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                            border: Border.all(color: AppColors.divider),
                           ),
                           child: Obx(() => TableCalendar(
                                 firstDay: DateTime.utc(2020, 1, 1),
@@ -117,37 +135,54 @@ class _EventVisitorPageState extends State<EventVisitorPage> {
                                   controller.selectedDay.value = selectedDay;
                                   controller.focusedDay.value = focusedDay;
                                 },
-                                calendarStyle: CalendarStyle(
+                                calendarStyle: const CalendarStyle(
                                   selectedDecoration: BoxDecoration(
-                                      color: colorScheme.primary,
+                                      color: AppColors.secondary,
                                       shape: BoxShape.circle),
                                   todayDecoration: BoxDecoration(
-                                      color:
-                                          colorScheme.primary.withOpacity(0.2),
+                                      color: AppColors.divider,
                                       shape: BoxShape.circle),
                                   todayTextStyle:
-                                      TextStyle(color: colorScheme.primary),
+                                      TextStyle(color: AppColors.textPrimary),
                                   markerDecoration: BoxDecoration(
-                                      color: colorScheme.secondary,
+                                      color: AppColors.accentPink,
                                       shape: BoxShape.circle),
+                                  outsideDaysVisible: false,
                                 ),
                                 headerStyle: const HeaderStyle(
                                   formatButtonVisible: false,
                                   titleCentered: true,
+                                  titleTextStyle: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               )),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                       ],
                     ),
                     secondChild: Obx(() {
                       final count = controller.filteredEvents.length;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          '$count kegiatan ditemukan',
-                          style: theme.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: AppColors.accentNeonBlue,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '$count kegiatan ditemukan',
+                              style: theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w900),
+                            ),
+                          ],
                         ),
                       );
                     }),
@@ -175,12 +210,24 @@ class _EventVisitorPageState extends State<EventVisitorPage> {
             }
 
             return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, i) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: EventCard(event: events[i]),
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.04),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: EventCard(event: events[i]),
+                    ),
                   ),
                   childCount: events.length,
                 ),

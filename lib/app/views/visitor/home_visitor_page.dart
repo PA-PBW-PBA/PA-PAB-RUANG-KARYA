@@ -16,67 +16,70 @@ class HomeVisitorPage extends StatelessWidget {
     final eventController = Get.find<EventController>();
     final galleryController = Get.find<GalleryController>();
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 70,
+            expandedHeight: 80,
             floating: true,
             pinned: false,
             elevation: 0,
-            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.8),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(color: Colors.transparent),
-            ),
+            backgroundColor: AppColors.background,
             title: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Image.asset(
                     'assets/images/logo_mark.png',
-                    height: 24,
-                    errorBuilder: (_, __, ___) => Icon(
+                    height: 28,
+                    errorBuilder: (_, __, ___) => const Icon(
                       Icons.palette_rounded,
-                      color: colorScheme.primary,
-                      size: 20,
+                      color: AppColors.primary,
+                      size: 24,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  AppConstants.appName,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppConstants.appName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    Text(
+                      'Seni & Kreativitas',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.secondary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 16),
-                child: TextButton(
+                child: IconButton(
                   onPressed: () => Get.toNamed(AppRoutes.login),
-                  style: TextButton.styleFrom(
-                    foregroundColor: colorScheme.primary,
-                    backgroundColor: colorScheme.primary.withOpacity(0.08),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  icon: const Icon(Icons.login_rounded, color: AppColors.primary),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary.withOpacity(0.05),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -84,23 +87,24 @@ class HomeVisitorPage extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 12),
-                  _buildModernHero(context),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
+                  _buildCreativeHero(context),
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
                     title: 'Kegiatan Terdekat',
-                    subtitle: 'Jangan lewatkan momen seru kami',
+                    subtitle: 'Eksplorasi kegiatan bersama kami',
+                    accentColor: AppColors.accentPink,
                     onSeeAll: () {
-                      eventController.resetFilters(); // <--- TAMBAHKAN INI
+                      eventController.resetFilters();
                       Get.toNamed(AppRoutes.eventVisitor);
                     },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (eventController.isLoading.value) {
                       return _buildShimmerPlaceholder();
@@ -109,23 +113,23 @@ class HomeVisitorPage extends StatelessWidget {
                       return _buildEmptyState('Belum ada kegiatan terdekat');
                     }
                     return SizedBox(
-                      height: 180,
+                      height: 200,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        separatorBuilder: (_, __) => const SizedBox(width: 20),
                         itemBuilder: (_, i) => Container(
-                          width: 280,
+                          width: 300,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 12,
+                                color: AppColors.primary.withOpacity(0.06),
+                                blurRadius: 15,
                                 spreadRadius: 1,
-                                offset: const Offset(0, 4),
+                                offset: const Offset(0, 10),
                               ),
                             ],
                           ),
@@ -134,47 +138,48 @@ class HomeVisitorPage extends StatelessWidget {
                       ),
                     );
                   }),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
                     title: 'Eksplorasi Divisi',
-                    subtitle: 'Temukan minat dan bakatmu di sini',
+                    subtitle: 'Temukan ruang karyamu di sini',
+                    accentColor: AppColors.accentPurple,
                   ),
-                  const SizedBox(height: 8),
-                  _buildModernDivisionGrid(context),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+                  _buildCreativeDivisionGrid(context),
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
-                    title: 'Karya Terbaru',
-                    subtitle: 'Inspirasi tanpa batas dari anggota kami',
+                    title: 'Galeri Terbaru',
+                    subtitle: 'Inspirasi karya anggota',
+                    accentColor: AppColors.accentOrange,
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryVisitor),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
                       return _buildEmptyState('Galeri masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.only(bottom: 20),
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.85,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 0.8,
                       ),
                       itemCount: galleryController.gallery.take(4).length,
                       itemBuilder: (_, i) => Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: AppColors.primary.withOpacity(0.05),
                               blurRadius: 15,
-                              spreadRadius: 1,
-                              offset: const Offset(0, 6),
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
@@ -183,7 +188,7 @@ class HomeVisitorPage extends StatelessWidget {
                       ),
                     );
                   }),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
@@ -191,41 +196,43 @@ class HomeVisitorPage extends StatelessWidget {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        width: double.infinity,
-        height: 60,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Container(
+          height: 64,
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withOpacity(0.4),
-                blurRadius: 25,
-                spreadRadius: -2,
+                color: AppColors.primary.withOpacity(0.2),
+                blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: FloatingActionButton.extended(
+          child: ElevatedButton(
             onPressed: () => Get.toNamed(AppRoutes.login),
-            backgroundColor: colorScheme.primary,
-            elevation:
-                0, // Elevation diatur ke 0 karena kita pakai Custom Shadow di Container
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            label: Row(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              elevation: 0,
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Sudah Anggota? Masuk Sekarang',
+                Text(
+                  'Mulai Berkarya Sekarang',
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_rounded,
-                    size: 20, color: Colors.white),
+                SizedBox(width: 12),
+                Icon(Icons.arrow_forward_rounded, color: Colors.white),
               ],
             ),
           ),
@@ -234,91 +241,93 @@ class HomeVisitorPage extends StatelessWidget {
     );
   }
 
-  Widget _buildModernHero(BuildContext context) {
+  Widget _buildCreativeHero(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
-      height: 200,
+      height: 250,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorScheme.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.4),
-            blurRadius: 25,
-            spreadRadius: 2,
-            offset: const Offset(0, 12),
+            color: AppColors.primary.withOpacity(0.25),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
+          // Decorative Abstract Shapes
           Positioned(
-            top: -40,
-            right: -40,
+            top: -50,
+            right: -50,
             child: CircleAvatar(
-              radius: 80,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              radius: 100,
+              backgroundColor: AppColors.secondary.withOpacity(0.15),
             ),
           ),
           Positioned(
-            bottom: -20,
-            left: 20,
-            child: CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.white.withOpacity(0.05),
+            bottom: -30,
+            left: -20,
+            child: Transform.rotate(
+              angle: 0.5,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: AppColors.accentPink.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(28),
+            padding: const EdgeInsets.all(32),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Text(
-                    'UKM Seni & Kreativitas',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
-                    ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(width: 8),
+                      Text(
+                        'UKM Seni & Kreativitas',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Ekspresikan Dirimu di\nRuang Karya',
+                  'Ekspresikan Dirimu di Ruang Karya',
                   style: theme.textTheme.headlineLarge?.copyWith(
                     color: Colors.white,
                     fontSize: 24,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                     height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     _buildHeroStat('400+', 'Anggota'),
-                    Container(
-                      height: 20,
-                      width: 1,
-                      margin: const EdgeInsets.symmetric(horizontal: 12),
-                      color: Colors.white24,
-                    ),
+                    const SizedBox(width: 24),
                     _buildHeroStat('4', 'Divisi'),
                   ],
                 ),
@@ -331,23 +340,23 @@ class HomeVisitorPage extends StatelessWidget {
   }
 
   Widget _buildHeroStat(String value, String label) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
           ),
         ),
-        const SizedBox(width: 4),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withOpacity(0.6),
             fontSize: 12,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -358,6 +367,7 @@ class HomeVisitorPage extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String subtitle,
+    required Color accentColor,
     VoidCallback? onSeeAll,
   }) {
     final theme = Theme.of(context);
@@ -365,64 +375,68 @@ class HomeVisitorPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                fontSize: 20,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: accentColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 13,
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.only(left: 22),
+                child: Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 11,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (onSeeAll != null)
           TextButton(
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+              foregroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Row(
-              children: [
-                Text(
-                  'Lihat Semua',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded,
-                    size: 18, color: theme.colorScheme.primary),
-              ],
-            ),
+            child: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
           ),
       ],
     );
   }
 
-  Widget _buildModernDivisionGrid(BuildContext context) {
+  Widget _buildCreativeDivisionGrid(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.3,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
+        childAspectRatio: 0.82,
       ),
       itemCount: AppConstants.divisions.length,
       itemBuilder: (_, i) {
@@ -431,31 +445,30 @@ class HomeVisitorPage extends StatelessWidget {
         return GestureDetector(
           onTap: () => Get.toNamed(AppRoutes.divisionInfo),
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: color.withOpacity(0.15), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: color.withOpacity(0.24),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: color.withOpacity(0.15), width: 2),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.12),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  child:
-                      Icon(_getDivisionIcon(division), color: color, size: 20),
+                  child: Icon(_getDivisionIcon(division), color: color, size: 24),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,17 +477,18 @@ class HomeVisitorPage extends StatelessWidget {
                       division,
                       style: TextStyle(
                         color: color,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Jelajahi Karya',
+                      'LIHAT DETAIL',
                       style: TextStyle(
                         color: color.withOpacity(0.6),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1,
                       ),
                     ),
                   ],
@@ -504,11 +518,11 @@ class HomeVisitorPage extends StatelessWidget {
 
   Widget _buildShimmerPlaceholder() {
     return Container(
-      height: 100,
+      height: 120,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.divider.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.divider.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
@@ -516,16 +530,16 @@ class HomeVisitorPage extends StatelessWidget {
 
   Widget _buildEmptyState(String message) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(40),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.divider.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.divider.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(28),
       ),
       child: Center(
         child: Text(
           message,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
         ),
       ),
     );

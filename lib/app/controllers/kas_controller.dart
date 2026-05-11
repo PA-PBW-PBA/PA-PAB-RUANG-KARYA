@@ -10,6 +10,7 @@ class KasController extends GetxController {
   final isLoading = false.obs;
   final errorMessage = ''.obs;
   final kasList = <KasModel>[].obs;
+  final isFabVisible = true.obs;
 
   // --- GETTERS ---
   double get totalPemasukan =>
@@ -27,6 +28,20 @@ class KasController extends GetxController {
       symbol: 'Rp ',
       decimalDigits: 0,
     ).format(amount);
+  }
+
+  String formatCompactCurrency(double amount) {
+    if (amount >= 1000000000000) {
+      return 'Rp${(amount / 1000000000000).toStringAsFixed(1)} T';
+    } else if (amount >= 1000000000) {
+      return 'Rp${(amount / 1000000000).toStringAsFixed(1)} M';
+    } else if (amount >= 1000000) {
+      return 'Rp${(amount / 1000000).toStringAsFixed(1)} JT';
+    } else if (amount >= 1000) {
+      return 'Rp${(amount / 1000).toStringAsFixed(1)} RB';
+    } else {
+      return formatCurrency(amount);
+    }
   }
 
   @override

@@ -6,6 +6,7 @@ import '../../models/event_model.dart';
 import '../widgets/event_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/member_bottom_nav.dart';
+import '../../../core/theme/app_colors.dart';
 
 class EventMemberPage extends StatelessWidget {
   const EventMemberPage({super.key});
@@ -47,7 +48,7 @@ class EventMemberPage extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
               child: Column(
                 children: [
                   const SizedBox(height: 12),
@@ -117,24 +118,29 @@ class EventMemberPage extends StatelessWidget {
                           CalendarFormat.month: 'Month',
                         },
                         eventLoader: (day) => controller.getEventsForDay(day),
-                        calendarStyle: CalendarStyle(
+                        calendarStyle: const CalendarStyle(
                           todayDecoration: BoxDecoration(
-                            color: colorScheme.primary.withOpacity(0.15),
+                            color: AppColors.secondary,
                             shape: BoxShape.circle,
                           ),
                           todayTextStyle: TextStyle(
-                            color: colorScheme.primary,
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                           selectedDecoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
                           markerDecoration: BoxDecoration(
-                            color: colorScheme.secondary,
+                            color: AppColors.accentPink,
                             shape: BoxShape.circle,
                           ),
                           outsideDaysVisible: false,
+                          defaultTextStyle:
+                              TextStyle(fontWeight: FontWeight.w600),
+                          weekendTextStyle: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.danger),
                         ),
                         headerStyle: HeaderStyle(
                           formatButtonVisible: false,
@@ -198,11 +204,14 @@ class EventMemberPage extends StatelessWidget {
             final List<EventModel> events = controller.filteredEvents;
 
             if (events.isEmpty) {
-              return const SliverFillRemaining(
-                child: EmptyState(
-                  message: 'Tidak ada kegiatan di tanggal ini',
-                  subtitle: 'Pilih tanggal lain di kalender',
-                  icon: Icons.event_busy_rounded,
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 60),
+                  child: EmptyState(
+                    message: 'Tidak ada kegiatan di tanggal ini',
+                    subtitle: 'Pilih tanggal lain di kalender',
+                    icon: Icons.event_busy_rounded,
+                  ),
                 ),
               );
             }

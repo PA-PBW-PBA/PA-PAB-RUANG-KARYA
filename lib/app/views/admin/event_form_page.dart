@@ -528,7 +528,7 @@ class _EventImagesSection extends StatelessWidget {
               height: 80,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: AppColors.surfaceTeal.withOpacity(0.5),
+                color: AppColors.accentNeonBlue.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                     color: colorScheme.primary.withOpacity(0.2),

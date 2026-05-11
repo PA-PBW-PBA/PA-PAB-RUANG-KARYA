@@ -12,37 +12,44 @@ class MemberBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       {
-        'icon': Icons.home_outlined,
+        'icon': Icons.home_rounded,
+        'activeIcon': Icons.home_rounded,
         'label': 'Home',
         'route': AppRoutes.homeMember,
       },
       {
-        'icon': Icons.event_outlined,
+        'icon': Icons.event_note_rounded,
+        'activeIcon': Icons.event_note_rounded,
         'label': 'Kegiatan',
         'route': AppRoutes.eventMember,
       },
       {
-        'icon': Icons.photo_library_outlined,
+        'icon': Icons.auto_awesome_motion_rounded,
+        'activeIcon': Icons.auto_awesome_motion_rounded,
         'label': 'Galeri',
         'route': AppRoutes.galleryMember,
       },
       {
-        'icon': Icons.person_outline,
+        'icon': Icons.person_rounded,
+        'activeIcon': Icons.person_rounded,
         'label': 'Profil',
         'route': AppRoutes.profileMember,
       },
     ];
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor.withOpacity(0.95),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: Theme.of(context).dividerColor,
-          width: 0.5,
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -58,37 +65,34 @@ class MemberBottomNav extends StatelessWidget {
               }
             },
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutExpo,
               padding: EdgeInsets.symmetric(
-                horizontal: isActive ? 16 : 12,
-                vertical: 8,
+                horizontal: isActive ? 12 : 8,
+                vertical: 10,
               ),
               decoration: BoxDecoration(
                 color: isActive
-                    ? Theme.of(context).colorScheme.secondary
+                    ? Colors.white.withOpacity(0.15)
                     : Colors.transparent,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
                   Icon(
-                    item['icon'] as IconData,
-                    size: 20,
-                    color: isActive
-                        ? AppColors.textPrimary
-                        : Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.5),
+                    (isActive ? item['activeIcon'] : item['icon']) as IconData,
+                    size: 24,
+                    color: isActive ? Colors.white : Colors.white.withOpacity(0.5),
                   ),
-                  if (isActive) ...[
-                    const SizedBox(width: 6),
+                  if (isActive && MediaQuery.of(context).size.width > 380) ...[
+                    const SizedBox(width: 8),
                     Text(
                       item['label'] as String,
                       style: const TextStyle(
-                        color: AppColors.textPrimary,
+                        color: Colors.white,
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -101,3 +105,4 @@ class MemberBottomNav extends StatelessWidget {
     );
   }
 }
+

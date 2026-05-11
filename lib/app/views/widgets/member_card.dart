@@ -25,50 +25,49 @@ class MemberCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: theme.dividerColor.withOpacity(0.5),
-          width: 1,
+          color: AppColors.divider,
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(28),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
                   // Avatar
                   Stack(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(2),
+                        padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: colorScheme.primary.withOpacity(0.2),
+                            color: AppColors.primary.withOpacity(0.08),
                             width: 1.5,
                           ),
                         ),
                         child: CircleAvatar(
-                          radius: 26,
-                          backgroundColor: colorScheme.primary.withOpacity(0.1),
+                          radius: 28,
+                          backgroundColor: AppColors.primary.withOpacity(0.05),
                           backgroundImage: member.avatarUrl != null
                               ? CachedNetworkImageProvider(member.avatarUrl!)
                               : null,
@@ -77,38 +76,37 @@ class MemberCard extends StatelessWidget {
                                   member.fullName.isNotEmpty
                                       ? member.fullName[0].toUpperCase()
                                       : '?',
-                                  style: TextStyle(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 20,
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 22,
                                   ),
                                 )
                               : null,
                         ),
                       ),
-                      // Dot status aktif/nonaktif
                       if (showStatusBadge)
                         Positioned(
-                          bottom: 2,
-                          right: 2,
+                          bottom: 4,
+                          right: 4,
                           child: Container(
-                            width: 11,
-                            height: 11,
+                            width: 14,
+                            height: 14,
                             decoration: BoxDecoration(
                               color: member.isActive
                                   ? AppColors.success
-                                  : AppColors.accentRed,
+                                  : AppColors.danger,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: theme.cardColor,
-                                width: 1.5,
+                                color: Colors.white,
+                                width: 2.5,
                               ),
                             ),
                           ),
                         ),
                     ],
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 18),
 
                   // Info Section
                   Expanded(
@@ -121,32 +119,33 @@ class MemberCard extends StatelessWidget {
                               child: Text(
                                 member.fullName,
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.2,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.textPrimary,
+                                  fontSize: 16,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            // Badge teks aktif/nonaktif — hanya di view yang perlu
                             if (showStatusBadge)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
+                                    horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: member.isActive
-                                      ? AppColors.success.withOpacity(0.12)
-                                      : AppColors.accentRed.withOpacity(0.12),
+                                      ? AppColors.success.withOpacity(0.1)
+                                      : AppColors.danger.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  member.isActive ? 'Aktif' : 'Nonaktif',
+                                  member.isActive ? 'AKTIF' : 'NONAKTIF',
                                   style: TextStyle(
                                     color: member.isActive
                                         ? AppColors.success
-                                        : AppColors.accentRed,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
+                                        : AppColors.danger,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                               ),
@@ -155,38 +154,48 @@ class MemberCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Text(
-                              member.nim,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                            Expanded(
+                              child: Text(
+                                member.nim,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Container(
-                              width: 3,
-                              height: 3,
+                              width: 4,
+                              height: 4,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.textSecondary,
+                                color: AppColors.divider,
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Angkatan ${member.angkatan ?? '-'}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Angkatan ${member.angkatan ?? '-'}',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        // Chip kompak — tidak overflow
+                        const SizedBox(height: 12),
                         DivisionChipRow(
                           divisions: member.divisions,
                           maxVisible: 3,
-                          size: 24,
+                          size: 26,
                         ),
                       ],
                     ),
@@ -195,14 +204,16 @@ class MemberCard extends StatelessWidget {
                   // Action Menu
                   if (onEdit != null || onDelete != null)
                     PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert_rounded,
-                        color: AppColors.textSecondary.withOpacity(0.6),
-                        size: 20,
+                      icon: const Icon(
+                        Icons.more_horiz_rounded,
+                        color: AppColors.textSecondary,
+                        size: 24,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                       ),
+                      elevation: 10,
+                      shadowColor: Colors.black.withOpacity(0.2),
                       onSelected: (value) {
                         if (value == 'edit') onEdit?.call();
                         if (value == 'delete') onDelete?.call();
@@ -212,10 +223,14 @@ class MemberCard extends StatelessWidget {
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(Icons.edit_outlined,
-                                  size: 18, color: colorScheme.primary),
-                              const SizedBox(width: 10),
-                              const Text('Edit Profil'),
+                              Icon(Icons.edit_rounded,
+                                  size: 20, color: AppColors.secondary),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Edit Profil',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w700, fontSize: 14),
+                              ),
                             ],
                           ),
                         ),
@@ -223,11 +238,17 @@ class MemberCard extends StatelessWidget {
                           value: 'delete',
                           child: Row(
                             children: [
-                              const Icon(Icons.person_off_outlined,
-                                  size: 18, color: AppColors.accentRed),
-                              const SizedBox(width: 10),
-                              const Text('Nonaktifkan',
-                                  style: TextStyle(color: AppColors.accentRed)),
+                              Icon(Icons.person_off_rounded,
+                                  size: 20, color: AppColors.danger),
+                              const SizedBox(width: 12),
+                              Text(
+                                member.isActive ? 'Nonaktifkan' : 'Aktifkan',
+                                style: const TextStyle(
+                                  color: AppColors.danger,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -242,3 +263,4 @@ class MemberCard extends StatelessWidget {
     );
   }
 }
+

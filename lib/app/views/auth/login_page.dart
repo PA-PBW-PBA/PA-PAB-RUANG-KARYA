@@ -170,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.accentLime.withOpacity(0.15),
+                  color: AppColors.accentPink.withValues(alpha: 0.15)
                 ),
               ),
             ),

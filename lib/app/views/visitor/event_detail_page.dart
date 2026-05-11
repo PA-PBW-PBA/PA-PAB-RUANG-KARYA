@@ -14,35 +14,32 @@ class EventDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final EventModel event = Get.arguments as EventModel;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     final session = Supabase.instance.client.auth.currentSession;
     final isLoggedIn = session != null;
 
-    // Tentukan warna header dari divisi pertama
     final headerColor = event.divisions.isNotEmpty
         ? AppColors.getDivisionColor(event.divisions.first)
-        : colorScheme.primary;
+        : AppColors.primary;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // ── AppBar dengan foto atau gradient pastel ───────────────
           SliverAppBar(
-            expandedHeight: event.imageUrls.isNotEmpty ? 280 : 220,
+            expandedHeight: event.imageUrls.isNotEmpty ? 300 : 220,
             pinned: true,
             stretch: true,
             elevation: 0,
-            backgroundColor: headerColor,
+            backgroundColor: AppColors.primary,
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                backgroundColor: Colors.black26,
+                backgroundColor: Colors.white.withOpacity(0.2),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded,
-                      color: Colors.white, size: 20),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white, size: 18),
                   onPressed: () => Get.back(),
                 ),
               ),
@@ -60,13 +57,12 @@ class EventDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // — Badge status + divisi
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
                         _StatusBadge(isPublic: event.isPublic),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 12),
                         ...event.divisions.map((d) => Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: DivisionBadge(division: d),
@@ -76,52 +72,56 @@ class EventDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // — Judul
                   Text(
                     event.title,
                     style: theme.textTheme.headlineLarge?.copyWith(
-                      fontSize: 24,
+                      fontSize: 30,
                       fontWeight: FontWeight.w900,
-                      height: 1.2,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 32),
 
-                  // — Info jadwal
-                  _SectionLabel(label: 'Jadwal Pelaksanaan'),
+                  _SectionLabel(label: 'Detail Kegiatan', color: AppColors.secondary),
                   const SizedBox(height: 16),
                   _InfoCard(event: event),
                   const SizedBox(height: 32),
 
-                  // — Foto Kegiatan (jika ada lebih dari 1 foto, tampilkan grid)
                   if (event.imageUrls.length > 1) ...[
-                    _SectionLabel(label: 'Foto Kegiatan'),
-                    const SizedBox(height: 12),
+                    _SectionLabel(label: 'Dokumentasi', color: AppColors.accentPink),
+                    const SizedBox(height: 16),
                     _EventPhotoGrid(imageUrls: event.imageUrls),
                     const SizedBox(height: 32),
                   ],
 
-                  // — Deskripsi
                   if (event.description != null &&
                       event.description!.isNotEmpty) ...[
-                    _SectionLabel(label: 'Deskripsi Kegiatan'),
-                    const SizedBox(height: 12),
+                    _SectionLabel(label: 'Deskripsi', color: AppColors.accentPurple),
+                    const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceYellow,
-                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: AppColors.divider, width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.04),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
                       child: Text(
                         event.description!,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.6,
+                          fontSize: 15,
+                          height: 1.8,
                         ),
                       ),
                     ),
                   ],
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
@@ -130,40 +130,54 @@ class EventDetailPage extends StatelessWidget {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: isLoggedIn
-              ? ElevatedButton.icon(
-                  onPressed: () => Get.toNamed(AppRoutes.eventMember),
-                  icon: const Icon(Icons.calendar_month_rounded,
-                      color: Colors.white),
-                  label: const Text('Lihat di Jadwalku',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                )
-              : ElevatedButton.icon(
-                  onPressed: () => Get.toNamed(AppRoutes.login),
-                  icon: const Icon(Icons.login_rounded, color: Colors.white),
-                  label: const Text('Login untuk Ikuti Kegiatan',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          child: Container(
+            height: 64,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () => isLoggedIn 
+                  ? Get.toNamed(AppRoutes.eventMember) 
+                  : Get.toNamed(AppRoutes.login),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(isLoggedIn ? Icons.calendar_month_rounded : Icons.login_rounded, 
+                      color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text(
+                    isLoggedIn ? 'Lihat di Jadwalku' : 'Login untuk Ikuti',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-// ======================================================
-// HERO IMAGE — foto pertama sebagai hero (bila ada)
-// ======================================================
 class _EventHeroImage extends StatelessWidget {
   final List<String> imageUrls;
   const _EventHeroImage({required this.imageUrls});
@@ -177,14 +191,11 @@ class _EventHeroImage extends StatelessWidget {
           imageUrl: imageUrls.first,
           fit: BoxFit.cover,
           placeholder: (_, __) => Container(color: AppColors.divider),
-          errorWidget: (_, __, ___) => _EventHeroGradient(
-              color: Theme.of(context).colorScheme.primary),
         ),
-        // Gradient overlay supaya teks di AppBar tetap terbaca
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
+              colors: [Colors.black.withOpacity(0.6), Colors.transparent, Colors.black.withOpacity(0.4)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -201,66 +212,58 @@ class _EventHeroGradient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color, AppColors.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primary, color],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        Center(
-          child: Icon(
-            Icons.event_available_rounded,
-            size: 80,
-            color: Colors.white.withOpacity(0.2),
-          ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.edit_calendar_rounded,
+          size: 80,
+          color: Colors.white.withOpacity(0.15),
         ),
-      ],
+      ),
     );
   }
 }
 
-// ======================================================
-// GRID FOTO KEGIATAN
-// ======================================================
 class _EventPhotoGrid extends StatelessWidget {
   final List<String> imageUrls;
   const _EventPhotoGrid({required this.imageUrls});
 
   @override
   Widget build(BuildContext context) {
-    // Tampilkan maks 6 foto
-    final shown = imageUrls.skip(1).take(5).toList();
+    final shown = imageUrls.skip(1).take(3).toList();
+    if (shown.isEmpty) return const SizedBox.shrink();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 1,
-      ),
-      itemCount: shown.length,
-      itemBuilder: (context, i) {
-        return GestureDetector(
-          onTap: () => _showFullImage(context, shown[i]),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: CachedNetworkImage(
-              imageUrl: shown[i],
-              fit: BoxFit.cover,
-              placeholder: (_, __) =>
-                  Container(color: AppColors.divider),
+    return Row(
+      children: shown.map((url) => Expanded(
+        child: GestureDetector(
+          onTap: () => _showFullImage(context, url),
+          child: Container(
+            margin: const EdgeInsets.only(right: 12),
+            height: 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              image: DecorationImage(
+                image: CachedNetworkImageProvider(url),
+                fit: BoxFit.cover,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      )).toList(),
     );
   }
 
@@ -269,30 +272,20 @@ class _EventPhotoGrid extends StatelessWidget {
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Stack(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: InteractiveViewer(
-                maxScale: 5.0,
-                child: CachedNetworkImage(
-                  imageUrl: url,
-                  fit: BoxFit.contain,
-                ),
-              ),
+              borderRadius: BorderRadius.circular(32),
+              child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
             ),
             Positioned(
-              top: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: () => Get.back(),
-                child: const CircleAvatar(
+              top: 16,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Get.back(),
+                icon: const CircleAvatar(
                   backgroundColor: Colors.black54,
-                  radius: 18,
-                  child: Icon(Icons.close_rounded,
-                      color: Colors.white, size: 20),
+                  child: Icon(Icons.close_rounded, color: Colors.white),
                 ),
               ),
             ),
@@ -303,22 +296,31 @@ class _EventPhotoGrid extends StatelessWidget {
   }
 }
 
-// ======================================================
-// REUSABLE WIDGETS DALAM FILE INI
-// ======================================================
-
 class _SectionLabel extends StatelessWidget {
   final String label;
-  const _SectionLabel({required this.label});
+  final Color color;
+  const _SectionLabel({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
             color: AppColors.textPrimary,
+            letterSpacing: -0.5,
           ),
+        ),
+      ],
     );
   }
 }
@@ -329,29 +331,22 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isPublic ? AppColors.success : AppColors.primary;
+    final color = isPublic ? AppColors.success : AppColors.accentPink;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.2), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isPublic ? Icons.public_rounded : Icons.lock_rounded,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 6),
+          Icon(isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 14, color: color),
+          const SizedBox(width: 8),
           Text(
-            isPublic ? 'Publik' : 'Internal',
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-            ),
+            isPublic ? 'PUBLIK' : 'INTERNAL',
+            style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
           ),
         ],
       ),
@@ -365,43 +360,28 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: AppColors.divider, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          _InfoRow(
-            context: context,
-            icon: Icons.calendar_today_rounded,
-            label: 'Tanggal',
-            value: _formatDate(event.startTime),
-            color: colorScheme.primary,
-          ),
-          Divider(height: 1, indent: 60, color: AppColors.divider),
-          _InfoRow(
-            context: context,
-            icon: Icons.access_time_rounded,
-            label: 'Waktu',
-            value:
-                '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)} WIB',
-            color: colorScheme.primary,
-          ),
+          _InfoRow(icon: Icons.calendar_today_rounded, label: 'TANGGAL', value: _formatDate(event.startTime), color: AppColors.secondary),
+          const Divider(height: 1, indent: 70, color: AppColors.divider),
+          _InfoRow(icon: Icons.access_time_rounded, label: 'WAKTU', value: '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)} WIB', color: AppColors.accentPink),
           if (event.location != null && event.location!.isNotEmpty) ...[
-            Divider(height: 1, indent: 60, color: AppColors.divider),
-            _InfoRow(
-              context: context,
-              icon: Icons.location_on_rounded,
-              label: 'Lokasi',
-              value: event.location!,
-              color: colorScheme.primary,
-            ),
+            const Divider(height: 1, indent: 70, color: AppColors.divider),
+            _InfoRow(icon: Icons.location_on_rounded, label: 'LOKASI', value: event.location!, color: AppColors.accentPurple),
           ],
         ],
       ),
@@ -409,62 +389,40 @@ class _InfoCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime date) =>
-      '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  String _formatTime(DateTime date) => '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 }
 
 class _InfoRow extends StatelessWidget {
-  final BuildContext context;
   final IconData icon;
   final String label;
   final String value;
   final Color color;
 
-  const _InfoRow({
-    required this.context,
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _InfoRow({required this.icon, required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 20, color: color),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+            child: Icon(icon, size: 22, color: color),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary)),
+                Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                const SizedBox(height: 4),
+                Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               ],
             ),
           ),

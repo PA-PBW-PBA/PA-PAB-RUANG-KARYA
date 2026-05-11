@@ -12,121 +12,117 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.eventDetail, arguments: event),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: Theme.of(context).dividerColor,
-            width: 0.5,
+            color: AppColors.divider,
+            width: 1.5,
           ),
         ),
         child: Row(
           children: [
-            // Thumbnail
+            // Thumbnail / Icon
             Container(
-              width: 72,
-              height: 72,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                Icons.event,
-                color: Theme.of(context).colorScheme.primary,
-                size: 28,
+              child: const Icon(
+                Icons.event_rounded,
+                color: AppColors.primary,
+                size: 32,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Badge internal
-                  if (!event.isPublic) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.4),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.lock_outline,
-                              size: 10, color: AppColors.primary),
-                          const SizedBox(width: 3),
-                          Text('Internal',
-                              style: TextStyle(
+                  Row(
+                    children: [
+                      if (!event.isPublic) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.lock_rounded, size: 10, color: AppColors.primary),
+                              SizedBox(width: 4),
+                              Text(
+                                'Internal',
+                                style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 10,
-                                  fontWeight: FontWeight.w600)),
-                        ],
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Text(
+                          _formatDate(event.startTime),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
-
-                  // Judul — tidak dipotong paksa, pakai ellipsis wajar
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     event.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      color: AppColors.textPrimary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
-
-                  // Tanggal
+                  const SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_outlined,
-                          size: 12,
-                          color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Text(_formatDate(event.startTime),
-                          style: Theme.of(context).textTheme.bodySmall),
+                      const Icon(Icons.location_on_rounded, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          event.location ?? 'Online / TBA',
+                          style: theme.textTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-
-                  // Lokasi
-                  if (event.location != null && event.location!.isNotEmpty)
-                    Row(
-                      children: [
-                        Icon(Icons.location_on_outlined,
-                            size: 12,
-                            color: Theme.of(context).colorScheme.primary),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(event.location!,
-                              style: Theme.of(context).textTheme.bodySmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 8),
-
-                  // FIX #3: Ganti Wrap(DivisionBadge) → DivisionChipRow
-                  // agar chip kompak tidak overflow ke bawah.
+                  const SizedBox(height: 12),
                   DivisionChipRow(
                     divisions: event.divisions,
-                    maxVisible: 3,
-                    size: 22,
+                    maxVisible: 2,
+                    size: 24,
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, size: 20),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.divider),
           ],
         ),
       ),
@@ -134,8 +130,7 @@ class EventCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.year}';
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

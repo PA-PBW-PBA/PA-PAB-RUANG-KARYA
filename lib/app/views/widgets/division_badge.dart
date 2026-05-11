@@ -16,17 +16,19 @@ class DivisionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = AppColors.getDivisionColor(division);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(999),
+        color: color.withOpacity(0.24),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.15), width: 1.5),
       ),
       child: Text(
-        division,
+        division.toUpperCase(),
         style: TextStyle(
-          color: Colors.white,
+          color: color,
           fontSize: fontSize,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -35,9 +37,6 @@ class DivisionBadge extends StatelessWidget {
 
 /// Chip kompak huruf singkatan — dipakai di kartu anggota & event card
 /// agar tidak overflow saat ada banyak divisi.
-///
-/// Contoh: divisions = ['Musik','Tari','DKV','Kreatif Event']
-///   → tampil 3 chip (M, T, D) + chip "+1"
 class DivisionChipRow extends StatelessWidget {
   final List<String> divisions;
 
@@ -56,7 +55,6 @@ class DivisionChipRow extends StatelessWidget {
 
   /// Ambil singkatan 1 huruf dari nama divisi
   static String _abbrev(String division) {
-    // Khusus: "Kreatif Event" → "KE"
     final words = division.trim().split(RegExp(r'\s+'));
     if (words.length >= 2) {
       return words.map((w) => w[0].toUpperCase()).take(2).join();
@@ -81,19 +79,19 @@ class DivisionChipRow extends StatelessWidget {
             child: Container(
               width: size,
               height: size,
-              margin: const EdgeInsets.only(right: 4),
+              margin: const EdgeInsets.only(right: 6),
               decoration: BoxDecoration(
-                color: color,
+                color: color.withOpacity(0.2),
                 shape: BoxShape.circle,
+                border: Border.all(color: color.withOpacity(0.3), width: 1.5),
               ),
               alignment: Alignment.center,
               child: Text(
                 _abbrev(d),
                 style: TextStyle(
-                  color: Colors.white,
+                  color: color,
                   fontSize: size * 0.38,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
@@ -106,8 +104,10 @@ class DivisionChipRow extends StatelessWidget {
               width: size,
               height: size,
               decoration: BoxDecoration(
-                color: AppColors.textSecondary.withOpacity(0.2),
+                color: AppColors.textSecondary.withOpacity(0.1),
                 shape: BoxShape.circle,
+                border: Border.all(
+                    color: AppColors.textSecondary.withOpacity(0.1), width: 1.5),
               ),
               alignment: Alignment.center,
               child: Text(
@@ -115,7 +115,7 @@ class DivisionChipRow extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: size * 0.34,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
@@ -124,3 +124,4 @@ class DivisionChipRow extends StatelessWidget {
     );
   }
 }
+

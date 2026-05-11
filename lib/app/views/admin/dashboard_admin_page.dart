@@ -21,7 +21,6 @@ class DashboardAdminPage extends StatefulWidget {
 }
 
 class _DashboardAdminPageState extends State<DashboardAdminPage> {
-  // Statistik absensi: eventTitle → {hadir, izin, tidakHadir}
   final _attendanceStats = <Map<String, dynamic>>[].obs;
   final _loadingStats = false.obs;
 
@@ -35,14 +34,12 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     _loadingStats.value = true;
     try {
       final supabase = Supabase.instance.client;
-      // Ambil 5 kegiatan terakhir yang sudah punya data absensi
       final response = await supabase
           .from('attendances')
           .select('event_id, status, events(title)')
           .order('created_at', ascending: false)
           .limit(200);
 
-      // Group by event
       final Map<String, Map<String, dynamic>> grouped = {};
       for (final row in response) {
         final eventId = row['event_id'] as String;
@@ -69,10 +66,8 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
         }
       }
 
-      // Ambil 5 event terbaru saja
       _attendanceStats.value = grouped.values.take(5).toList();
     } catch (_) {
-      // silent fail — stats bersifat tambahan
     } finally {
       _loadingStats.value = false;
     }
@@ -86,7 +81,6 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     final memberController = Get.put(MemberController());
     final kasController = Get.put(KasController());
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     final hour = DateTime.now().hour;
     final greeting = hour < 11
@@ -98,7 +92,7 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                 : 'Selamat Malam';
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -107,22 +101,51 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
             floating: true,
             pinned: false,
             elevation: 0,
-            backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.9),
-            title: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Image.asset(
-                'assets/images/logo_mark.png',
-                height: 32,
-                errorBuilder: (_, __, ___) => Icon(
-                  Icons.palette_rounded,
-                  color: colorScheme.primary,
-                  size: 28,
+            backgroundColor: AppColors.background,
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Image.asset(
+                    'assets/images/logo_mark.png',
+                    height: 28,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.palette_rounded,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppConstants.appName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    Text(
+                      'Admin Panel',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.secondary,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             actions: [
               Obx(() => Padding(
-                    padding: const EdgeInsets.only(right: 20, top: 8),
+                    padding: const EdgeInsets.only(right: 16),
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.profileAdmin),
                       child: Container(
@@ -130,12 +153,13 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: colorScheme.primary.withOpacity(0.3),
-                              width: 1.5),
+                            color: AppColors.primary.withOpacity(0.1),
+                            width: 1.5,
+                          ),
                         ),
                         child: CircleAvatar(
-                          radius: 18,
-                          backgroundColor: colorScheme.primary.withOpacity(0.1),
+                          radius: 20,
+                          backgroundColor: AppColors.primary.withOpacity(0.05),
                           child: Text(
                             authController.currentUser.value?.fullName
                                         .isNotEmpty ==
@@ -143,9 +167,9 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                                 ? authController.currentUser.value!.fullName[0]
                                     .toUpperCase()
                                 : '?',
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w800,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w900,
                               fontSize: 16,
                             ),
                           ),
@@ -157,11 +181,11 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
                   Obx(() => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -169,7 +193,7 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                             greeting,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -177,60 +201,77 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                           Text(
                             '${authController.currentUser.value?.fullName.split(' ').first ?? 'Admin'}!',
                             style: theme.textTheme.headlineLarge?.copyWith(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            authController.currentUser.value?.isBendahara ==
-                                    true
-                                ? 'Administrator — Bendahara Utama'
-                                : 'Administrator — Badan Pengurus Harian',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w700,
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              authController.currentUser.value?.isBendahara ==
+                                      true
+                                  ? 'Administrator — Bendahara Utama'
+                                  : 'Administrator — Badan Pengurus Harian',
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 10,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
                       )),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   _buildPremiumAdminCard(
                       context, memberController, kasController, authController),
-                  const SizedBox(height: 32),
-                  _buildSectionHeader(context, title: 'Manajemen Inti'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 40),
+                  _buildSectionHeader(
+                    context,
+                    title: 'Manajemen Inti',
+                    subtitle: 'Kelola data UKM kamu',
+                    accentColor: AppColors.accentPurple,
+                  ),
+                  const SizedBox(height: 16),
                   _buildModernManagementGrid(context, authController),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
                     title: 'Kegiatan Terdekat',
+                    subtitle: 'Pantau agenda mendatang',
+                    accentColor: AppColors.accentPink,
                     onSeeAll: () => Get.toNamed(AppRoutes.eventList),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (eventController.events.isEmpty) {
                       return _buildEmptyState('Belum ada kegiatan terjadwal');
                     }
                     return SizedBox(
-                      height: 180,
+                      height: 200,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         physics: const BouncingScrollPhysics(),
                         itemCount: eventController.events.take(5).length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        separatorBuilder: (_, __) => const SizedBox(width: 20),
                         itemBuilder: (_, i) => Container(
-                          width: 280,
+                          width: 300,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 12,
+                                color: AppColors.primary.withOpacity(0.06),
+                                blurRadius: 15,
                                 spreadRadius: 1,
-                                offset: const Offset(0, 4),
+                                offset: const Offset(0, 10),
                               ),
                             ],
                           ),
@@ -239,59 +280,57 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                       ),
                     );
                   }),
-                  const SizedBox(height: 32),
-
-                  // ── Distribusi Anggota per Divisi ──────────────────────────
-                  _buildSectionHeader(context, title: 'Anggota per Divisi'),
-                  const SizedBox(height: 12),
-                  _buildModernDivisionGrid(context, memberController),
-                  const SizedBox(height: 32),
-
-                  // ── Statistik Absensi ──────────────────────────────────────
-                  _buildSectionHeader(context, title: 'Statistik Absensi'),
-                  const SizedBox(height: 4),
-                  Text(
-                    '5 kegiatan terakhir yang sudah direkap',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  const SizedBox(height: 40),
+                  _buildSectionHeader(
+                    context,
+                    title: 'Anggota per Divisi',
+                    subtitle: 'Distribusi sumber daya manusia',
+                    accentColor: AppColors.secondary,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  _buildModernDivisionGrid(context, memberController),
+                  const SizedBox(height: 40),
+                  _buildSectionHeader(
+                    context,
+                    title: 'Statistik Absensi',
+                    subtitle: 'Rekap kehadiran anggota',
+                    accentColor: AppColors.success,
+                  ),
+                  const SizedBox(height: 16),
                   _buildAttendanceStats(context),
-                  const SizedBox(height: 32),
-
-                  // ── Galeri Terbaru ─────────────────────────────────────────
+                  const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
                     title: 'Galeri Terbaru',
+                    subtitle: 'Dokumentasi karya anggota',
+                    accentColor: AppColors.accentOrange,
                     onSeeAll: () => Get.toNamed(AppRoutes.galleryAdmin),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Obx(() {
                     if (galleryController.gallery.isEmpty) {
                       return _buildEmptyState('Galeri admin masih kosong');
                     }
                     return GridView.builder(
                       shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.only(bottom: 20),
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.85,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 0.8,
                       ),
                       itemCount: galleryController.gallery.take(4).length,
                       itemBuilder: (_, i) => Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: AppColors.primary.withOpacity(0.05),
                               blurRadius: 15,
-                              spreadRadius: 1,
-                              offset: const Offset(0, 6),
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
@@ -311,13 +350,11 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     );
   }
 
-  // ── Statistik Absensi Widget ──────────────────────────────────────────────
   Widget _buildAttendanceStats(BuildContext context) {
-    final theme = Theme.of(context);
     return Obx(() {
       if (_loadingStats.value) {
         return Container(
-          height: 80,
+          height: 100,
           alignment: Alignment.center,
           child: const CircularProgressIndicator(strokeWidth: 2),
         );
@@ -333,73 +370,67 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
           final izin = stat['izin'] as int;
           final tidakHadir = stat['tidakHadir'] as int;
           final pct = total == 0 ? 0.0 : hadir / total;
+          final statusColor = pct >= 0.75
+              ? AppColors.success
+              : pct >= 0.5
+                  ? AppColors.warning
+                  : AppColors.accentRed;
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: theme.dividerColor.withOpacity(0.5),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.divider, width: 1.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
                         stat['title'] as String,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15,
+                          color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      '${(pct * 100).round()}% hadir',
-                      style: TextStyle(
-                        color: pct >= 0.75
-                            ? AppColors.success
-                            : pct >= 0.5
-                                ? AppColors.warning
-                                : AppColors.accentRed,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${(pct * 100).round()}% HADIR',
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                // Progress bar kehadiran
+                const SizedBox(height: 16),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: pct,
-                    minHeight: 6,
-                    backgroundColor: AppColors.divider.withOpacity(0.3),
-                    valueColor: AlwaysStoppedAnimation(
-                      pct >= 0.75
-                          ? AppColors.success
-                          : pct >= 0.5
-                              ? AppColors.warning
-                              : AppColors.accentRed,
-                    ),
+                    minHeight: 8,
+                    backgroundColor: AppColors.divider,
+                    valueColor: AlwaysStoppedAnimation(statusColor),
                   ),
                 ),
-                const SizedBox(height: 10),
-                // Legenda angka
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     _statPill('Hadir', hadir, AppColors.success),
@@ -409,11 +440,11 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                     _statPill('Absen', tidakHadir, AppColors.accentRed),
                     const Spacer(),
                     Text(
-                      '$total peserta',
+                      '$total Peserta',
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -427,47 +458,44 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
   }
 
   Widget _statPill(String label, int count, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '$label $count',
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
+    return Row(
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-      ),
+        const SizedBox(width: 6),
+        Text(
+          '$count $label',
+          style: TextStyle(
+            color: AppColors.textPrimary.withOpacity(0.7),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
-
-  // ── Existing widgets (unchanged) ──────────────────────────────────────────
 
   Widget _buildPremiumAdminCard(
       BuildContext context,
       MemberController memberController,
       KasController kasController,
       AuthController authController) {
-    final canManageKas = authController.currentUser.value?.canManageKas ?? false;
+    final canManageKas =
+        authController.currentUser.value?.canManageKas ?? false;
     return Obx(() => Container(
           width: double.infinity,
-          height: 180,
+          height: 200,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E293B), Color(0xFF334155)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(28),
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 25,
-                spreadRadius: 2,
-                offset: const Offset(0, 12),
+                color: AppColors.primary.withOpacity(0.3),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
               ),
             ],
           ),
@@ -475,80 +503,76 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
           child: Stack(
             children: [
               Positioned(
-                top: -20,
-                right: -20,
+                top: -30,
+                right: -30,
                 child: CircleAvatar(
-                  radius: 60,
-                  backgroundColor: Colors.white.withOpacity(0.03),
-                ),
-              ),
-              Positioned(
-                bottom: -30,
-                left: -10,
-                child: Icon(
-                  Icons.admin_panel_settings_rounded,
-                  size: 150,
-                  color: Colors.white.withOpacity(0.02),
+                  radius: 80,
+                  backgroundColor: AppColors.secondary.withOpacity(0.1),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(28),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Text(
+                      'OVERVIEW SISTEM',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const Spacer(),
                     Row(
                       children: [
                         _buildStatItem(
-                          context,
-                          'Total Anggota',
+                          'Anggota',
                           '${memberController.members.length}',
                           Icons.people_alt_rounded,
-                          AppColors.primaryLight,
+                          AppColors.secondary,
                         ),
                         if (canManageKas) ...[
                           Container(
                             height: 40,
-                            width: 1,
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            color: Colors.white12,
+                            width: 1.5,
+                            margin: const EdgeInsets.symmetric(horizontal: 24),
+                            color: Colors.white.withOpacity(0.1),
                           ),
                           _buildStatItem(
-                            context,
-                            'Saldo Kas Aktif',
-                            'Rp ${_formatAmount(kasController.totalSaldo)}',
+                            'Saldo Kas',
+                            kasController.formatCompactCurrency(kasController.totalSaldo),
                             Icons.account_balance_wallet_rounded,
-                            AppColors.secondaryLight,
+                            AppColors.accentYellow,
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                          horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(16),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.1)),
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.info_outline_rounded,
-                              color: Colors.white.withOpacity(0.5), size: 14),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Status Sistem: Berjalan Normal',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Spacer(),
                           const CircleAvatar(
                             radius: 3,
-                            backgroundColor: AppColors.accentGreen,
+                            backgroundColor: AppColors.success,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'SISTEM AKTIF',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
                           ),
                         ],
                       ),
@@ -561,41 +585,36 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
         ));
   }
 
-  Widget _buildStatItem(BuildContext context, String label, String value,
-      IconData icon, Color color) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color.withOpacity(0.8), size: 14),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
+  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color, size: 14),
+            const SizedBox(width: 6),
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.4),
+                fontSize: 9,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
               ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -609,28 +628,28 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
         'icon': Icons.group_add_rounded,
         'label': 'Anggota',
         'route': AppRoutes.memberList,
-        'color': AppColors.primary,
+        'color': AppColors.secondary,
         'requiresKas': false,
       },
       {
         'icon': Icons.event_note_rounded,
         'label': 'Kegiatan',
         'route': AppRoutes.eventList,
-        'color': AppColors.secondary,
+        'color': AppColors.accentPink,
         'requiresKas': false,
       },
       {
         'icon': Icons.add_photo_alternate_rounded,
         'label': 'Galeri',
         'route': AppRoutes.galleryAdmin,
-        'color': AppColors.accentGreen,
+        'color': AppColors.accentOrange,
         'requiresKas': false,
       },
       {
         'icon': Icons.payments_rounded,
         'label': 'Kas',
         'route': AppRoutes.kasPage,
-        'color': AppColors.accentRed,
+        'color': AppColors.success,
         'requiresKas': true,
       },
     ];
@@ -645,9 +664,9 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.65,
       ),
       itemCount: items.length,
       itemBuilder: (_, i) {
@@ -655,34 +674,27 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
         final color = item['color'] as Color;
         return InkWell(
           onTap: () => Get.toNamed(item['route'] as String),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           child: Column(
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 18),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: color.withOpacity(0.15), width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withOpacity(0.08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: color.withOpacity(0.12), width: 1.5),
                 ),
                 child: Icon(item['icon'] as IconData, color: color, size: 24),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
                 item['label'] as String,
+                maxLines: 1,
                 style: const TextStyle(
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -705,7 +717,7 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.4,
+          childAspectRatio: 0.82,
         ),
         itemCount: AppConstants.divisions.length,
         itemBuilder: (_, i) {
@@ -718,20 +730,13 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
 
           return InkWell(
             onTap: () => Get.toNamed(AppRoutes.memberList, arguments: division),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: color.withOpacity(0.12), width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: color.withOpacity(0.24),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: color.withOpacity(0.15), width: 2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -741,20 +746,20 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
-                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(_getDivisionIcon(division),
-                            color: color, size: 16),
+                            color: color, size: 20),
                       ),
                       Text(
                         '$count',
                         style: TextStyle(
                           color: color,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ],
@@ -764,32 +769,20 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                     children: [
                       Text(
                         division,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w700,
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.w900,
                           fontSize: 14,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-                      // Mini progress bar proporsi anggota
+                      const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: pct,
                           minHeight: 4,
-                          backgroundColor: color.withOpacity(0.1),
+                          backgroundColor: Colors.white.withOpacity(0.3),
                           valueColor: AlwaysStoppedAnimation(color),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${(pct * 100).round()}% dari total',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -818,39 +811,63 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     }
   }
 
-  Widget _buildSectionHeader(BuildContext context,
-      {required String title, VoidCallback? onSeeAll}) {
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required Color accentColor,
+    VoidCallback? onSeeAll,
+  }) {
     final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          title,
-          style: theme.textTheme.titleLarge
-              ?.copyWith(fontWeight: FontWeight.w800, fontSize: 18),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 22),
+              child: Text(
+                subtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
         ),
         if (onSeeAll != null)
           TextButton(
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              foregroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
-            child: Row(
-              children: [
-                Text(
-                  'Lihat Semua',
-                  style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded,
-                    size: 18, color: theme.colorScheme.primary),
-              ],
-            ),
+            child: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
           ),
       ],
     );
@@ -858,16 +875,17 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
 
   Widget _buildEmptyState(String message) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(40),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.divider.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.divider.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(28),
       ),
       child: Center(
         child: Text(
           message,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: const TextStyle(
+              color: AppColors.textSecondary, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -875,10 +893,11 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
 
   String _formatAmount(double amount) {
     if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}jt';
+      return 'Rp ${(amount / 1000000).toStringAsFixed(1)}Jt';
     } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(0)}rb';
+      return 'Rp ${(amount / 1000).toStringAsFixed(0)}Rb';
     }
-    return amount.toStringAsFixed(0);
+    return 'Rp ${amount.toStringAsFixed(0)}';
   }
 }
+

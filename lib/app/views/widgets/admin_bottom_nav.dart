@@ -16,12 +16,10 @@ class AdminBottomNav extends StatelessWidget {
     final user = authController.currentUser.value;
     final canManageKas = user?.canManageKas ?? false;
 
+    // Bottom bar hanya 3 item utama; Anggota, Galeri & Kas ada di Quick Access dashboard
     final allItems = [
       {'icon': Icons.dashboard_rounded, 'label': 'Beranda', 'route': AppRoutes.dashboardAdmin, 'requiresKas': false, 'color': AppColors.primary},
-      {'icon': Icons.groups_rounded, 'label': 'Anggota', 'route': AppRoutes.memberList, 'requiresKas': false, 'color': AppColors.accentBlue},
       {'icon': Icons.event_note_rounded, 'label': 'Kegiatan', 'route': AppRoutes.eventList, 'requiresKas': false, 'color': AppColors.accentTeal},
-      {'icon': Icons.auto_awesome_motion_rounded, 'label': 'Galeri', 'route': AppRoutes.galleryAdmin, 'requiresKas': false, 'color': AppColors.secondary},
-      {'icon': Icons.account_balance_wallet_rounded, 'label': 'Kas', 'route': AppRoutes.kasPage, 'requiresKas': true, 'color': AppColors.accentGreen},
       {'icon': Icons.person_rounded, 'label': 'Profil', 'route': AppRoutes.profileAdmin, 'requiresKas': false, 'color': AppColors.accentOrange},
     ];
 

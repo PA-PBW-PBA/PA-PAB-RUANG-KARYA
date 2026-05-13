@@ -7,6 +7,8 @@ import '../../models/event_model.dart';
 import '../../routes/app_routes.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/division_badge.dart';
+import '../widgets/division_filter_bar.dart';
+import '../widgets/event_card.dart';
 import '../widgets/admin_bottom_nav.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -21,6 +23,12 @@ class _EventListPageState extends State<EventListPage> {
   final controller = Get.find<EventController>();
   late ScrollController _scrollController;
   bool _isFabVisible = true;
+
+  // FIX 1: Toggle tampilan admin vs visitor
+  bool _isVisitorView = false;
+
+  // Toggle sub-view di visitor mode (list vs kalender)
+  bool _showCalendar = false;
 
   @override
   void initState() {
@@ -45,6 +53,16 @@ class _EventListPageState extends State<EventListPage> {
 
   @override
   Widget build(BuildContext context) {
+    return _isVisitorView
+        ? _buildVisitorView(context)
+        : _buildAdminView(context);
+  }
+
+  // =========================================================
+  // ADMIN VIEW (tampilan asli dengan kalender + tombol aksi)
+  // =========================================================
+
+  Widget _buildAdminView(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -64,7 +82,22 @@ class _EventListPageState extends State<EventListPage> {
               onPressed: () => Get.back(),
             ),
             backgroundColor: AppColors.background,
-                  flexibleSpace: FlexibleSpaceBar(
+            actions: [
+              // FIX 1: tombol switch ke tampilan visitor
+              Tooltip(
+                message: 'Tampilan pengunjung',
+                child: IconButton(
+                  icon: const Icon(Icons.remove_red_eye_outlined,
+                      color: AppColors.primary),
+                  onPressed: () {
+                    controller.resetFilters();
+                    setState(() => _isVisitorView = true);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.2,
               title: Text(
                 'Agenda Kegiatan',
@@ -129,7 +162,6 @@ class _EventListPageState extends State<EventListPage> {
                   ),
                   const SizedBox(height: 24),
                   Obx(() {
-                    // Trigger rebuild saat list events berubah
                     // ignore: unused_local_variable
                     final dataTrigger = controller.events.length;
 
@@ -191,11 +223,11 @@ class _EventListPageState extends State<EventListPage> {
                         headerStyle: HeaderStyle(
                           formatButtonVisible: false,
                           titleCentered: true,
-                          titleTextStyle:
-                              theme.textTheme.titleMedium!.copyWith(
+                          titleTextStyle: theme.textTheme.titleMedium!.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
-                          leftChevronIcon: const Icon(Icons.chevron_left_rounded,
+                          leftChevronIcon: const Icon(
+                              Icons.chevron_left_rounded,
                               color: AppColors.primary),
                           rightChevronIcon: const Icon(
                               Icons.chevron_right_rounded,
@@ -302,7 +334,8 @@ class _EventListPageState extends State<EventListPage> {
               ],
             ),
             child: FloatingActionButton.extended(
-              onPressed: () => Get.toNamed(AppRoutes.eventForm),
+              // FIX 2: pakai navigateToEventForm agar tidak bisa double-tap
+              onPressed: () => controller.navigateToEventForm(),
               backgroundColor: AppColors.primary,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -318,6 +351,265 @@ class _EventListPageState extends State<EventListPage> {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: const AdminBottomNav(currentIndex: 2),
+    );
+  }
+
+  // =========================================================
+  // VISITOR VIEW (tampilan seperti EventVisitorPage, tapi ada
+  // tombol kembali ke mode admin di pojok kanan)
+  // =========================================================
+
+  Widget _buildVisitorView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      extendBody: true,
+      body: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: false,
+            elevation: 0,
+            backgroundColor: AppColors.background,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              onPressed: () => Get.back(),
+            ),
+            title: Text(
+              'Kegiatan UKM',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            actions: [
+              // Toggle kalender / list (sama seperti visitor asli)
+              IconButton(
+                onPressed: () => setState(() => _showCalendar = !_showCalendar),
+                icon: Icon(
+                  _showCalendar
+                      ? Icons.grid_view_rounded
+                      : Icons.calendar_today_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
+              ),
+              // FIX 1: Tombol kembali ke mode admin
+              Tooltip(
+                message: 'Mode admin',
+                child: IconButton(
+                  icon: const Icon(Icons.admin_panel_settings_outlined,
+                      color: AppColors.primary),
+                  onPressed: () {
+                    controller.resetFilters();
+                    setState(() {
+                      _isVisitorView = false;
+                      _showCalendar = false;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Search Bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.06),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      onChanged: controller.searchQuery.call,
+                      decoration: InputDecoration(
+                        hintText: 'Cari kegiatan seru...',
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: AppColors.textSecondary),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 18),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Filter Divisi (sama seperti visitor)
+                  Obx(() => DivisionFilterBar(
+                        divisions: controller.divisions.toList(),
+                        selected: controller.selectedDivision,
+                        onSelected: controller.filterByDivision,
+                      )),
+                  const SizedBox(height: 20),
+
+                  // Kalender / Header
+                  AnimatedCrossFade(
+                    duration: const Duration(milliseconds: 400),
+                    crossFadeState: _showCalendar
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(32),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.06),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                            border: Border.all(color: AppColors.divider),
+                          ),
+                          child: Obx(() => TableCalendar(
+                                firstDay: DateTime.utc(2020, 1, 1),
+                                lastDay: DateTime.utc(2030, 12, 31),
+                                focusedDay: controller.focusedDay.value,
+                                selectedDayPredicate: (day) => isSameDay(
+                                    controller.selectedDay.value, day),
+                                eventLoader: controller.getEventsForDay,
+                                calendarFormat: CalendarFormat.month,
+                                startingDayOfWeek: StartingDayOfWeek.monday,
+                                onDaySelected: (selectedDay, focusedDay) {
+                                  controller.selectedDay.value = selectedDay;
+                                  controller.focusedDay.value = focusedDay;
+                                },
+                                calendarStyle: const CalendarStyle(
+                                  selectedDecoration: BoxDecoration(
+                                      color: AppColors.secondary,
+                                      shape: BoxShape.circle),
+                                  todayDecoration: BoxDecoration(
+                                      color: AppColors.divider,
+                                      shape: BoxShape.circle),
+                                  todayTextStyle:
+                                      TextStyle(color: AppColors.textPrimary),
+                                  markerDecoration: BoxDecoration(
+                                      color: AppColors.accentPink,
+                                      shape: BoxShape.circle),
+                                  outsideDaysVisible: false,
+                                ),
+                                headerStyle: const HeaderStyle(
+                                  formatButtonVisible: false,
+                                  titleCentered: true,
+                                  titleTextStyle: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              )),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                    secondChild: Obx(() {
+                      final count = controller.filteredEvents.length;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: AppColors.accentNeonBlue,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '$count kegiatan ditemukan',
+                              style: theme.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w900),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // List kegiatan (pakai EventCard sama seperti visitor)
+          Obx(() {
+            final List<EventModel> events = controller.filteredEvents;
+
+            if (events.isEmpty) {
+              return SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyState(
+                  message: _showCalendar
+                      ? 'Tidak ada kegiatan di tanggal ini'
+                      : 'Tidak ada kegiatan ditemukan',
+                  subtitle: 'Coba pilih divisi atau tanggal yang berbeda',
+                  icon: Icons.event_busy_rounded,
+                ),
+              );
+            }
+
+            return SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.04),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: EventCard(event: events[i]),
+                    ),
+                  ),
+                  childCount: events.length,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+      // FAB tetap muncul di visitor view agar admin bisa tambah kegiatan
+      floatingActionButton: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: _isFabVisible ? 1.0 : 0.0,
+        child: Visibility(
+          visible: _isFabVisible,
+          child: FloatingActionButton(
+            onPressed: () => controller.navigateToEventForm(),
+            backgroundColor: AppColors.primary,
+            elevation: 0,
+            child: const Icon(Icons.add_rounded, color: Colors.white),
           ),
         ),
       ),
@@ -444,8 +736,9 @@ class _EventListPageState extends State<EventListPage> {
                   _actionIcon(
                     icon: Icons.edit_note_rounded,
                     color: AppColors.secondary,
+                    // FIX 2: pakai navigateToEventForm
                     onTap: () =>
-                        Get.toNamed(AppRoutes.eventForm, arguments: event),
+                        controller.navigateToEventForm(editEvent: event),
                   ),
                   _actionIcon(
                     icon: Icons.delete_rounded,
@@ -462,7 +755,9 @@ class _EventListPageState extends State<EventListPage> {
   }
 
   Widget _actionIcon(
-      {required IconData icon, required Color color, required VoidCallback onTap}) {
+      {required IconData icon,
+      required Color color,
+      required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -508,7 +803,8 @@ class _EventListPageState extends State<EventListPage> {
             onPressed: () => Get.back(),
             child: const Text('BATAL',
                 style: TextStyle(
-                    fontWeight: FontWeight.w900, color: AppColors.textSecondary)),
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () {

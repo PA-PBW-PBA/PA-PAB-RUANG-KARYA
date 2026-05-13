@@ -235,7 +235,7 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                   const SizedBox(height: 40),
                   _buildSectionHeader(
                     context,
-                    title: 'Manajemen Inti',
+                    title: 'Akses Cepat',
                     subtitle: 'Kelola data UKM kamu',
                     accentColor: AppColors.accentPurple,
                   ),

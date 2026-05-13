@@ -244,6 +244,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       return;
     }
 
-    _authController.changePassword(_newPasswordController.text.trim());
+    _authController.changePassword(
+      _newPasswordController.text.trim(),
+      currentPassword: _isFirstLogin ? null : _currentPasswordController.text.trim(),
+    );
   }
 }

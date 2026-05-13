@@ -25,6 +25,9 @@ class EventController extends GetxController {
   // === FOTO KEGIATAN ===
   final pickedEventImages = <XFile>[].obs;
 
+  // === FIX 2: Guard agar tidak buka form dua kali ===
+  bool _isNavigatingToForm = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -40,10 +43,9 @@ class EventController extends GetxController {
   }
 
   // =========================================================
-  // VALIDASI — tiap validasi dalam fungsi tersendiri
+  // VALIDASI
   // =========================================================
 
-  /// Validasi judul tidak boleh kosong dan minimal 3 karakter
   String? validateTitle(String value) {
     final v = value.trim();
     if (v.isEmpty) return 'Judul kegiatan tidak boleh kosong';
@@ -51,7 +53,6 @@ class EventController extends GetxController {
     return null;
   }
 
-  /// Validasi waktu: keduanya harus diisi, start < end
   String? validateTime(DateTime? startTime, DateTime? endTime,
       {bool isEdit = false}) {
     if (startTime == null || endTime == null) {
@@ -66,10 +67,24 @@ class EventController extends GetxController {
     return null;
   }
 
-  /// Validasi minimal satu divisi terkait dipilih
   String? validateDivisions(List<String> selected) {
     if (selected.isEmpty) return 'Pilih minimal satu divisi terkait';
     return null;
+  }
+
+  // =========================================================
+  // NAVIGASI — FIX 2: Cegah dobel tap buka form
+  // =========================================================
+
+  void navigateToEventForm({EventModel? editEvent}) {
+    if (_isNavigatingToForm) return;
+    _isNavigatingToForm = true;
+    final route = Get.toNamed('/event-form', arguments: editEvent);
+    if (route != null) {
+      route.then((_) => _isNavigatingToForm = false);
+    } else {
+      _isNavigatingToForm = false;
+    }
   }
 
   // =========================================================
@@ -96,15 +111,15 @@ class EventController extends GetxController {
     for (final file in pickedEventImages) {
       final bytes = await file.readAsBytes();
       final ext = file.path.split('.').last;
-      final path = 'events/$eventId/${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final path =
+          'events/$eventId/${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       await _supabase.storage
           .from(AppConstants.bucketGallery)
           .uploadBinary(path, bytes);
 
-      final url = _supabase.storage
-          .from(AppConstants.bucketGallery)
-          .getPublicUrl(path);
+      final url =
+          _supabase.storage.from(AppConstants.bucketGallery).getPublicUrl(path);
 
       urls.add(url);
     }
@@ -117,8 +132,6 @@ class EventController extends GetxController {
     isLoading.value = true;
     try {
       final urls = await _uploadEventImages(eventId);
-
-      // Ambil imageUrls yang sudah ada
       final event = events.firstWhere((e) => e.id == eventId);
       final updatedUrls = [...event.imageUrls, ...urls];
 
@@ -178,19 +191,12 @@ class EventController extends GetxController {
     }
   }
 
+  // FIX 3: Realtime stream tidak bisa join relasi — fetch ulang saat ada perubahan
   void _setupRealtimeListener() {
-    _supabase.from('events').stream(primaryKey: ['id']).listen((data) {
-      events.value = data.map<EventModel>((json) {
-        final divList = (json['event_divisions'] as List?)
-                ?.map((e) => e['divisions']?['name'] as String?)
-                .whereType<String>()
-                .toList() ??
-            [];
-        final eventData = Map<String, dynamic>.from(json);
-        eventData['divisions'] = divList;
-        return EventModel.fromJson(eventData);
-      }).toList();
-      _applyFilter();
+    _supabase.from('events').stream(primaryKey: ['id']).listen((_) {
+      // Stream hanya sebagai trigger; data lengkap (dengan divisi) diambil
+      // lewat fetchEvents() agar event_divisions selalu ikut terbaca.
+      fetchEvents();
     });
   }
 
@@ -217,6 +223,7 @@ class EventController extends GetxController {
       _applyFilter();
     } catch (e) {
       errorMessage.value = 'Gagal memuat data kegiatan';
+      debugPrint('FETCH EVENTS ERROR: $e');
     } finally {
       isLoading.value = false;
     }
@@ -314,7 +321,6 @@ class EventController extends GetxController {
 
       final eventId = response['id'];
 
-      // Upload foto jika ada
       if (pickedEventImages.isNotEmpty) {
         final urls = await _uploadEventImages(eventId);
         await _supabase
@@ -328,6 +334,7 @@ class EventController extends GetxController {
       Get.back();
       Get.snackbar('Berhasil', 'Kegiatan berhasil ditambahkan');
     } catch (e) {
+      debugPrint('CREATE EVENT ERROR: $e');
       errorMessage.value = 'Gagal menambah kegiatan';
     } finally {
       isLoading.value = false;
@@ -348,7 +355,6 @@ class EventController extends GetxController {
     if (index == -1) return;
     final oldItem = events[index];
 
-    // Optimistic update
     events[index] = oldItem.copyWith(
       title: title,
       description: description,
@@ -375,7 +381,6 @@ class EventController extends GetxController {
       await _supabase.from('event_divisions').delete().eq('event_id', id);
       await _insertEventDivisions(id, divisions);
 
-      // Upload foto baru jika ada
       if (pickedEventImages.isNotEmpty) {
         final urls = await _uploadEventImages(id);
         final existing = events[index].imageUrls;
@@ -390,7 +395,6 @@ class EventController extends GetxController {
       Get.back();
       Get.snackbar('Berhasil', 'Kegiatan berhasil diperbarui');
     } catch (e) {
-      // Rollback
       events[index] = oldItem;
       events.refresh();
       _applyFilter();

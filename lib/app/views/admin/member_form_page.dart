@@ -282,7 +282,7 @@ class _MemberFormPageState extends State<MemberFormPage> {
 
                   const SizedBox(height: 32),
 
-                  Builder(builder: (context) {
+                  Obx(() {
                     final caller = Get.find<AuthController>().currentUser.value;
                     if (caller == null || !caller.isAdmin) {
                       return const SizedBox.shrink();

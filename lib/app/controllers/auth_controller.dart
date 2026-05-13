@@ -88,10 +88,30 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> changePassword(String newPassword) async {
+  Future<void> changePassword(String newPassword,
+      {String? currentPassword}) async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
+      // Jika ada password lama, verifikasi dulu dengan re-login
+      if (currentPassword != null && currentPassword.isNotEmpty) {
+        final email = _supabase.auth.currentUser?.email ?? '';
+        try {
+          await _supabase.auth.signInWithPassword(
+            email: email,
+            password: currentPassword,
+          );
+        } on AuthException catch (e) {
+          final msg = e.message.toLowerCase();
+          if (msg.contains('invalid') || msg.contains('wrong') || msg.contains('credentials')) {
+            errorMessage.value = 'Password saat ini salah. Periksa kembali.';
+          } else {
+            errorMessage.value = 'Password saat ini tidak dapat diverifikasi.';
+          }
+          return;
+        }
+      }
+
       await _supabase.auth.updateUser(UserAttributes(password: newPassword));
       await _supabase.from('profiles').update({'is_first_login': false}).eq(
           'id', _supabase.auth.currentUser!.id);
@@ -100,8 +120,19 @@ class AuthController extends GetxController {
       if (user == null) return;
       Get.snackbar('Berhasil', 'Password berhasil diperbarui');
       _redirect(user);
+    } on AuthException catch (e) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('same') || msg.contains('different') || msg.contains('previously used')) {
+        errorMessage.value = 'Password baru tidak boleh sama dengan password lama.';
+      } else if (msg.contains('weak') || msg.contains('too short')) {
+        errorMessage.value = 'Password terlalu lemah. Gunakan kombinasi huruf dan angka.';
+      } else if (msg.contains('network') || msg.contains('connection')) {
+        errorMessage.value = 'Gagal terhubung ke server. Periksa koneksi internet.';
+      } else {
+        errorMessage.value = 'Gagal memperbarui password: ${e.message}';
+      }
     } catch (_) {
-      errorMessage.value = 'Gagal mengubah password. Coba lagi.';
+      errorMessage.value = 'Terjadi kesalahan tak terduga. Coba lagi.';
     } finally {
       isLoading.value = false;
     }

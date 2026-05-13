@@ -6,6 +6,7 @@ import '../../controllers/event_controller.dart';
 import '../../models/event_model.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../services/notification_service.dart';
 
 // ======================================================
 // EVENT FORM PAGE — UI terpisah dari logic di Controller
@@ -175,22 +176,14 @@ class _EventFormPageState extends State<EventFormPage> {
           TextButton(
             onPressed: () {
               Get.back();
-              _performSave(title, location, description);
+              _performSave(title, location, description, sendNotif: false);
             },
             child: const Text('Simpan Saja'),
           ),
           ElevatedButton(
             onPressed: () {
               Get.back();
-              Get.snackbar(
-                'Notifikasi Terkirim',
-                'Anggota akan segera menerima pemberitahuan.',
-                snackPosition: SnackPosition.TOP,
-                backgroundColor: AppColors.accentGreen.withOpacity(0.9),
-                colorText: Colors.white,
-                duration: const Duration(seconds: 3),
-              );
-              _performSave(title, location, description);
+              _performSave(title, location, description, sendNotif: true);
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accentGreen),
@@ -201,7 +194,8 @@ class _EventFormPageState extends State<EventFormPage> {
     );
   }
 
-  void _performSave(String title, String location, String description) {
+  Future<void> _performSave(String title, String location, String description,
+      {bool sendNotif = false}) async {
     if (_isEdit) {
       _controller.updateEvent(
         id: _editEvent!.id,
@@ -214,7 +208,7 @@ class _EventFormPageState extends State<EventFormPage> {
         divisions: _selectedDivisions,
       );
     } else {
-      _controller.createEvent(
+      final eventId = await _controller.createEvent(
         title: title,
         location: location,
         description: description,
@@ -223,6 +217,33 @@ class _EventFormPageState extends State<EventFormPage> {
         isPublic: _isPublic,
         divisions: _selectedDivisions,
       );
+
+      // Kirim push notification ke semua anggota jika diminta
+      if (sendNotif && eventId != null) {
+        final success = await NotificationService.instance.sendEventNotification(
+          eventTitle: title,
+          location: location.isNotEmpty ? location : 'Lokasi belum ditentukan',
+          eventId: eventId,
+        );
+        if (success) {
+          Get.snackbar(
+            'Notifikasi Terkirim ✅',
+            'Semua anggota akan menerima pemberitahuan.',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: AppColors.accentGreen.withOpacity(0.9),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        } else {
+          Get.snackbar(
+            'Kegiatan Tersimpan',
+            'Tapi notifikasi gagal dikirim. Coba lagi nanti.',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: AppColors.accentOrange.withOpacity(0.9),
+            colorText: Colors.white,
+          );
+        }
+      }
     }
   }
 

@@ -290,7 +290,7 @@ class EventController extends GetxController {
   // CRUD
   // =========================================================
 
-  Future<void> createEvent({
+  Future<String?> createEvent({
     required String title,
     required String location,
     required String description,
@@ -333,12 +333,15 @@ class EventController extends GetxController {
       await fetchEvents();
       Get.back();
       Get.snackbar('Berhasil', 'Kegiatan berhasil ditambahkan');
+      return response['id'] as String?;
     } catch (e) {
       debugPrint('CREATE EVENT ERROR: $e');
       errorMessage.value = 'Gagal menambah kegiatan';
+      return null;
     } finally {
       isLoading.value = false;
     }
+    return null;
   }
 
   Future<void> updateEvent({

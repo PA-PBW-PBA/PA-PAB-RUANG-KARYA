@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../services/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../routes/app_routes.dart';
@@ -70,6 +71,8 @@ class AuthController extends GetxController {
         return;
       }
 
+      // Simpan FCM token setelah login berhasil
+      await NotificationService.instance.saveTokenToSupabase(user.id);
       _redirect(user);
     } on AuthException {
       errorMessage.value = 'NIM/email atau password salah.';
@@ -158,6 +161,10 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      await NotificationService.instance.clearToken(userId);
+    }
     await _supabase.auth.signOut();
     currentUser.value = null;
     Get.offAllNamed(AppRoutes.homeVisitor);

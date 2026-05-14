@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/event_model.dart';
 import '../../core/constants/app_constants.dart';
+import '../services/notification_service.dart';
 
 class EventController extends GetxController {
   final _supabase = Supabase.instance.client;
@@ -291,58 +292,68 @@ class EventController extends GetxController {
   // =========================================================
 
   Future<String?> createEvent({
-    required String title,
-    required String location,
-    required String description,
-    required DateTime startTime,
-    required DateTime endTime,
-    required bool isPublic,
-    required List<String> divisions,
-  }) async {
-    isLoading.value = true;
-    try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) throw Exception('User tidak ditemukan');
+  required String title,
+  required String location,
+  required String description,
+  required DateTime startTime,
+  required DateTime endTime,
+  required bool isPublic,
+  required List<String> divisions,
+}) async {
+  isLoading.value = true;
+  try {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('User tidak ditemukan');
 
-      final response = await _supabase
+    final response = await _supabase
+        .from('events')
+        .insert({
+          'title': title,
+          'location': location,
+          'description': description,
+          'start_time': startTime.toIso8601String(),
+          'end_time': endTime.toIso8601String(),
+          'is_public': isPublic,
+          'created_by': userId,
+          'image_urls': [],
+        })
+        .select()
+        .single();
+
+    final eventId = response['id'] as String;
+
+    if (pickedEventImages.isNotEmpty) {
+      final urls = await _uploadEventImages(eventId);
+      await _supabase
           .from('events')
-          .insert({
-            'title': title,
-            'location': location,
-            'description': description,
-            'start_time': startTime.toIso8601String(),
-            'end_time': endTime.toIso8601String(),
-            'is_public': isPublic,
-            'created_by': userId,
-            'image_urls': [],
-          })
-          .select()
-          .single();
-
-      final eventId = response['id'];
-
-      if (pickedEventImages.isNotEmpty) {
-        final urls = await _uploadEventImages(eventId);
-        await _supabase
-            .from('events')
-            .update({'image_urls': urls}).eq('id', eventId);
-        clearPickedImages();
-      }
-
-      await _insertEventDivisions(eventId, divisions);
-      await fetchEvents();
-      Get.back();
-      Get.snackbar('Berhasil', 'Kegiatan berhasil ditambahkan');
-      return response['id'] as String?;
-    } catch (e) {
-      debugPrint('CREATE EVENT ERROR: $e');
-      errorMessage.value = 'Gagal menambah kegiatan';
-      return null;
-    } finally {
-      isLoading.value = false;
+          .update({'image_urls': urls}).eq('id', eventId);
+      clearPickedImages();
     }
+
+    await _insertEventDivisions(eventId, divisions);
+
+    // ==============================
+    // KIRIM PUSH NOTIFICATION
+    // ==============================
+    await NotificationService.instance.sendEventNotification(
+      eventTitle: title,
+      location: location,
+      eventId: eventId,
+    );
+
+    await fetchEvents();
+    Get.back();
+    Get.snackbar('Berhasil', 'Kegiatan berhasil ditambahkan');
+
+    return eventId;
+  } catch (e) {
+    debugPrint('CREATE EVENT ERROR: $e');
+    errorMessage.value = 'Gagal menambah kegiatan';
     return null;
+  } finally {
+    isLoading.value = false;
   }
+}
 
   Future<void> updateEvent({
     required String id,
